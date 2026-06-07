@@ -1,0 +1,32 @@
+---
+import {
+  defaultLocale,
+  getLocalePath,
+  locales,
+  type Locale,
+} from "../../data/schools";
+
+export function getStaticPaths() {
+  return locales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as Locale;
+const destination = getLocalePath(locale);
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content={`0; url=${destination}`} />
+    <link rel="canonical" href={destination} />
+    <script define:vars={{ destination }} is:inline>
+      location.replace(destination);
+    </script>
+  </head>
+  <body>
+    <a href={destination}>Acecore Schools</a>
+  </body>
+</html>
