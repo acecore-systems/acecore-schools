@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "acecore-schools",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-06-07",
+  "vars": {
+    "ACECORE_NET_URL": "https://acecore.net",
+    "PUBLIC_APP_URL": "https://schools.acecore.net",
+    "ALLOWED_ORIGINS": "https://schools.acecore.net,https://acecore.net",
+  },
+  "env": {
+    "preview": {
+      "vars": {
+        "ACECORE_NET_URL": "https://acecore.net",
+        "PUBLIC_APP_URL": "https://acecore-schools.pages.dev",
+        "ALLOWED_ORIGINS": "https://acecore-schools.pages.dev,https://acecore.net",
+      },
+    },
+    "production": {
+      "vars": {
+        "ACECORE_NET_URL": "https://acecore.net",
+        "PUBLIC_APP_URL": "https://schools.acecore.net",
+        "ALLOWED_ORIGINS": "https://schools.acecore.net,https://acecore.net",
+      },
+    },
+  },
+}
