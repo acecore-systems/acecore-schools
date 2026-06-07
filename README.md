@@ -1,15 +1,15 @@
 # Acecore Schools
 
-Acecore Schools の予約、会員ポータル、外部カレンダー連携を担当するアプリケーションです。
+Acecore Schools の紹介ページ、予約、会員ポータル、外部カレンダー連携を担当するアプリケーションです。
 `acecore.net` 本体に Schools runtime を載せず、別 repo / 別 Cloudflare Pages project として管理します。
 
 ## Service Boundary
 
-| Area              | Responsibility                                                                     |
-| ----------------- | ---------------------------------------------------------------------------------- |
-| `acecore.net`     | Schools の紹介、SEO、無料体験 CTA、問い合わせ導線                                  |
-| `acecore-schools` | 無料体験予約、会員ポータル、予約変更・キャンセル、read-only ICS、Schools 用 Stripe |
-| Acecore Accounts  | 共通ログイン、共通 user id、メール確認、パスワードリセット                         |
+| Area              | Responsibility                                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `acecore.net`     | Schools への外部導線、旧 `/schools/` リダイレクト、問い合わせ導線                                                         |
+| `acecore-schools` | Schools 紹介ページ、SEO、無料体験 CTA、無料体験予約、会員ポータル、予約変更・キャンセル、read-only ICS、Schools 用 Stripe |
+| Acecore Accounts  | 共通ログイン、共通 user id、メール確認、パスワードリセット                                                                |
 
 `acecore.net` は予約 DB、Schools の Stripe webhook、会員 session、ICS token を持ちません。
 Schools の予約作成・変更・キャンセルはこの app の portal/API からのみ行います。
@@ -73,9 +73,18 @@ npm run dev
 npm run build
 ```
 
-Health check:
+Routes:
 
 ```text
+/
+/en/
+/zh-cn/
+/es/
+/pt/
+/fr/
+/ko/
+/de/
+/ru/
 /api/health
 ```
 
