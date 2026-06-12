@@ -3,7 +3,6 @@ import {
   acecoreOrigin,
   defaultLocale,
   getLocalePath,
-  getLocalizedAcecoreUrl,
   htmlLangMap,
   lineUrl,
   localeLabels,
@@ -12,6 +11,7 @@ import {
   schoolsOrigin,
   type Locale,
 } from "../data/schools";
+import { schoolsDetailContent } from "../data/schools-details";
 
 interface Props {
   locale: Locale;
@@ -21,8 +21,11 @@ const { locale } = Astro.props;
 const content = schoolsContent[locale] ?? schoolsContent[defaultLocale];
 const canonicalPath = getLocalePath(locale);
 const canonicalUrl = new URL(canonicalPath, schoolsOrigin).href;
-const pricingUrl = getLocalizedAcecoreUrl(locale, "/pricing/");
-const contactUrl = getLocalizedAcecoreUrl(locale, "/contact/");
+const pricingUrl = "#pricing";
+const trialInquiryUrl = lineUrl;
+const trialUrl = "#trial";
+const detail =
+  schoolsDetailContent[locale] ?? schoolsDetailContent[defaultLocale];
 
 const heroImage =
   "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&h=900&fit=crop&q=82&fm=webp";
@@ -102,6 +105,14 @@ const jsonLd = {
       provider: { "@type": "EducationalOrganization", name: "Acecore Schools" },
       url: `${canonicalUrl}#${section.id}`,
     })),
+    {
+      "@type": "FAQPage",
+      mainEntity: detail.faqs.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: { "@type": "Answer", text: item.answer },
+      })),
+    },
   ],
 };
 ---
@@ -139,11 +150,13 @@ const jsonLd = {
         <span>Acecore Schools</span>
       </a>
       <nav class="primary-nav" aria-label="School sections">
-        <a href="#juku">{content.juku.title}</a>
-        <a href="#robot-programming">{content.robotProgramming.title}</a>
+        <a href="#trial">{detail.trial.eyebrow}</a>
+        <a href="#course-fit">{detail.courses.eyebrow}</a>
+        <a href="#schedule">{detail.schedule.eyebrow}</a>
         <a href="#pricing">{content.pricing.title}</a>
+        <a href="#faq">{detail.faqEyebrow}</a>
       </nav>
-      <a class="header-cta" href={contactUrl}>{content.ctaForm}</a>
+      <a class="header-cta" href={trialUrl}>{detail.trial.primaryCta}</a>
     </header>
 
     <main>
@@ -163,14 +176,11 @@ const jsonLd = {
           <p class="hero-lead">{content.heroSubtitle}</p>
           <p class="hero-copy">{content.intro}</p>
           <div class="hero-actions">
-            <a class="button primary" href={contactUrl}>{content.ctaForm}</a>
-            <a
-              class="button secondary"
-              href={lineUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <a class="button primary" href={trialUrl}
+              >{detail.trial.primaryCta}</a
             >
-              {content.ctaLine}
+            <a class="button secondary" href={pricingUrl}>
+              {detail.trial.secondaryCta}
             </a>
           </div>
         </div>
@@ -188,6 +198,102 @@ const jsonLd = {
             </a>
           ))
         }
+      </section>
+
+      <section class="trial-section" id="trial" aria-labelledby="trial-title">
+        <div class="section-heading">
+          <p>{detail.trial.eyebrow}</p>
+          <h2 id="trial-title">{detail.trial.title}</h2>
+          <span>{detail.trial.body}</span>
+        </div>
+        <div class="trial-grid">
+          <div class="trial-copy">
+            <ul class="check-list">
+              {detail.trial.points.map((point) => <li>{point}</li>)}
+            </ul>
+            <p>{detail.trial.note}</p>
+          </div>
+          <div class="trial-actions-panel">
+            <a
+              class="button primary"
+              href={trialInquiryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {detail.trial.primaryCta}
+            </a>
+            <a class="button secondary" href={pricingUrl}>
+              {detail.trial.secondaryCta}
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="target-section"
+        id="course-fit"
+        aria-labelledby="course-fit-title"
+      >
+        <div class="section-heading compact">
+          <p>{detail.courses.eyebrow}</p>
+          <h2 id="course-fit-title">{detail.courses.title}</h2>
+          <span>{detail.courses.body}</span>
+        </div>
+        <div class="target-grid">
+          {
+            detail.courses.items.map((course) => (
+              <article class="target-card">
+                <h3>{course.title}</h3>
+                <p>{course.body}</p>
+                <dl class="meta-grid">
+                  <div>
+                    <dt>{detail.courses.audienceLabel}</dt>
+                    <dd>{course.audience}</dd>
+                  </div>
+                  <div>
+                    <dt>{detail.courses.frequencyLabel}</dt>
+                    <dd>{course.frequency}</dd>
+                  </div>
+                </dl>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section
+        class="schedule-section"
+        id="schedule"
+        aria-labelledby="schedule-title"
+      >
+        <div class="section-heading">
+          <p>{detail.schedule.eyebrow}</p>
+          <h2 id="schedule-title">{detail.schedule.title}</h2>
+          <span>{detail.schedule.body}</span>
+        </div>
+        <div class="schedule-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>{detail.schedule.dayLabel}</th>
+                <th>{detail.schedule.timeLabel}</th>
+                <th>{detail.schedule.noteLabel}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                detail.schedule.items.map((item) => (
+                  <tr>
+                    <td>{item.day}</td>
+                    <td>{item.time}</td>
+                    <td>{item.note}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="schedule-note">{detail.schedule.note}</p>
       </section>
 
       <section class="flow-section" aria-labelledby="flow-title">
@@ -307,28 +413,50 @@ const jsonLd = {
             <p>{content.pricing.ctaBody}</p>
           </div>
           <div class="hero-actions compact-actions">
-            <a class="button secondary" href={pricingUrl}
-              >{content.pricing.ctaPricing}</a
+            <a class="button secondary" href={trialUrl}
+              >{detail.trial.primaryCta}</a
             >
-            <a class="button primary" href={contactUrl}
-              >{content.pricing.ctaContact}</a
+            <a
+              class="button primary"
+              href={trialInquiryUrl}
+              target="_blank"
+              rel="noopener noreferrer">{content.pricing.ctaContact}</a
             >
           </div>
         </div>
       </section>
 
+      <section class="faq-section" id="faq" aria-labelledby="faq-title">
+        <div class="section-heading compact">
+          <p>{detail.faqEyebrow}</p>
+          <h2 id="faq-title">{detail.faqTitle}</h2>
+        </div>
+        <div class="faq-list">
+          {
+            detail.faqs.map((item) => (
+              <article class="faq-item">
+                <h3>{item.question}</h3>
+                <p>{item.answer}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
       <section class="final-cta" aria-labelledby="cta-title">
-        <h2 id="cta-title">{content.ctaHeading}</h2>
-        <p>{content.ctaBody}</p>
+        <h2 id="cta-title">{detail.finalCta.title}</h2>
+        <p>{detail.finalCta.body}</p>
         <div class="hero-actions">
-          <a class="button primary" href={contactUrl}>{content.ctaForm}</a>
           <a
-            class="button secondary"
-            href={lineUrl}
+            class="button primary"
+            href={trialInquiryUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
-            {content.ctaLine}
+            {detail.trial.primaryCta}
+          </a>
+          <a class="button secondary" href={pricingUrl}>
+            {detail.trial.secondaryCta}
           </a>
         </div>
       </section>
@@ -677,6 +805,155 @@ const jsonLd = {
     content: "•";
   }
 
+  .trial-section,
+  .target-section,
+  .schedule-section,
+  .faq-section {
+    scroll-margin-top: 96px;
+  }
+
+  .trial-section,
+  .schedule-section {
+    background: #ffffff;
+  }
+
+  .trial-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+    gap: 18px;
+    align-items: stretch;
+  }
+
+  .trial-copy,
+  .trial-actions-panel,
+  .target-card,
+  .faq-item {
+    border: 1px solid #d8dfd8;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.86);
+  }
+
+  .trial-copy,
+  .target-card,
+  .faq-item {
+    padding: 24px;
+  }
+
+  .check-list li {
+    color: #405047;
+    line-height: 1.75;
+  }
+
+  .trial-copy > p,
+  .schedule-note {
+    margin-top: 18px;
+    color: #526056;
+    line-height: 1.75;
+  }
+
+  .trial-actions-panel {
+    display: grid;
+    align-content: center;
+    gap: 12px;
+    padding: 24px;
+    background: #eef7ef;
+  }
+
+  .trial-actions-panel .button {
+    text-align: center;
+  }
+
+  .target-section {
+    background: #edf2ec;
+  }
+
+  .target-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .target-card h3,
+  .faq-item h3 {
+    color: #10251c;
+  }
+
+  .target-card > p,
+  .faq-item p {
+    margin-top: 10px;
+    color: #56625a;
+    line-height: 1.75;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 18px 0 0;
+  }
+
+  .meta-grid div {
+    border-radius: 8px;
+    padding: 14px;
+    background: #f7f8f4;
+  }
+
+  .meta-grid dt {
+    color: #10251c;
+    font-size: 0.86rem;
+    font-weight: 900;
+  }
+
+  .meta-grid dd {
+    margin: 6px 0 0;
+    color: #56625a;
+    line-height: 1.55;
+  }
+
+  .schedule-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #d8dfd8;
+    border-radius: 8px;
+    background: white;
+  }
+
+  table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  th,
+  td {
+    padding: 16px;
+    vertical-align: top;
+  }
+
+  th {
+    background: #10251c;
+    color: white;
+  }
+
+  td {
+    border-top: 1px solid #d8dfd8;
+    color: #526056;
+    line-height: 1.65;
+  }
+
+  td:first-child,
+  td:nth-child(2) {
+    color: #10251c;
+    font-weight: 900;
+  }
+
+  .faq-list {
+    display: grid;
+    gap: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
   .courses {
     display: grid;
     gap: 72px;
@@ -827,6 +1104,9 @@ const jsonLd = {
       padding: 64px 20px;
     }
 
+    .trial-grid,
+    .target-grid,
+    .meta-grid,
     .flow-grid,
     .pricing-grid,
     .compare-section,
