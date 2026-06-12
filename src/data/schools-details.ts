@@ -57,10 +57,10 @@ export const schoolsDetailContent = {
     trial: {
       eyebrow: "Free Trial",
       title: "まずは無料体験で、学び方と相性を確認できます",
-      body: "初回は学習状況、目標、得意不得意を確認し、どのコース・頻度が合うかを一緒に整理します。予約機能の実装までは、お問い合わせフォームまたはLINEで日程を調整します。",
-      primaryCta: "無料体験を予約する",
+      body: "初回は学習状況、目標、得意不得意を確認し、どのコース・頻度が合うかを一緒に整理します。予約機能の実装までは、LINEで日程を調整します。",
+      primaryCta: "LINEで無料体験を相談する",
       secondaryCta: "料金の目安を見る",
-      note: "予約機能、変更、キャンセルは今後Schools app側で扱います。現時点ではお問い合わせフォームまたはLINEからご相談ください。",
+      note: "予約機能、変更、キャンセルは今後Schools app側で扱います。現時点ではLINEからご相談ください。",
       points: [
         "学習目的と現在地を確認して、無理のない初回プランを提案します。",
         "保護者同席での相談や、学校・家庭学習との両立相談にも対応します。",
@@ -158,7 +158,7 @@ export const schoolsDetailContent = {
       {
         question: "授業の変更やキャンセルはどこで行いますか？",
         answer:
-          "予約、変更、キャンセルはSchools app側のポータルで扱う方針です。現在はお問い合わせフォームまたはLINEでご相談ください。",
+          "予約、変更、キャンセルはSchools app側のポータルで扱う方針です。現在はLINEでご相談ください。",
       },
       {
         question: "外部カレンダーから予約を編集できますか？",
@@ -169,22 +169,22 @@ export const schoolsDetailContent = {
     finalCta: {
       title: "無料体験から始めましょう",
       body: "まだコースが決まっていなくても大丈夫です。学びたいこと、困っていること、通える曜日をもとに初回の内容を整理します。",
-      primary: "Schools appで予約する",
-      secondary: "問い合わせで相談する",
+      primary: "LINEで無料体験を相談する",
+      secondary: "料金の目安を見る",
     },
   },
   en: {
     trial: {
       eyebrow: "Free Trial",
       title: "Start with a free trial to check the learning style and fit",
-      body: "In the first session, we review the learner's current situation, goals, strengths, and difficulties, then suggest a suitable course and frequency. Reservations and schedule coordination are handled in the Schools app.",
-      primaryCta: "Book a free trial",
+      body: "In the first session, we review the learner's current situation, goals, strengths, and difficulties, then suggest a suitable course and frequency. Until online booking is ready, we coordinate dates on LINE.",
+      primaryCta: "Ask about a free trial on LINE",
       secondaryCta: "View pricing guide",
-      note: "Reservations, changes, and cancellations are handled in the Schools app. Acecore Schools provides guide information only.",
+      note: "Online booking, changes, and cancellations will be handled in the Schools app later. For now, please contact us on LINE.",
       points: [
         "We review goals and current level, then suggest a realistic first plan.",
         "Parents can join the consultation, including questions about balancing school and home study.",
-        "After online booking, we send a confirmation email with preparation and access details.",
+        "After the date is confirmed, we send preparation and access details.",
       ],
     },
     courses: {
@@ -243,7 +243,7 @@ export const schoolsDetailContent = {
       dayLabel: "Day",
       timeLabel: "Time",
       noteLabel: "Use case",
-      note: "Check the Schools app for the latest availability. Holidays, long vacations, and events may use separate slots.",
+      note: "Please confirm the latest availability on LINE until online booking is ready. Holidays, long vacations, and events may use separate slots.",
       items: [
         {
           day: "Weekdays",
@@ -283,29 +283,29 @@ export const schoolsDetailContent = {
       {
         question: "Where are lesson changes and cancellations handled?",
         answer:
-          "Reservations, changes, and cancellations are planned to be handled in the Schools app portal. Acecore Schools does not provide editing features.",
+          "Reservations, changes, and cancellations are planned for the Schools app portal. Until then, please contact us on LINE.",
       },
       {
         question: "Can external calendars edit reservations?",
         answer:
-          "For safety, external calendars such as Outlook are planned to be read-only. Changes and cancellations are handled from the portal.",
+          "For safety, external calendars such as Outlook are planned to be read-only. Changes and cancellations will be handled from the portal after it is released.",
       },
     ],
     finalCta: {
       title: "Start with a free trial",
       body: "You do not need to choose a course in advance. We will organize the first session based on what you want to learn, where you need help, and available days.",
-      primary: "Book in the Schools app",
-      secondary: "Ask through contact",
+      primary: "Ask on LINE",
+      secondary: "View pricing guide",
     },
   },
   "zh-cn": {
     trial: {
       eyebrow: "Free Trial",
       title: "先通过免费体验确认学习方式和相性",
-      body: "第一次会确认当前学习情况、目标、擅长和不擅长的内容，并一起整理适合的课程和频率。预约和日程调整在 Schools app 中受理。",
-      primaryCta: "预约免费体验",
+      body: "第一次会确认当前学习情况、目标、擅长和不擅长的内容，并一起整理适合的课程和频率。在线预约上线前，请通过 LINE 调整日程。",
+      primaryCta: "通过 LINE 咨询免费体验",
       secondaryCta: "查看费用参考",
-      note: "预约、变更和取消在 Schools app 中处理。Acecore Schools 只提供说明信息。",
+      note: "在线预约、变更和取消今后会在 Schools app 中处理。现阶段请通过 LINE 咨询。",
       points: [
         "确认学习目标和当前位置，提出不过度勉强的初次计划。",
         "家长可一起参加，也可以咨询学校学习和家庭学习的平衡。",
@@ -363,7 +363,7 @@ export const schoolsDetailContent = {
       dayLabel: "星期",
       timeLabel: "时间段",
       noteLabel: "对象・用途",
-      note: "最新空位请在 Schools app 查看。节假日、长假和活动时可能提供其他时段。",
+      note: "在线预约上线前，最新空位请通过 LINE 确认。节假日、长假和活动时可能提供其他时段。",
       items: [
         {
           day: "平日",
@@ -403,19 +403,19 @@ export const schoolsDetailContent = {
       {
         question: "授课变更和取消在哪里进行？",
         answer:
-          "预约、变更和取消计划在 Schools app 的门户中处理。Acecore Schools 不提供编辑功能。",
+          "预约、变更和取消计划在 Schools app 的门户中处理。上线前请通过 LINE 咨询。",
       },
       {
         question: "可以从外部日历编辑预约吗？",
         answer:
-          "出于安全考虑，Outlook 等外部日历计划为只读。变更和取消从门户进行。",
+          "出于安全考虑，Outlook 等外部日历计划为只读。门户上线后，变更和取消从门户进行。",
       },
     ],
     finalCta: {
       title: "从免费体验开始",
       body: "还没决定课程也没关系。我们会根据想学的内容、困扰和可参加时间整理初次内容。",
-      primary: "在 Schools app 预约",
-      secondary: "通过表单咨询",
+      primary: "通过 LINE 咨询",
+      secondary: "查看费用参考",
     },
   },
   es: {
@@ -423,14 +423,14 @@ export const schoolsDetailContent = {
       eyebrow: "Free Trial",
       title:
         "Empieza con una prueba gratuita para comprobar el estilo de aprendizaje",
-      body: "En la primera sesión revisamos la situación actual, objetivos, puntos fuertes y dificultades, y proponemos el curso y la frecuencia adecuados. Las reservas y ajustes se gestionan en Schools app.",
+      body: "En la primera sesión revisamos la situación actual, objetivos, puntos fuertes y dificultades, y proponemos el curso y la frecuencia adecuados. Hasta que la reserva online esté lista, coordinamos por LINE.",
       primaryCta: "Reservar prueba gratuita",
       secondaryCta: "Ver guía de precios",
-      note: "Las reservas, cambios y cancelaciones se gestionan en Schools app. Acecore Schools solo publica información de guía.",
+      note: "Las reservas online, cambios y cancelaciones se gestionarán en Schools app más adelante. Por ahora, consúltanos por LINE.",
       points: [
         "Revisamos objetivos y nivel actual para proponer un primer plan realista.",
         "La familia puede asistir y consultar cómo combinar escuela y estudio en casa.",
-        "Tras la reserva online enviamos un correo de confirmación con preparación y acceso.",
+        "Tras confirmar la fecha enviaremos la preparación y los detalles de acceso.",
       ],
     },
     courses: {
@@ -486,7 +486,7 @@ export const schoolsDetailContent = {
       dayLabel: "Día",
       timeLabel: "Horario",
       noteLabel: "Uso",
-      note: "Consulta la disponibilidad actual en Schools app. Festivos, vacaciones y eventos pueden tener otros horarios.",
+      note: "Hasta que la reserva online esté lista, consulta la disponibilidad actual por LINE. Festivos, vacaciones y eventos pueden tener otros horarios.",
       items: [
         {
           day: "Entre semana",
@@ -527,19 +527,19 @@ export const schoolsDetailContent = {
       {
         question: "¿Dónde se cambian o cancelan clases?",
         answer:
-          "Las reservas, cambios y cancelaciones se gestionarán en el portal de Schools app. Acecore Schools no tendrá funciones de edición.",
+          "Las reservas, cambios y cancelaciones se gestionarán en el portal de Schools app. Hasta entonces, consúltanos por LINE.",
       },
       {
         question: "¿Se pueden editar reservas desde calendarios externos?",
         answer:
-          "Por seguridad, calendarios como Outlook serán solo lectura. Los cambios y cancelaciones se hacen desde el portal.",
+          "Por seguridad, calendarios como Outlook serán solo lectura. Los cambios y cancelaciones se harán desde el portal cuando esté disponible.",
       },
     ],
     finalCta: {
       title: "Empieza con una prueba gratuita",
       body: "No necesitas decidir el curso por adelantado. Organizamos la primera sesión según lo que quieras aprender, tus dudas y tus horarios.",
-      primary: "Reservar en Schools app",
-      secondary: "Consultar por formulario",
+      primary: "Consultar por LINE",
+      secondary: "Ver guía de precios",
     },
   },
   pt: {
@@ -547,10 +547,10 @@ export const schoolsDetailContent = {
       eyebrow: "Teste gratuito",
       title:
         "Comece com um teste gratuito para confirmar o metodo e a compatibilidade",
-      body: "No teste, confirmamos objetivos, situacao atual, dificuldades e disponibilidade antes de propor um primeiro plano realista. A reserva e feita no Schools app.",
-      primaryCta: "Reservar teste gratuito",
+      body: "No teste, confirmamos objetivos, situacao atual, dificuldades e disponibilidade antes de propor um primeiro plano realista. Ate a reserva online ficar pronta, combinamos datas pelo LINE.",
+      primaryCta: "Consultar teste gratuito pelo LINE",
       secondaryCta: "Ver referencia de precos",
-      note: "Reservas e alteracoes sao geridas no Schools app. Acecore Schools funciona como pagina informativa e nao edita reservas.",
+      note: "Reservas online, alteracoes e cancelamentos serao geridos no Schools app futuramente. Por enquanto, fale conosco pelo LINE.",
       points: [
         "Confirmamos o objetivo de aprendizagem e o nivel atual para propor um plano inicial sem sobrecarga.",
         "Responsaveis podem participar para alinhar objetivos, ritmo e acompanhamento em casa.",
@@ -605,7 +605,7 @@ export const schoolsDetailContent = {
       dayLabel: "Dia",
       timeLabel: "Horario",
       noteLabel: "Uso",
-      note: "As vagas mais recentes sao confirmadas no Schools app. Feriados, ferias e eventos podem ter horarios separados.",
+      note: "Ate a reserva online ficar pronta, confirme as vagas mais recentes pelo LINE. Feriados, ferias e eventos podem ter horarios separados.",
       items: [
         {
           day: "Dias uteis",
@@ -646,19 +646,19 @@ export const schoolsDetailContent = {
       {
         question: "Onde fazer alteracoes ou cancelamentos?",
         answer:
-          "Reservas, alteracoes e cancelamentos serao tratados no portal do Schools app. Acecore Schools nao oferece edicao de reservas.",
+          "Reservas, alteracoes e cancelamentos serao tratados no portal do Schools app. Ate la, fale conosco pelo LINE.",
       },
       {
         question: "Calendarios externos podem editar reservas?",
         answer:
-          "Por seguranca, calendarios externos como Outlook serao somente leitura. Alteracoes e cancelamentos ficam no portal.",
+          "Por seguranca, calendarios externos como Outlook serao somente leitura. Alteracoes e cancelamentos ficarao no portal quando ele estiver disponivel.",
       },
     ],
     finalCta: {
       title: "Comece com um teste gratuito",
       body: "Nao e necessario escolher um curso antes. Organizamos a primeira aula com base no que voce quer aprender, nas dificuldades e nos dias disponiveis.",
-      primary: "Reservar no Schools app",
-      secondary: "Perguntar pelo contato",
+      primary: "Consultar pelo LINE",
+      secondary: "Ver referencia de precos",
     },
   },
   fr: {
@@ -666,10 +666,10 @@ export const schoolsDetailContent = {
       eyebrow: "Essai gratuit",
       title:
         "Commencez par un essai gratuit pour verifier la methode et l'adequation",
-      body: "Pendant l'essai, nous confirmons les objectifs, la situation actuelle, les difficultes et les disponibilites avant de proposer un premier plan realiste. La reservation se fait dans la Schools app.",
+      body: "Pendant l'essai, nous confirmons les objectifs, la situation actuelle, les difficultes et les disponibilites avant de proposer un premier plan realiste. Jusqu'a la mise en ligne de la reservation, nous coordonnons par LINE.",
       primaryCta: "Reserver l'essai gratuit",
       secondaryCta: "Voir les tarifs indicatifs",
-      note: "La reservation et les changements sont geres dans la Schools app. Acecore Schools reste une page d'information et ne gere pas les modifications de reservation.",
+      note: "La reservation en ligne, les changements et les annulations seront geres dans la Schools app plus tard. Pour l'instant, contactez-nous via LINE.",
       points: [
         "Nous verifions l'objectif d'apprentissage et le niveau actuel afin de proposer un premier plan sans surcharge.",
         "Les parents peuvent participer pour discuter des objectifs, du rythme et du suivi a la maison.",
@@ -726,7 +726,7 @@ export const schoolsDetailContent = {
       dayLabel: "Jour",
       timeLabel: "Horaire",
       noteLabel: "Usage",
-      note: "Les disponibilites les plus recentes sont confirmees dans la Schools app. Vacances, jours feries et evenements peuvent avoir des creneaux separes.",
+      note: "Jusqu a la mise en ligne de la reservation, les disponibilites sont confirmees via LINE. Vacances, jours feries et evenements peuvent avoir des creneaux separes.",
       items: [
         {
           day: "Jours de semaine",
@@ -767,30 +767,30 @@ export const schoolsDetailContent = {
       {
         question: "Ou gerer les changements ou annulations de lecon ?",
         answer:
-          "Les reservations, changements et annulations sont prevus dans le portail de la Schools app. Acecore Schools ne propose pas de fonction de modification.",
+          "Les reservations, changements et annulations sont prevus dans le portail de la Schools app. D ici la, contactez-nous via LINE.",
       },
       {
         question:
           "Les calendriers externes peuvent-ils modifier les reservations ?",
         answer:
-          "Pour des raisons de securite, les calendriers externes comme Outlook sont prevus en lecture seule. Les changements se font depuis le portail.",
+          "Pour des raisons de securite, les calendriers externes comme Outlook sont prevus en lecture seule. Les changements se feront depuis le portail quand il sera disponible.",
       },
     ],
     finalCta: {
       title: "Commencez par un essai gratuit",
       body: "Il n'est pas necessaire de choisir un cours a l'avance. Nous organiserons la premiere seance selon ce que vous voulez apprendre, vos difficultes et vos disponibilites.",
-      primary: "Reserver dans la Schools app",
-      secondary: "Demander via le contact",
+      primary: "Demander via LINE",
+      secondary: "Voir les tarifs indicatifs",
     },
   },
   ko: {
     trial: {
       eyebrow: "무료 체험",
       title: "먼저 무료 체험으로 학습 방식과 적합성을 확인하세요",
-      body: "무료 체험에서는 목표, 현재 수준, 어려운 점, 가능한 요일을 확인하고 무리 없는 첫 계획을 제안합니다. 예약은 Schools app에서 진행합니다.",
-      primaryCta: "무료 체험 예약하기",
+      body: "무료 체험에서는 목표, 현재 수준, 어려운 점, 가능한 요일을 확인하고 무리 없는 첫 계획을 제안합니다. 온라인 예약 기능이 준비되기 전까지는 LINE으로 일정을 조정합니다.",
+      primaryCta: "LINE으로 무료 체험 상담하기",
       secondaryCta: "가격 기준 보기",
-      note: "예약과 변경은 Schools app에서 관리합니다. Acecore Schools은 안내 페이지이며 예약 편집 기능을 두지 않습니다.",
+      note: "온라인 예약, 변경, 취소는 향후 Schools app에서 관리합니다. 현재는 LINE으로 문의해 주세요.",
       points: [
         "학습 목적과 현재 위치를 확인해 무리 없는 첫 계획을 제안합니다.",
         "보호자도 함께 참여해 목표, 수업 빈도, 가정에서의 지원 방법을 상담할 수 있습니다.",
@@ -841,7 +841,7 @@ export const schoolsDetailContent = {
       dayLabel: "요일",
       timeLabel: "시간대",
       noteLabel: "대상 및 활용",
-      note: "최신 빈 자리는 Schools app에서 확인합니다. 공휴일, 방학, 이벤트 시에는 별도 시간대를 안내할 수 있습니다.",
+      note: "온라인 예약 기능이 준비되기 전까지 최신 빈 자리는 LINE으로 확인합니다. 공휴일, 방학, 이벤트 시에는 별도 시간대를 안내할 수 있습니다.",
       items: [
         {
           day: "평일",
@@ -881,29 +881,29 @@ export const schoolsDetailContent = {
       {
         question: "수업 변경이나 취소는 어디서 하나요?",
         answer:
-          "예약, 변경, 취소는 Schools app 포털에서 처리하는 방향입니다. Acecore Schools에는 편집 기능을 두지 않습니다.",
+          "예약, 변경, 취소는 Schools app 포털에서 처리하는 방향입니다. 그 전까지는 LINE으로 문의해 주세요.",
       },
       {
         question: "외부 캘린더에서 예약을 수정할 수 있나요?",
         answer:
-          "안전성을 위해 Outlook 같은 외부 캘린더는 표시 전용으로 할 계획입니다. 변경과 취소는 포털에서 진행합니다.",
+          "안전성을 위해 Outlook 같은 외부 캘린더는 표시 전용으로 할 계획입니다. 포털 공개 후 변경과 취소는 포털에서 진행합니다.",
       },
     ],
     finalCta: {
       title: "무료 체험으로 시작하세요",
       body: "아직 코스를 정하지 않아도 괜찮습니다. 배우고 싶은 것, 어려운 점, 가능한 요일을 바탕으로 첫 수업 내용을 정리합니다.",
-      primary: "Schools app에서 예약하기",
-      secondary: "문의로 상담하기",
+      primary: "LINE으로 상담하기",
+      secondary: "가격 기준 보기",
     },
   },
   de: {
     trial: {
       eyebrow: "Kostenlose Probestunde",
       title: "Mit einer kostenlosen Probestunde Methode und Passung prufen",
-      body: "In der Probestunde klaren wir Ziele, aktuellen Stand, Schwierigkeiten und verfugbare Zeiten und schlagen einen realistischen ersten Plan vor. Die Buchung erfolgt in der Schools app.",
-      primaryCta: "Kostenlose Probestunde buchen",
+      body: "In der Probestunde klaren wir Ziele, aktuellen Stand, Schwierigkeiten und verfugbare Zeiten und schlagen einen realistischen ersten Plan vor. Bis die Online-Buchung bereit ist, stimmen wir Termine per LINE ab.",
+      primaryCta: "Kostenlose Probestunde per LINE anfragen",
       secondaryCta: "Preisubersicht ansehen",
-      note: "Buchungen und Anderungen werden in der Schools app verwaltet. Acecore Schools bleibt eine Informationsseite und bietet keine Bearbeitung von Reservierungen.",
+      note: "Online-Buchungen, Anderungen und Stornierungen werden spater in der Schools app verwaltet. Bis dahin kontaktieren Sie uns bitte per LINE.",
       points: [
         "Wir prufen Lernziel und aktuellen Stand, um einen ersten Plan ohne Uberforderung vorzuschlagen.",
         "Eltern konnen teilnehmen, um Ziele, Rhythmus und Begleitung zuhause abzustimmen.",
@@ -956,7 +956,7 @@ export const schoolsDetailContent = {
       dayLabel: "Tag",
       timeLabel: "Zeit",
       noteLabel: "Nutzung",
-      note: "Aktuelle Verfugbarkeit wird in der Schools app bestatigt. Feiertage, Ferien und Events konnen eigene Zeitfenster haben.",
+      note: "Bis die Online-Buchung bereit ist, wird die aktuelle Verfugbarkeit per LINE bestatigt. Feiertage, Ferien und Events konnen eigene Zeitfenster haben.",
       items: [
         {
           day: "Wochentage",
@@ -997,19 +997,19 @@ export const schoolsDetailContent = {
       {
         question: "Wo werden Anderungen oder Stornierungen vorgenommen?",
         answer:
-          "Reservierungen, Anderungen und Stornierungen sind im Portal der Schools app vorgesehen. Acecore Schools bietet keine Bearbeitungsfunktion.",
+          "Reservierungen, Anderungen und Stornierungen sind im Portal der Schools app vorgesehen. Bis dahin kontaktieren Sie uns bitte per LINE.",
       },
       {
         question: "Konnen externe Kalender Reservierungen bearbeiten?",
         answer:
-          "Aus Sicherheitsgrunden sollen externe Kalender wie Outlook nur lesend sein. Anderungen erfolgen im Portal.",
+          "Aus Sicherheitsgrunden sollen externe Kalender wie Outlook nur lesend sein. Anderungen erfolgen im Portal, sobald es verfugbar ist.",
       },
     ],
     finalCta: {
       title: "Mit einer kostenlosen Probestunde starten",
       body: "Ein Kurs muss vorher nicht feststehen. Wir organisieren die erste Stunde nach Lernwunsch, Schwierigkeiten und passenden Tagen.",
-      primary: "In der Schools app buchen",
-      secondary: "Uber Kontakt fragen",
+      primary: "Per LINE anfragen",
+      secondary: "Preisubersicht ansehen",
     },
   },
   ru: {
@@ -1017,10 +1017,10 @@ export const schoolsDetailContent = {
       eyebrow: "Бесплатное пробное занятие",
       title:
         "Начните с бесплатного пробного занятия, чтобы проверить формат и совместимость",
-      body: "На пробном занятии мы уточняем цели, текущий уровень, трудности и доступное время, а затем предлагаем реалистичный первый план. Запись проходит в Schools app.",
-      primaryCta: "Записаться на пробное занятие",
+      body: "На пробном занятии мы уточняем цели, текущий уровень, трудности и доступное время, а затем предлагаем реалистичный первый план. Пока онлайн-запись не готова, согласуем дату через LINE.",
+      primaryCta: "Спросить о пробном занятии в LINE",
       secondaryCta: "Посмотреть ориентир цен",
-      note: "Запись и изменения управляются в Schools app. Acecore Schools остается информационной страницей и не редактирует бронирования.",
+      note: "Онлайн-запись, изменения и отмены позже будут управляться в Schools app. Сейчас свяжитесь с нами через LINE.",
       points: [
         "Мы уточняем цель обучения и текущий уровень, чтобы предложить первый план без лишней нагрузки.",
         "Родители могут участвовать, чтобы обсудить цели, ритм занятий и поддержку дома.",
@@ -1076,7 +1076,7 @@ export const schoolsDetailContent = {
       dayLabel: "День",
       timeLabel: "Время",
       noteLabel: "Формат",
-      note: "Актуальные свободные окна подтверждаются в Schools app. Праздники, каникулы и события могут иметь отдельные окна.",
+      note: "Пока онлайн-запись не готова, актуальные свободные окна подтверждаются через LINE. Праздники, каникулы и события могут иметь отдельные окна.",
       items: [
         {
           day: "Будни",
@@ -1116,19 +1116,19 @@ export const schoolsDetailContent = {
       {
         question: "Где менять или отменять занятия?",
         answer:
-          "Бронирования, изменения и отмены планируются в портале Schools app. Acecore Schools не предоставляет функции редактирования.",
+          "Бронирования, изменения и отмены планируются в портале Schools app. До запуска портала свяжитесь с нами через LINE.",
       },
       {
         question: "Могут ли внешние календари изменять бронирования?",
         answer:
-          "Для безопасности внешние календари, например Outlook, планируются только для просмотра. Изменения выполняются в портале.",
+          "Для безопасности внешние календари, например Outlook, планируются только для просмотра. Изменения будут выполняться в портале после его запуска.",
       },
     ],
     finalCta: {
       title: "Начните с бесплатного пробного занятия",
       body: "Не нужно заранее выбирать курс. Мы организуем первое занятие по тому, чему вы хотите научиться, где нужна помощь и какие дни подходят.",
-      primary: "Записаться в Schools app",
-      secondary: "Задать вопрос через контакт",
+      primary: "Спросить в LINE",
+      secondary: "Посмотреть ориентир цен",
     },
   },
 } satisfies Record<Locale, SchoolsDetailContent>;

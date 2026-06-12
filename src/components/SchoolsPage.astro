@@ -3,7 +3,6 @@ import {
   acecoreOrigin,
   defaultLocale,
   getLocalePath,
-  getLocalizedAcecoreUrl,
   htmlLangMap,
   lineUrl,
   localeLabels,
@@ -23,7 +22,7 @@ const content = schoolsContent[locale] ?? schoolsContent[defaultLocale];
 const canonicalPath = getLocalePath(locale);
 const canonicalUrl = new URL(canonicalPath, schoolsOrigin).href;
 const pricingUrl = "#pricing";
-const contactUrl = getLocalizedAcecoreUrl(locale, "/contact/");
+const trialInquiryUrl = lineUrl;
 const trialUrl = "#trial";
 const detail =
   schoolsDetailContent[locale] ?? schoolsDetailContent[defaultLocale];
@@ -215,16 +214,16 @@ const jsonLd = {
             <p>{detail.trial.note}</p>
           </div>
           <div class="trial-actions-panel">
-            <a class="button primary" href={contactUrl}>
-              {detail.trial.primaryCta}
-            </a>
             <a
-              class="button secondary"
-              href={lineUrl}
+              class="button primary"
+              href={trialInquiryUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {content.ctaLine}
+              {detail.trial.primaryCta}
+            </a>
+            <a class="button secondary" href={pricingUrl}>
+              {detail.trial.secondaryCta}
             </a>
           </div>
         </div>
@@ -417,8 +416,11 @@ const jsonLd = {
             <a class="button secondary" href={trialUrl}
               >{detail.trial.primaryCta}</a
             >
-            <a class="button primary" href={contactUrl}
-              >{content.pricing.ctaContact}</a
+            <a
+              class="button primary"
+              href={trialInquiryUrl}
+              target="_blank"
+              rel="noopener noreferrer">{content.pricing.ctaContact}</a
             >
           </div>
         </div>
@@ -445,16 +447,16 @@ const jsonLd = {
         <h2 id="cta-title">{detail.finalCta.title}</h2>
         <p>{detail.finalCta.body}</p>
         <div class="hero-actions">
-          <a class="button primary" href={contactUrl}>
-            {detail.trial.primaryCta}
-          </a>
           <a
-            class="button secondary"
-            href={lineUrl}
+            class="button primary"
+            href={trialInquiryUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
-            {detail.finalCta.secondary}
+            {detail.trial.primaryCta}
+          </a>
+          <a class="button secondary" href={pricingUrl}>
+            {detail.trial.secondaryCta}
           </a>
         </div>
       </section>
