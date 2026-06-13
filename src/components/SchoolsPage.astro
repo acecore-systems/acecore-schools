@@ -25,13 +25,42 @@ const pricingUrl = getLocalizedAcecoreUrl(locale, "/pricing/");
 const contactUrl = getLocalizedAcecoreUrl(locale, "/contact/");
 
 const heroImage =
-  "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&h=900&fit=crop&q=82&fm=webp";
+  "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1800&h=1100&fit=crop&q=86&fm=webp";
 const jukuImage =
-  "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1000&h=625&fit=crop&q=82&fm=webp";
+  "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1000&h=700&fit=crop&q=84&fm=webp";
 const programmingImage =
-  "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=1000&h=625&fit=crop&q=82&fm=webp";
+  "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=1000&h=700&fit=crop&q=84&fm=webp";
+const practicalImage =
+  "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=1000&h=700&fit=crop&q=84&fm=webp";
 const pcImage =
-  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&h=625&fit=crop&q=82&fm=webp";
+  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&h=700&fit=crop&q=84&fm=webp";
+const gedImage =
+  "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1000&h=700&fit=crop&q=84&fm=webp";
+
+const iconMap = {
+  mail: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6.5h15v11h-15z"/><path d="m5 7 7 6 7-6"/></svg>`,
+  chat: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.75c0-1.24 1.01-2.25 2.25-2.25h9.5c1.24 0 2.25 1.01 2.25 2.25v6.5c0 1.24-1.01 2.25-2.25 2.25h-4.5L8 19.5v-4H7.25C6.01 15.5 5 14.49 5 13.25z"/><path d="M8.5 9.5h7M8.5 12.25h4.75"/></svg>`,
+  sparkles: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.7 5.2L19 10l-5.3 1.8L12 17l-1.7-5.2L5 10l5.3-1.8z"/><path d="m18.5 15 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>`,
+  bot: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8.5h8a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3Z"/><path d="M12 8.5V5M9 5h6M9.25 13h.01M14.75 13h.01M9 16h6"/></svg>`,
+  code: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 8-4 4 4 4M15 8l4 4-4 4"/><path d="m13 6-2 12"/></svg>`,
+  flag: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4.5"/><path d="M6 5h10.5l-1.8 4 1.8 4H6"/></svg>`,
+  login: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4"/><path d="m10 8 4 4-4 4M14 12H4"/></svg>`,
+  calendar: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v14H5z"/><path d="M8 3.5v4M16 3.5v4M5 9h14"/></svg>`,
+  book: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5.5A3.5 3.5 0 0 1 8 2h11v17H8a3.5 3.5 0 0 0-3.5 3.5z"/><path d="M8 2v17"/></svg>`,
+} as const;
+
+const getStepIcon = (icon: string) => {
+  if (icon === "bot") return iconMap.bot;
+  if (icon === "code-xml") return iconMap.code;
+  if (icon === "flag") return iconMap.flag;
+  return iconMap.sparkles;
+};
+
+const getPricingIcon = (icon: string) => {
+  if (icon === "calendar-days") return iconMap.calendar;
+  if (icon === "book-open") return iconMap.book;
+  return iconMap.login;
+};
 
 const courseSections = [
   {
@@ -58,6 +87,8 @@ const courseSections = [
     kicker: "03",
     title: content.practicalProgramming.title,
     body: content.practicalProgramming.desc,
+    image: practicalImage,
+    imageAlt: content.robotProgramming.progImgAlt,
     listTitle: content.practicalProgramming.contentsLabel,
     items: content.practicalProgramming.contents,
   },
@@ -76,6 +107,8 @@ const courseSections = [
     kicker: "05",
     title: content.ged.title,
     body: content.ged.desc,
+    image: gedImage,
+    imageAlt: content.ged.title,
     listTitle: content.ged.supportLabel,
     items: content.ged.supports,
   },
@@ -135,7 +168,7 @@ const jsonLd = {
   <body>
     <header class="site-header">
       <a class="brand" href={canonicalPath} aria-label="Acecore Schools">
-        <span class="brand-mark">A</span>
+        <span class="brand-mark" aria-hidden="true">A</span>
         <span>Acecore Schools</span>
       </a>
       <nav class="primary-nav" aria-label="School sections">
@@ -147,30 +180,27 @@ const jsonLd = {
     </header>
 
     <main>
-      <section class="hero">
+      <section class="hero" aria-labelledby="hero-title">
         <div class="hero-media" aria-hidden="true">
-          <img
-            src={heroImage}
-            alt=""
-            width="1600"
-            height="900"
-            loading="eager"
-          />
+          <img src={heroImage} alt="" width="1800" height="1100" loading="eager" />
         </div>
         <div class="hero-content">
-          <p class="eyebrow">Acecore Schools</p>
-          <h1>{content.heroTitle}</h1>
+          <h1 id="hero-title">{content.heroTitle}</h1>
           <p class="hero-lead">{content.heroSubtitle}</p>
           <p class="hero-copy">{content.intro}</p>
           <div class="hero-actions">
-            <a class="button primary" href={contactUrl}>{content.ctaForm}</a>
+            <a class="button primary" href={contactUrl}>
+              <span class="button-icon" set:html={iconMap.mail} />
+              <span>{content.ctaForm}</span>
+            </a>
             <a
               class="button secondary"
               href={lineUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {content.ctaLine}
+              <span class="button-icon" set:html={iconMap.chat} />
+              <span>{content.ctaLine}</span>
             </a>
           </div>
         </div>
@@ -200,9 +230,15 @@ const jsonLd = {
           {
             content.learningSteps.map((step, index) => (
               <article>
-                <span class="step-number">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
+                <div class="step-shell">
+                  <span class="step-number">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span
+                    class:list={["step-icon", `accent-${step.accent}`]}
+                    set:html={getStepIcon(step.icon)}
+                  />
+                </div>
                 <h3>{step.title}</h3>
                 <p>{step.description}</p>
               </article>
@@ -212,37 +248,62 @@ const jsonLd = {
       </section>
 
       <section class="compare-section" aria-labelledby="compare-title">
-        <div>
-          <p class="eyebrow dark">Learning Fit</p>
+        <div class="compare-copy">
+          <p>Learning Fit</p>
           <h2 id="compare-title">{content.compareTitle}</h2>
         </div>
-        <div class="compare-grid">
-          <article>
-            <h3>{content.compareBefore}</h3>
-            <ul>
-              {content.compareBeforeItems.map((item) => <li>{item}</li>)}
-            </ul>
-          </article>
-          <article class="highlight">
-            <h3>{content.compareAfter}</h3>
-            <ul>
-              {content.compareAfterItems.map((item) => <li>{item}</li>)}
-            </ul>
-          </article>
+        <div class="compare-table" role="table" aria-label={content.compareTitle}>
+          <div class="compare-row compare-head" role="row">
+            <span role="columnheader">{content.compareBefore}</span>
+            <span role="columnheader">{content.compareAfter}</span>
+          </div>
+          {
+            content.compareBeforeItems.map((item, index) => (
+              <div class="compare-row" role="row">
+                <span role="cell">{item}</span>
+                <span role="cell">{content.compareAfterItems[index]}</span>
+              </div>
+            ))
+          }
         </div>
       </section>
 
-      <section class="courses" aria-label="Courses">
+      <section class="course-overview" aria-label="Courses">
+        <div class="course-rail">
+          {
+            courseSections.map((section) => (
+              <a href={`#${section.id}`}>
+                <img
+                  src={section.image}
+                  alt=""
+                  width="520"
+                  height="360"
+                  loading="lazy"
+                />
+                <span>{section.kicker}</span>
+                <strong>{section.title}</strong>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="courses">
         {
           courseSections.map((section, index) => (
             <article
-              class:list={[
-                "course-section",
-                index % 2 === 1 && "reversed",
-                !section.image && "text-only",
-              ]}
+              class:list={["course-section", index % 2 === 1 && "reversed"]}
               id={section.id}
             >
+              <figure class="course-image">
+                <img
+                  src={section.image}
+                  alt={section.imageAlt}
+                  width="1000"
+                  height="700"
+                  loading="lazy"
+                />
+              </figure>
               <div class="course-copy">
                 <p class="section-number">{section.kicker}</p>
                 <h2>{section.title}</h2>
@@ -268,17 +329,6 @@ const jsonLd = {
                   </div>
                 )}
               </div>
-              {section.image && (
-                <figure class="course-image">
-                  <img
-                    src={section.image}
-                    alt={section.imageAlt}
-                    width="1000"
-                    height="625"
-                    loading="lazy"
-                  />
-                </figure>
-              )}
             </article>
           ))
         }
@@ -294,6 +344,7 @@ const jsonLd = {
           {
             content.pricing.items.map((item) => (
               <article>
+                <span class="pricing-icon" set:html={getPricingIcon(item.icon)} />
                 <h3>{item.label}</h3>
                 <p class="price">{item.price}</p>
                 <p>{item.note}</p>
@@ -307,28 +358,34 @@ const jsonLd = {
             <p>{content.pricing.ctaBody}</p>
           </div>
           <div class="hero-actions compact-actions">
-            <a class="button secondary" href={pricingUrl}
-              >{content.pricing.ctaPricing}</a
-            >
-            <a class="button primary" href={contactUrl}
-              >{content.pricing.ctaContact}</a
-            >
+            <a class="button secondary light" href={pricingUrl}>
+              {content.pricing.ctaPricing}
+            </a>
+            <a class="button primary" href={contactUrl}>
+              {content.pricing.ctaContact}
+            </a>
           </div>
         </div>
       </section>
 
       <section class="final-cta" aria-labelledby="cta-title">
-        <h2 id="cta-title">{content.ctaHeading}</h2>
-        <p>{content.ctaBody}</p>
+        <div>
+          <h2 id="cta-title">{content.ctaHeading}</h2>
+          <p>{content.ctaBody}</p>
+        </div>
         <div class="hero-actions">
-          <a class="button primary" href={contactUrl}>{content.ctaForm}</a>
+          <a class="button primary" href={contactUrl}>
+            <span class="button-icon" set:html={iconMap.mail} />
+            <span>{content.ctaForm}</span>
+          </a>
           <a
             class="button secondary"
             href={lineUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
-            {content.ctaLine}
+            <span class="button-icon" set:html={iconMap.chat} />
+            <span>{content.ctaLine}</span>
           </a>
         </div>
       </section>
@@ -344,6 +401,18 @@ const jsonLd = {
 <style>
   :root {
     color-scheme: light;
+    --page: #f6f8f4;
+    --paper: #ffffff;
+    --paper-soft: #eef6f2;
+    --ink: #071f1d;
+    --text: #18302c;
+    --muted: #5b6d67;
+    --line: rgba(7, 31, 29, 0.12);
+    --brand: #006c63;
+    --brand-deep: #00423d;
+    --accent: #f3b83b;
+    --teal-soft: #d9f0ea;
+    --shadow: 0 24px 80px rgba(4, 39, 34, 0.12);
     font-family:
       Inter,
       "Noto Sans JP",
@@ -352,39 +421,56 @@ const jsonLd = {
       BlinkMacSystemFont,
       "Segoe UI",
       sans-serif;
-    background: #f7f8f4;
-    color: #17201a;
+    background: var(--page);
+    color: var(--text);
     scroll-behavior: smooth;
-    overflow-x: hidden;
   }
 
   * {
     box-sizing: border-box;
   }
 
+  html,
   body {
+    min-width: 320px;
     margin: 0;
-    background: #f7f8f4;
     overflow-x: hidden;
+    background: var(--page);
+  }
+
+  body {
+    min-height: 100vh;
   }
 
   a {
     color: inherit;
   }
 
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+
   .site-header {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 20;
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 20px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 24px;
     align-items: center;
     min-height: 72px;
-    border-bottom: 1px solid rgba(23, 32, 26, 0.1);
+    border-bottom: 1px solid var(--line);
     padding: 0 max(20px, calc((100vw - 1180px) / 2));
-    background: rgba(247, 248, 244, 0.92);
-    backdrop-filter: blur(14px);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(18px);
   }
 
   .brand,
@@ -397,61 +483,82 @@ const jsonLd = {
   }
 
   .brand {
+    min-width: 0;
     gap: 10px;
-    font-weight: 800;
+    color: var(--ink);
+    font-size: 1.05rem;
+    font-weight: 900;
     text-decoration: none;
+    white-space: nowrap;
   }
 
   .brand-mark {
+    position: relative;
     display: grid;
+    flex: 0 0 auto;
     place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: #14532d;
-    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background:
+      linear-gradient(135deg, transparent 53%, var(--accent) 54% 65%, transparent 66%),
+      linear-gradient(135deg, var(--brand) 0 48%, transparent 49%);
+    color: transparent;
+    overflow: hidden;
   }
 
   .primary-nav {
     justify-content: center;
-    gap: 18px;
-    font-size: 0.92rem;
+    gap: 6px;
   }
 
   .primary-nav a,
   .header-cta {
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #25443f;
+    font-size: 0.9rem;
+    font-weight: 750;
+    line-height: 1.2;
     text-decoration: none;
+  }
+
+  .primary-nav a:hover,
+  .header-cta:hover {
+    background: var(--paper-soft);
+    color: var(--brand-deep);
   }
 
   .header-cta {
     justify-self: end;
-    font-weight: 800;
-    color: #0f766e;
+    border: 1px solid rgba(0, 108, 99, 0.24);
+    color: var(--brand);
   }
 
   .hero {
     position: relative;
     display: grid;
-    align-items: end;
-    min-height: min(760px, calc(100vh - 48px));
+    align-items: center;
+    min-height: clamp(580px, 78svh, 740px);
     overflow: hidden;
-    padding: 120px max(20px, calc((100vw - 1180px) / 2)) 72px;
-    color: white;
+    padding: 104px max(20px, calc((100vw - 1180px) / 2)) 78px;
+    isolation: isolate;
   }
 
   .hero-media {
     position: absolute;
     inset: 0;
+    z-index: -2;
+    background: #e6efec;
   }
 
   .hero-media::after {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      90deg,
-      rgba(10, 27, 19, 0.84),
-      rgba(10, 27, 19, 0.28)
-    );
+    z-index: 1;
+    background:
+      linear-gradient(90deg, rgba(246, 248, 244, 0.98) 0%, rgba(246, 248, 244, 0.88) 42%, rgba(246, 248, 244, 0.22) 74%, rgba(246, 248, 244, 0.08) 100%),
+      linear-gradient(0deg, rgba(246, 248, 244, 1) 0%, rgba(246, 248, 244, 0) 24%);
     content: "";
   }
 
@@ -459,118 +566,169 @@ const jsonLd = {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: 68% 48%;
   }
 
   .hero-content {
-    position: relative;
-    width: min(760px, 100%);
+    width: min(650px, 100%);
     min-width: 0;
-    max-width: 760px;
-  }
-
-  .eyebrow,
-  .section-heading p,
-  .section-number {
-    margin: 0 0 12px;
-    color: #5eead4;
-    font-size: 0.82rem;
-    font-weight: 900;
-    letter-spacing: 0;
-    text-transform: uppercase;
-  }
-
-  .eyebrow.dark,
-  .section-number {
-    color: #0f766e;
-  }
-
-  h1,
-  h2,
-  h3,
-  p {
-    margin: 0;
   }
 
   h1 {
     max-width: 100%;
-    font-size: clamp(3rem, 7vw, 6.6rem);
-    line-height: 0.92;
+    color: var(--ink);
+    font-size: clamp(3.3rem, 8vw, 6.4rem);
+    font-weight: 950;
+    line-height: 0.95;
     letter-spacing: 0;
     overflow-wrap: anywhere;
   }
 
   .hero-lead {
-    max-width: 100%;
-    margin-top: 18px;
-    font-size: clamp(1.25rem, 2.4vw, 2rem);
-    font-weight: 700;
-    overflow-wrap: anywhere;
+    max-width: 720px;
+    margin-top: 22px;
+    color: var(--ink);
+    font-size: clamp(1.25rem, 1.8vw, 1.78rem);
+    font-weight: 850;
+    line-height: 1.35;
+    text-wrap: balance;
   }
 
   .hero-copy {
-    max-width: 690px;
+    max-width: 620px;
     margin-top: 18px;
-    color: rgba(255, 255, 255, 0.86);
+    color: var(--muted);
     font-size: 1.04rem;
-    line-height: 1.85;
+    line-height: 1.9;
     overflow-wrap: anywhere;
   }
 
   .hero-actions {
     flex-wrap: wrap;
     gap: 12px;
-    margin-top: 28px;
+    margin-top: 30px;
   }
 
   .button {
-    min-height: 46px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    max-width: 100%;
+    border: 1px solid transparent;
     border-radius: 8px;
     padding: 12px 18px;
-    font-weight: 800;
+    font-size: 0.94rem;
+    font-weight: 850;
+    line-height: 1.2;
+    text-align: center;
     text-decoration: none;
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      background 160ms ease;
+  }
+
+  .button:hover {
+    transform: translateY(-1px);
   }
 
   .button.primary {
-    border-color: #14532d;
-    background: #14532d;
+    border-color: var(--brand);
+    background: var(--brand);
     color: white;
+    box-shadow: 0 16px 36px rgba(0, 108, 99, 0.22);
   }
 
   .button.secondary {
+    border-color: rgba(0, 108, 99, 0.24);
     background: rgba(255, 255, 255, 0.9);
-    color: #17201a;
+    color: var(--brand-deep);
   }
 
-  .language-bar {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    border-bottom: 1px solid rgba(23, 32, 26, 0.1);
-    padding: 18px 20px;
+  .button.secondary.light {
     background: white;
   }
 
+  .button-icon,
+  .pricing-icon,
+  .step-icon {
+    display: inline-grid;
+    place-items: center;
+  }
+
+  .button-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+  }
+
+  .button-icon :global(svg),
+  .pricing-icon :global(svg),
+  .step-icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .button-icon :global(path),
+  .pricing-icon :global(path),
+  .step-icon :global(path) {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .language-bar {
+    position: relative;
+    z-index: 2;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    border-block: 1px solid var(--line);
+    padding: 16px max(20px, calc((100vw - 1180px) / 2));
+    background: var(--paper);
+  }
+
   .language-bar a {
-    border-radius: 999px;
-    padding: 8px 12px;
-    color: #46554b;
-    font-size: 0.9rem;
+    min-height: 38px;
+    border: 1px solid rgba(7, 31, 29, 0.1);
+    border-radius: 8px;
+    padding: 9px 13px;
+    color: #4d625d;
+    font-size: 0.88rem;
+    font-weight: 750;
+    line-height: 1.15;
     text-decoration: none;
+    white-space: nowrap;
   }
 
   .language-bar a.active {
-    background: #14532d;
+    border-color: var(--brand);
+    background: var(--brand);
     color: white;
   }
 
   section {
-    padding: 82px max(20px, calc((100vw - 1180px) / 2));
+    padding: 92px max(20px, calc((100vw - 1180px) / 2));
   }
 
   .section-heading {
-    max-width: 760px;
-    margin-bottom: 32px;
+    display: grid;
+    gap: 14px;
+    max-width: 770px;
+    margin-bottom: 34px;
+  }
+
+  .section-heading p,
+  .compare-copy p,
+  .section-number {
+    color: var(--brand);
+    font-size: 0.78rem;
+    font-weight: 950;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   .section-heading h2,
@@ -578,8 +736,9 @@ const jsonLd = {
   .course-copy h2,
   .pricing h2,
   .final-cta h2 {
-    color: #10251c;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    color: var(--ink);
+    font-size: clamp(2.1rem, 4.2vw, 3.8rem);
+    font-weight: 950;
     line-height: 1.05;
     letter-spacing: 0;
   }
@@ -587,144 +746,263 @@ const jsonLd = {
   .section-heading span,
   .course-copy > p,
   .pricing .section-heading span,
-  .final-cta p {
-    display: block;
-    margin-top: 16px;
-    color: #526056;
-    line-height: 1.8;
+  .final-cta p,
+  .pricing-cta p {
+    color: var(--muted);
+    line-height: 1.85;
   }
 
-  .flow-grid,
-  .pricing-grid {
+  .flow-section {
+    background:
+      linear-gradient(180deg, rgba(217, 240, 234, 0.45), rgba(246, 248, 244, 0)),
+      var(--page);
+  }
+
+  .flow-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-  }
-
-  .flow-grid article,
-  .pricing-grid article,
-  .compare-grid article,
-  .list-panel,
-  .course-cards > div,
-  .pricing-cta {
-    border: 1px solid #d8dfd8;
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--line);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.82);
+    background: var(--line);
+    box-shadow: var(--shadow);
   }
 
   .flow-grid article {
-    min-height: 210px;
-    padding: 22px;
+    min-height: 250px;
+    padding: 26px;
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .step-shell {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
   }
 
   .step-number {
-    color: #0f766e;
-    font-weight: 900;
+    color: rgba(0, 66, 61, 0.5);
+    font-size: 0.84rem;
+    font-weight: 950;
+  }
+
+  .step-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    color: var(--brand);
+    background: var(--teal-soft);
+  }
+
+  .step-icon.accent-amber {
+    color: #966300;
+    background: #fff0c8;
+  }
+
+  .step-icon.accent-emerald {
+    color: #006d3d;
+    background: #dff6e8;
+  }
+
+  .step-icon.accent-slate {
+    color: #334155;
+    background: #e8edf1;
   }
 
   .flow-grid h3,
   .pricing-grid h3,
-  .course-cards h3 {
-    margin: 12px 0 10px;
-    color: #10251c;
+  .course-cards h3,
+  .list-panel h3,
+  .pricing-cta h3 {
+    color: var(--ink);
+    font-size: 1.05rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  .flow-grid h3 {
+    margin-top: 28px;
   }
 
   .flow-grid p,
   .pricing-grid p,
-  .compare-grid li,
+  .compare-row span,
   .list-panel li,
   .course-cards p {
-    color: #56625a;
-    line-height: 1.7;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .flow-grid p {
+    margin-top: 12px;
+    font-size: 0.95rem;
   }
 
   .compare-section {
     display: grid;
-    grid-template-columns: 0.7fr 1.3fr;
-    gap: 28px;
-    background: #edf2ec;
+    grid-template-columns: minmax(220px, 0.54fr) minmax(0, 1.46fr);
+    gap: 36px;
+    align-items: start;
+    background: var(--paper);
   }
 
-  .compare-grid {
+  .compare-copy {
+    position: sticky;
+    top: 104px;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
   }
 
-  .compare-grid article {
-    padding: 24px;
+  .compare-table {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
   }
 
-  .compare-grid article.highlight {
-    border-color: #14532d;
-    background: #f8fbf7;
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
-  ul {
-    margin: 14px 0 0;
-    padding: 0;
-    list-style: none;
+  .compare-row + .compare-row {
+    border-top: 1px solid var(--line);
   }
 
-  li + li {
-    margin-top: 9px;
+  .compare-row span {
+    min-width: 0;
+    padding: 18px 20px;
+    overflow-wrap: anywhere;
   }
 
-  li::before {
-    margin-right: 8px;
-    color: #0f766e;
+  .compare-row span + span {
+    border-left: 1px solid var(--line);
+    background: linear-gradient(90deg, rgba(217, 240, 234, 0.42), rgba(255, 255, 255, 0));
+    color: var(--text);
+    font-weight: 750;
+  }
+
+  .compare-head span {
+    background: #eef3f0;
+    color: var(--ink);
     font-weight: 900;
-    content: "•";
+  }
+
+  .compare-head span + span {
+    background: var(--brand);
+    color: white;
+  }
+
+  .course-overview {
+    padding-top: 64px;
+    padding-bottom: 36px;
+    background: linear-gradient(180deg, var(--paper), var(--page));
+  }
+
+  .course-rail {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .course-rail a {
+    position: relative;
+    min-height: 268px;
+    overflow: hidden;
+    border-radius: 8px;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 18px 48px rgba(4, 39, 34, 0.12);
+    isolation: isolate;
+  }
+
+  .course-rail a::after {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgba(4, 39, 34, 0.02), rgba(4, 39, 34, 0.82));
+    content: "";
+  }
+
+  .course-rail img {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 220ms ease;
+  }
+
+  .course-rail a:hover img {
+    transform: scale(1.035);
+  }
+
+  .course-rail span,
+  .course-rail strong {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .course-rail span {
+    top: 18px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.8rem;
+    font-weight: 950;
+  }
+
+  .course-rail strong {
+    bottom: 18px;
+    font-size: clamp(1.1rem, 1.6vw, 1.45rem);
+    line-height: 1.18;
+    overflow-wrap: anywhere;
   }
 
   .courses {
     display: grid;
-    gap: 72px;
+    gap: 86px;
   }
 
   .course-section {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.86fr);
-    gap: 36px;
+    grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1fr);
+    gap: 46px;
     align-items: center;
     padding: 0;
-    scroll-margin-top: 96px;
-  }
-
-  .course-section.text-only {
-    grid-template-columns: minmax(0, 1fr);
+    scroll-margin-top: 104px;
   }
 
   .course-section.reversed {
-    grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.82fr);
   }
 
-  .course-section.reversed .course-copy {
+  .course-section.reversed .course-image {
     order: 2;
   }
 
-  .course-copy {
-    min-width: 0;
-  }
-
-  .list-panel,
-  .course-cards > div {
-    margin-top: 22px;
-    padding: 20px;
-  }
-
-  .course-cards {
-    display: grid;
-    gap: 12px;
-    margin-top: 22px;
-  }
-
   .course-image {
+    position: relative;
+    min-height: 420px;
     margin: 0;
     overflow: hidden;
     border-radius: 8px;
-    background: #dbe4dc;
-    aspect-ratio: 16 / 10;
+    background: #dbe8e2;
+    box-shadow: var(--shadow);
+  }
+
+  .course-image::after {
+    position: absolute;
+    inset: auto 18px 18px auto;
+    width: 76px;
+    height: 76px;
+    border: 14px solid rgba(255, 255, 255, 0.58);
+    border-left-color: rgba(243, 184, 59, 0.86);
+    border-radius: 50%;
+    content: "";
   }
 
   .course-image img {
@@ -733,9 +1011,64 @@ const jsonLd = {
     object-fit: cover;
   }
 
+  .course-copy {
+    min-width: 0;
+  }
+
+  .section-number {
+    display: inline-block;
+    margin-bottom: 14px;
+  }
+
+  .course-copy > p {
+    margin-top: 18px;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+
+  .list-panel,
+  .course-cards > div {
+    border-top: 1px solid var(--line);
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+
+  .course-cards {
+    display: grid;
+    gap: 18px;
+  }
+
+  ul {
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    position: relative;
+    padding-left: 26px;
+  }
+
+  li + li {
+    margin-top: 10px;
+  }
+
+  li::before {
+    position: absolute;
+    top: 0.66em;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brand);
+    content: "";
+  }
+
   .pricing {
-    background: #ffffff;
-    scroll-margin-top: 96px;
+    background:
+      radial-gradient(circle at 18% 10%, rgba(243, 184, 59, 0.2), transparent 28%),
+      linear-gradient(180deg, var(--paper), #eef6f2);
+    scroll-margin-top: 104px;
   }
 
   .section-heading.compact {
@@ -744,19 +1077,40 @@ const jsonLd = {
   }
 
   .pricing-grid {
+    display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
   }
 
   .pricing-grid article {
-    min-height: 190px;
-    padding: 24px;
+    display: grid;
+    gap: 12px;
+    min-height: 230px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 26px;
+    background: rgba(255, 255, 255, 0.84);
+  }
+
+  .pricing-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    color: var(--brand);
+    background: var(--teal-soft);
+  }
+
+  .pricing-icon :global(svg) {
+    width: 25px;
+    height: 25px;
   }
 
   .price {
-    margin: 10px 0;
-    color: #10251c !important;
-    font-size: 1.7rem;
-    font-weight: 900;
+    color: var(--ink);
+    font-size: clamp(1.55rem, 2.4vw, 2rem);
+    font-weight: 950;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
   }
 
   .pricing-cta {
@@ -764,135 +1118,211 @@ const jsonLd = {
     justify-content: space-between;
     align-items: center;
     gap: 24px;
+    border: 1px solid rgba(0, 108, 99, 0.18);
+    border-radius: 8px;
     margin-top: 16px;
-    padding: 24px;
-    background: #eef7ef;
+    padding: 28px;
+    background: var(--paper);
+  }
+
+  .pricing-cta > div:first-child {
+    max-width: 640px;
+  }
+
+  .pricing-cta p {
+    margin-top: 10px;
   }
 
   .compact-actions {
+    flex: 0 0 auto;
     margin-top: 0;
   }
 
   .final-cta {
-    background: #10251c;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 36px;
+    align-items: center;
+    background:
+      linear-gradient(135deg, rgba(0, 108, 99, 0.94), rgba(0, 66, 61, 1)),
+      var(--brand-deep);
     color: white;
-    text-align: center;
+  }
+
+  .final-cta h2 {
+    color: white;
   }
 
   .final-cta p {
-    max-width: 700px;
-    margin-inline: auto;
+    max-width: 720px;
+    margin-top: 16px;
     color: rgba(255, 255, 255, 0.78);
   }
 
   .final-cta .hero-actions {
-    justify-content: center;
+    justify-content: flex-end;
+    margin-top: 0;
+  }
+
+  .final-cta .button.secondary {
+    border-color: rgba(255, 255, 255, 0.38);
+    background: rgba(255, 255, 255, 0.11);
+    color: white;
   }
 
   footer {
     justify-content: center;
     flex-wrap: wrap;
     gap: 12px 18px;
-    padding: 28px 20px;
-    color: #607066;
+    border-top: 1px solid var(--line);
+    padding: 30px 20px;
+    background: var(--paper);
+    color: var(--muted);
     font-size: 0.9rem;
   }
 
-  @media (max-width: 900px) {
-    .site-header {
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      overflow: hidden;
-      padding: 0 16px;
-    }
+  footer a {
+    color: var(--brand-deep);
+    font-weight: 850;
+    text-decoration: none;
+  }
 
-    .header-cta {
-      max-width: calc(100vw - 86px);
-      font-size: 0.95rem;
-      line-height: 1.2;
-      overflow-wrap: anywhere;
-      text-align: right;
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition: none !important;
     }
+  }
 
+  @media (max-width: 1080px) {
     .primary-nav {
       display: none;
     }
 
+    .site-header {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .course-rail {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .flow-grid,
+    .pricing-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 820px) {
+    .site-header {
+      gap: 12px;
+      min-height: 66px;
+      padding-inline: 16px;
+    }
+
+    .brand {
+      font-size: 0.98rem;
+    }
+
+    .header-cta {
+      max-width: 44vw;
+      padding-inline: 10px;
+      font-size: 0.84rem;
+      overflow-wrap: anywhere;
+      text-align: center;
+    }
+
     .hero {
-      min-height: 680px;
-      padding: 96px 20px 56px;
+      min-height: 660px;
+      padding: 86px 20px 64px;
+    }
+
+    .hero-media::after {
+      background:
+        linear-gradient(180deg, rgba(246, 248, 244, 0.98) 0%, rgba(246, 248, 244, 0.88) 48%, rgba(246, 248, 244, 0.38) 100%),
+        linear-gradient(0deg, rgba(246, 248, 244, 1) 0%, rgba(246, 248, 244, 0) 28%);
+    }
+
+    .hero-media img {
+      object-position: 58% 45%;
     }
 
     section {
-      padding: 64px 20px;
+      padding: 70px 20px;
     }
 
     .flow-grid,
     .pricing-grid,
     .compare-section,
-    .compare-grid,
     .course-section,
-    .course-section.reversed {
+    .course-section.reversed,
+    .final-cta {
       grid-template-columns: 1fr;
     }
 
-    .course-section.reversed .course-copy {
+    .compare-copy {
+      position: static;
+    }
+
+    .course-section.reversed .course-image {
       order: 0;
+    }
+
+    .course-image {
+      min-height: 320px;
     }
 
     .pricing-cta {
       align-items: flex-start;
       flex-direction: column;
     }
+
+    .compact-actions,
+    .final-cta .hero-actions {
+      justify-content: flex-start;
+      width: 100%;
+    }
   }
 
-  @media (max-width: 560px) {
+  @media (max-width: 600px) {
     .brand span:last-child {
       display: none;
     }
 
-    .site-header {
-      grid-template-columns: auto minmax(0, 1fr);
-    }
-
     .header-cta {
-      justify-self: start;
-      max-width: 100%;
-      text-align: left;
+      max-width: calc(100vw - 78px);
+      justify-self: stretch;
     }
 
-    .hero-content {
-      max-width: min(350px, 100%);
+    .hero {
+      min-height: 620px;
+      padding-top: 78px;
     }
 
     h1 {
-      font-size: clamp(2.5rem, 16vw, 4.2rem);
-    }
-
-    .button {
-      width: 100%;
-      text-align: center;
-    }
-
-    .hero-actions {
-      width: 100%;
+      font-size: clamp(2.7rem, 16vw, 4.1rem);
     }
 
     .hero-lead {
-      max-width: min(350px, 100%);
-      line-height: 1.35;
-      word-break: break-all;
+      font-size: 1.22rem;
     }
 
     .hero-copy {
-      max-width: min(350px, 100%);
-      word-break: break-all;
+      font-size: 0.98rem;
+    }
+
+    .button,
+    .hero-actions {
+      width: 100%;
     }
 
     .language-bar {
       justify-content: flex-start;
       flex-wrap: nowrap;
       overflow-x: auto;
+      padding: 13px 16px;
       scrollbar-width: none;
     }
 
@@ -902,7 +1332,37 @@ const jsonLd = {
 
     .language-bar a {
       flex: 0 0 auto;
-      white-space: nowrap;
+    }
+
+    .flow-grid,
+    .pricing-grid,
+    .course-rail {
+      grid-template-columns: 1fr;
+    }
+
+    .flow-grid article {
+      min-height: 0;
+    }
+
+    .compare-row {
+      grid-template-columns: 1fr;
+    }
+
+    .compare-row span + span {
+      border-top: 1px solid var(--line);
+      border-left: 0;
+    }
+
+    .course-overview {
+      padding-top: 44px;
+    }
+
+    .course-rail a {
+      min-height: 220px;
+    }
+
+    .course-image {
+      min-height: 260px;
     }
   }
 </style>
