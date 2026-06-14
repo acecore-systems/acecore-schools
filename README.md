@@ -77,14 +77,6 @@ Routes:
 
 ```text
 /
-/en/
-/zh-cn/
-/es/
-/pt/
-/fr/
-/ko/
-/de/
-/ru/
 /api/health
 ```
 
