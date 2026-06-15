@@ -9,7 +9,7 @@ import {
 const content = schoolsContent;
 const canonicalPath = "/";
 const canonicalUrl = new URL(canonicalPath, schoolsOrigin).href;
-const contactUrl = acecoreOrigin + "/contact/";
+const contactUrl = "/contact/";
 
 const heroImage = "/images/schools/hero-workshop.webp";
 const jukuImage = "/images/schools/course-tutoring.webp";
@@ -206,6 +206,9 @@ const jsonLd = {
         <a href="#juku">{content.juku.title}</a>
         <a href="#robot-programming">{content.robotProgramming.title}</a>
         <a href="#pricing">料金</a>
+        <a href={acecoreOrigin} target="_blank" rel="noopener noreferrer"
+          >Acecore.net</a
+        >
       </nav>
       <a class="header-cta" href={contactUrl}>
         <span class="button-icon" set:html={iconMap.mail} />
@@ -437,6 +440,7 @@ const jsonLd = {
         <a href="#juku">{content.juku.title}</a>
         <a href="#robot-programming">{content.robotProgramming.title}</a>
         <a href="#pricing">{content.pricing.title}</a>
+        <a href={acecoreOrigin}>Acecore.net</a>
         <a href={contactUrl}>{content.ctaForm}</a>
       </nav>
     </footer>
@@ -1506,6 +1510,12 @@ const jsonLd = {
     }
   }
 
+  @media (max-width: 900px) {
+    .header-cta {
+      display: none;
+    }
+  }
+
   @media (max-width: 820px) {
     .site-header {
       gap: 12px;
@@ -1520,13 +1530,6 @@ const jsonLd = {
     .brand-mark {
       width: 29px;
       height: 35px;
-    }
-
-    .header-cta {
-      max-width: 44vw;
-      padding-inline: 12px;
-      font-size: 0.84rem;
-      overflow-wrap: anywhere;
     }
 
     .hero {

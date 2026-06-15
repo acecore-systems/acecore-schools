@@ -55,6 +55,8 @@ Cloudflare Pages の preview / production に分けて設定します。
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `RESEND_API_KEY`
+- `CONTACT_TO_EMAIL`
+- `RESEND_FROM_EMAIL`
 - `SCHOOLS_ICS_TOKEN_PEPPER`
 
 ### Vars
@@ -77,7 +79,9 @@ Routes:
 
 ```text
 /
+/contact/
 /api/health
+/api/contact
 ```
 
 ## References
