@@ -13,7 +13,7 @@ state: public landing page at local Astro dev server
 - Spacing and layout rhythm: Hero, four-step flow, comparison section, course cards, pricing, and final CTA follow the selected Workshop Journey order and open white spacing. Header was changed from fixed to top-only absolute positioning so it no longer overlaps mid-page content.
 - Colors and visual tokens: Teal, coral, lime, charcoal, white base, and light teal surfaces match the selected direction. CTA colors and course accent colors remain consistent across sections.
 - Image quality and asset fidelity: Hero, flow, course, and CTA images use generated classroom/workshop photography matching the hands-on robotics/coding direction. All project images loaded in Chrome after scrolling.
-- Copy and content: Existing source copy is preserved for hero, learning flow, comparison, course, pricing, and CTA content. Current source state is Japanese-only, so the multilingual language strip from the early concept is intentionally omitted.
+- Copy and content: Visible hero, learning flow, comparison, course, pricing, and CTA copy now follows the accepted Workshop Journey reference more closely. The language strip is restored as a visual strip only; no locale routes or multilingual runtime behavior were added.
 
 **Patches Made Since QA Started**
 
@@ -23,6 +23,8 @@ state: public landing page at local Astro dev server
 - Fixed mobile header and hero typography: header CTA is hidden on small screens, H1 wraps to two lines, and hero lead/body copy can wrap safely.
 - Added explicit wrapping for section descriptions and flow step copy so mobile text stays inside the viewport.
 - Switched mobile course cards to a vertical media/text layout to avoid cramped two-column copy at 390px.
+- Tightened the 824px reference layout: shorter hero, restored language strip, four-column flow, side-by-side comparison, five narrow course columns, compact pricing, and shorter final CTA.
+- Fixed mobile reference fidelity regressions: long flow headings wrap inside the viewport, the comparison title stacks cleanly, and the language strip keeps compact horizontal scrolling.
 
 **Implementation Checklist**
 

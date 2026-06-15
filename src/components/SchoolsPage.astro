@@ -22,8 +22,20 @@ const ctaImage = "/images/schools/cta-consultation.webp";
 const heroKicker = "つくる。理解する。未来につなげる。";
 const detailLabel = "詳しく見る";
 const scrollLabel = "Scroll";
+const languageLabels = [
+  "日本語",
+  "English",
+  "简体中文",
+  "Español",
+  "Português",
+  "Français",
+  "한국어",
+  "Deutsch",
+  "Русский",
+];
 
 const iconMap = {
+  globe: `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.2 2.25 3.3 5.08 3.3 8.5s-1.1 6.25-3.3 8.5M12 3.5C9.8 5.75 8.7 8.58 8.7 12s1.1 6.25 3.3 8.5"/></svg>`,
   mail: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6.5h15v11h-15z"/><path d="m5 7 7 6 7-6"/></svg>`,
   chat: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.75c0-1.24 1.01-2.25 2.25-2.25h9.5c1.24 0 2.25 1.01 2.25 2.25v6.5c0 1.24-1.01 2.25-2.25 2.25h-4.5L8 19.5v-4H7.25C6.01 15.5 5 14.49 5 13.25z"/><path d="M8.5 9.5h7M8.5 12.25h4.75"/></svg>`,
   sparkles: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.7 5.2L19 10l-5.3 1.8L12 17l-1.7-5.2L5 10l5.3-1.8z"/><path d="m18.5 15 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>`,
@@ -117,7 +129,22 @@ const courseSections = [
   },
 ];
 
+const courseDisplayHighlights: Record<string, string[]> = {
+  juku: ["定期テスト対策", "高校受験対策", "苦手科目の克服"],
+  "robot-programming": [
+    "ビジュアルプログラミング",
+    "ロボット組立・制御",
+    "コンテスト対策",
+  ],
+  "practical-programming": ["Web制作", "アプリ開発", "データ活用・AI基礎"],
+  "pc-smartphone": ["基本操作", "トラブル解決", "スマホ活用"],
+  ged: ["科目別対策", "過去問演習", "学習計画サポート"],
+};
+
 const getCourseHighlights = (section: (typeof courseSections)[number]) => {
+  if (courseDisplayHighlights[section.id]) {
+    return courseDisplayHighlights[section.id];
+  }
   if ("items" in section && section.items) return section.items.slice(0, 3);
   if ("courses" in section && section.courses) {
     return section.courses.map((course) => course.title);
@@ -178,7 +205,7 @@ const jsonLd = {
       <nav class="primary-nav" aria-label="School sections">
         <a href="#juku">{content.juku.title}</a>
         <a href="#robot-programming">{content.robotProgramming.title}</a>
-        <a href="#pricing">{content.pricing.title}</a>
+        <a href="#pricing">料金</a>
       </nav>
       <a class="header-cta" href={contactUrl}>
         <span class="button-icon" set:html={iconMap.mail} />
@@ -202,7 +229,6 @@ const jsonLd = {
           <p class="hero-kicker">{heroKicker}</p>
           <h1 id="hero-title">{content.heroTitle}</h1>
           <p class="hero-lead">{content.heroSubtitle}</p>
-          <p class="hero-copy">{content.intro}</p>
           <div class="hero-actions">
             <a class="button primary" href={contactUrl}>
               <span class="button-icon" set:html={iconMap.mail} />
@@ -225,15 +251,25 @@ const jsonLd = {
         </a>
       </section>
 
+      <div class="language-strip" aria-label="Language display">
+        <span class="language-globe" set:html={iconMap.globe} />
+        <div class="language-list">
+          {
+            languageLabels.map((label) => (
+              <span class:list={{ active: label === "日本語" }}>{label}</span>
+            ))
+          }
+        </div>
+      </div>
+
       <section
         class="flow-section"
         id="learning-flow"
         aria-labelledby="flow-title"
       >
         <div class="section-heading centered">
-          <p>{content.learningFlowEyebrow}</p>
-          <h2 id="flow-title">{content.learningFlowTitle}</h2>
-          <span>{content.learningFlowDesc}</span>
+          <p>学びの流れ</p>
+          <h2 id="flow-title">「わかる」から「できる」へ、4つのステップ</h2>
         </div>
         <div class="flow-grid">
           {
@@ -267,8 +303,11 @@ const jsonLd = {
 
       <section class="compare-section" aria-labelledby="compare-title">
         <div class="section-heading centered">
-          <p>VS</p>
-          <h2 id="compare-title">{content.compareTitle}</h2>
+          <h2 id="compare-title" class="compare-title">
+            <span>{content.compareBefore}</span>
+            <small>vs</small>
+            <span>{content.compareAfter}</span>
+          </h2>
         </div>
         <div class="compare-grid">
           <div class="compare-column compare-before">
@@ -303,7 +342,6 @@ const jsonLd = {
 
       <section class="courses" aria-labelledby="courses-title">
         <div class="section-heading centered">
-          <p>Courses</p>
           <h2 id="courses-title">目的に合わせて選べる、5つのコース</h2>
         </div>
         <div class="course-grid">
@@ -344,9 +382,7 @@ const jsonLd = {
 
       <section class="pricing" id="pricing" aria-labelledby="pricing-title">
         <div class="section-heading centered">
-          <p>Pricing</p>
-          <h2 id="pricing-title">{content.pricing.title}</h2>
-          <span>{content.pricing.body}</span>
+          <h2 id="pricing-title">料金のご案内</h2>
         </div>
         <div class="pricing-grid">
           {
@@ -483,8 +519,8 @@ const jsonLd = {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: 18px;
     align-items: center;
-    min-height: 74px;
-    padding: 12px max(22px, calc((100vw - 1320px) / 2));
+    min-height: 64px;
+    padding: 14px max(22px, calc((100vw - 1320px) / 2));
     pointer-events: none;
   }
 
@@ -506,9 +542,9 @@ const jsonLd = {
   .brand {
     justify-self: start;
     min-width: 0;
-    gap: 10px;
+    gap: 9px;
     color: var(--teal-deep);
-    font-size: 1.46rem;
+    font-size: 1.32rem;
     font-weight: 900;
     line-height: 0.98;
     text-decoration: none;
@@ -520,7 +556,7 @@ const jsonLd = {
 
   .brand small {
     color: #657171;
-    font-size: 0.9rem;
+    font-size: 0.84rem;
     font-weight: 760;
   }
 
@@ -528,8 +564,8 @@ const jsonLd = {
     position: relative;
     display: block;
     flex: 0 0 auto;
-    width: 34px;
-    height: 40px;
+    width: 32px;
+    height: 38px;
   }
 
   .brand-mark::before,
@@ -557,10 +593,10 @@ const jsonLd = {
 
   .primary-nav {
     justify-self: center;
-    gap: 2px;
+    gap: 1px;
     border: 1px solid rgba(255, 255, 255, 0.72);
     border-radius: 8px;
-    padding: 4px;
+    padding: 3px;
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 10px 30px rgba(12, 46, 51, 0.1);
     backdrop-filter: blur(18px);
@@ -569,9 +605,9 @@ const jsonLd = {
   .primary-nav a,
   .header-cta {
     border-radius: 6px;
-    padding: 11px 20px;
+    padding: 10px 18px;
     color: var(--ink);
-    font-size: 0.95rem;
+    font-size: 0.88rem;
     font-weight: 860;
     line-height: 1.15;
     text-decoration: none;
@@ -598,8 +634,9 @@ const jsonLd = {
     position: relative;
     display: grid;
     align-items: center;
-    min-height: 820px;
-    padding: 130px max(22px, calc((100vw - 1320px) / 2)) 92px;
+    min-height: clamp(410px, 50vw, 660px);
+    padding: clamp(96px, 9vw, 130px) max(22px, calc((100vw - 1320px) / 2))
+      clamp(46px, 5.4vw, 82px);
     overflow: hidden;
     isolation: isolate;
   }
@@ -618,11 +655,11 @@ const jsonLd = {
       linear-gradient(
         90deg,
         rgba(255, 255, 255, 0.99) 0%,
-        rgba(255, 255, 255, 0.86) 35%,
-        rgba(255, 255, 255, 0.2) 65%,
+        rgba(255, 255, 255, 0.87) 32%,
+        rgba(255, 255, 255, 0.22) 58%,
         rgba(255, 255, 255, 0.02) 100%
       ),
-      linear-gradient(0deg, var(--page) 0%, rgba(251, 252, 252, 0) 18%);
+      linear-gradient(0deg, var(--page) 0%, rgba(251, 252, 252, 0) 10%);
     content: "";
   }
 
@@ -630,33 +667,33 @@ const jsonLd = {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 64% 50%;
+    object-position: 63% 50%;
   }
 
   .hero-content {
-    width: min(650px, 100%);
+    width: min(420px, 100%);
     min-width: 0;
-    padding-top: 18px;
+    padding-top: 0;
   }
 
   .hero-kicker {
     display: inline-flex;
     max-width: 100%;
     border-radius: 8px;
-    padding: 11px 18px;
+    padding: 9px 16px;
     background: var(--teal);
     color: white;
-    font-size: 0.94rem;
+    font-size: 0.82rem;
     font-weight: 900;
     line-height: 1.2;
     overflow-wrap: anywhere;
   }
 
   h1 {
-    max-width: 620px;
-    margin-top: 24px;
+    max-width: 430px;
+    margin-top: 18px;
     color: var(--ink);
-    font-size: 5.9rem;
+    font-size: clamp(4.45rem, 7.2vw, 5.9rem);
     font-weight: 950;
     line-height: 0.92;
     letter-spacing: 0;
@@ -664,40 +701,31 @@ const jsonLd = {
   }
 
   .hero-lead {
-    max-width: 610px;
-    margin-top: 24px;
+    max-width: 390px;
+    margin-top: 16px;
     color: var(--ink);
-    font-size: 1.72rem;
+    font-size: clamp(1.35rem, 2.35vw, 1.72rem);
     font-weight: 900;
     line-height: 1.42;
     text-wrap: balance;
   }
 
-  .hero-copy {
-    max-width: 560px;
-    margin-top: 18px;
-    color: var(--muted);
-    font-size: 1.02rem;
-    line-height: 1.9;
-    overflow-wrap: anywhere;
-  }
-
   .hero-actions {
     flex-wrap: wrap;
     gap: 14px;
-    margin-top: 34px;
+    margin-top: 28px;
   }
 
   .button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 52px;
+    min-height: 40px;
     max-width: 100%;
     border: 1px solid transparent;
     border-radius: 8px;
-    padding: 14px 21px;
-    font-size: 0.95rem;
+    padding: 12px 20px;
+    font-size: 0.86rem;
     font-weight: 900;
     line-height: 1.18;
     text-align: center;
@@ -734,12 +762,13 @@ const jsonLd = {
   }
 
   .button-icon {
-    width: 19px;
-    height: 19px;
+    width: 17px;
+    height: 17px;
     margin-right: 8px;
   }
 
   .button-icon :global(svg),
+  .language-globe :global(svg),
   .pricing-icon :global(svg),
   .step-icon :global(svg),
   .course-icon :global(svg) {
@@ -748,6 +777,8 @@ const jsonLd = {
   }
 
   .button-icon :global(path),
+  .language-globe :global(path),
+  .language-globe :global(circle),
   .pricing-icon :global(path),
   .step-icon :global(path),
   .course-icon :global(path) {
@@ -761,12 +792,12 @@ const jsonLd = {
   .scroll-cue {
     position: absolute;
     right: 50%;
-    bottom: 34px;
+    bottom: 24px;
     display: grid;
     gap: 2px;
     place-items: center;
     color: white;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     font-weight: 850;
     text-decoration: none;
     text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35);
@@ -774,19 +805,64 @@ const jsonLd = {
   }
 
   .scroll-cue span:first-child {
-    font-size: 1.45rem;
+    font-size: 1.32rem;
     line-height: 1;
   }
 
+  .language-strip {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    border-bottom: 1px solid var(--line);
+    padding: 0 max(22px, calc((100vw - 1320px) / 2));
+    background: rgba(255, 255, 255, 0.96);
+    color: #1b2525;
+  }
+
+  .language-globe {
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    color: #101717;
+  }
+
+  .language-list {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .language-list span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    border-left: 1px solid rgba(17, 23, 23, 0.32);
+    padding-inline: 16px;
+    font-size: 0.78rem;
+    font-weight: 760;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .language-list span:first-child {
+    border-left: 0;
+  }
+
   section {
-    padding: 92px max(22px, calc((100vw - 1320px) / 2));
+    padding: 42px max(22px, calc((100vw - 1320px) / 2));
   }
 
   .section-heading {
     display: grid;
-    gap: 12px;
+    gap: 8px;
     max-width: 800px;
-    margin-bottom: 42px;
+    margin-bottom: 28px;
   }
 
   .section-heading.centered {
@@ -796,7 +872,7 @@ const jsonLd = {
 
   .section-heading p {
     color: var(--teal);
-    font-size: 0.88rem;
+    font-size: 0.76rem;
     font-weight: 950;
     letter-spacing: 0;
     text-transform: uppercase;
@@ -805,7 +881,7 @@ const jsonLd = {
   .section-heading h2,
   .final-cta h2 {
     color: var(--ink);
-    font-size: 2.65rem;
+    font-size: clamp(1.95rem, 3.4vw, 2.65rem);
     font-weight: 950;
     line-height: 1.12;
     letter-spacing: 0;
@@ -813,14 +889,37 @@ const jsonLd = {
     text-wrap: balance;
   }
 
+  .compare-title {
+    display: inline-flex;
+    gap: 22px;
+    align-items: baseline;
+    justify-content: center;
+  }
+
+  .compare-title span {
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .compare-title small {
+    color: var(--ink);
+    font-size: 0.62em;
+    font-weight: 950;
+    text-transform: lowercase;
+  }
+
   .section-heading h2::after {
     display: block;
     width: 42px;
     height: 4px;
     border-radius: 8px;
-    margin: 16px auto 0;
+    margin: 12px auto 0;
     background: var(--teal);
     content: "";
+  }
+
+  .compare-title::after {
+    display: none;
   }
 
   .section-heading span,
@@ -833,14 +932,27 @@ const jsonLd = {
     overflow-wrap: anywhere;
   }
 
+  .section-heading .compare-title span {
+    display: inline;
+    color: var(--ink);
+    line-height: 1.12;
+    overflow-wrap: normal;
+  }
+
   .flow-section {
     background: linear-gradient(180deg, #ffffff 0%, #fbfcfc 100%), var(--page);
+    padding-top: 22px;
+    padding-bottom: 14px;
   }
 
   .flow-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 28px;
+  }
+
+  .flow-section .section-heading {
+    margin-bottom: 16px;
   }
 
   .flow-card {
@@ -850,18 +962,19 @@ const jsonLd = {
 
   .flow-card + .flow-card::before {
     position: absolute;
-    top: 94px;
-    left: -22px;
+    top: 70px;
+    left: -24px;
     z-index: 2;
     color: var(--teal);
-    font-size: 3rem;
+    font-size: 2.8rem;
     font-weight: 300;
     line-height: 1;
     content: "›";
   }
 
   .flow-card figure {
-    aspect-ratio: 1.52;
+    height: 110px;
+    aspect-ratio: auto;
     overflow: hidden;
     border-radius: 8px;
     background: #e8eeee;
@@ -876,21 +989,21 @@ const jsonLd = {
 
   .step-heading {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
-    margin-top: 22px;
+    margin-top: 16px;
   }
 
   .step-number {
     color: var(--teal);
-    font-size: 2.1rem;
+    font-size: 1.85rem;
     font-weight: 950;
     line-height: 1;
   }
 
   .step-icon {
-    width: 34px;
-    height: 34px;
+    width: 28px;
+    height: 28px;
     color: var(--teal);
   }
 
@@ -911,14 +1024,14 @@ const jsonLd = {
   .compare-column h3,
   .pricing-card h3 {
     color: var(--ink);
-    font-size: 1.08rem;
+    font-size: 0.9rem;
     font-weight: 920;
     line-height: 1.45;
     overflow-wrap: anywhere;
   }
 
   .flow-card h3 {
-    margin-top: 10px;
+    margin-top: 8px;
   }
 
   .flow-card p,
@@ -931,8 +1044,9 @@ const jsonLd = {
   }
 
   .flow-card p {
-    margin-top: 10px;
-    font-size: 0.94rem;
+    margin-top: 8px;
+    font-size: 0.66rem;
+    line-height: 1.5;
     overflow-wrap: anywhere;
   }
 
@@ -940,15 +1054,21 @@ const jsonLd = {
     background:
       linear-gradient(180deg, #fbfcfc 0%, #ffffff 45%, #fbfcfc 100%),
       var(--page);
+    padding-top: 6px;
+    padding-bottom: 14px;
   }
 
   .compare-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 18px;
+    gap: 16px;
     align-items: stretch;
-    max-width: 1100px;
+    max-width: 1120px;
     margin-inline: auto;
+  }
+
+  .compare-section .section-heading {
+    margin-bottom: 14px;
   }
 
   .compare-column {
@@ -974,7 +1094,7 @@ const jsonLd = {
   }
 
   .compare-column h3 {
-    padding: 16px 20px;
+    padding: 8px 18px;
     text-align: center;
   }
 
@@ -990,20 +1110,24 @@ const jsonLd = {
     grid-template-columns: 38px minmax(0, 1fr);
     gap: 14px;
     align-items: center;
-    min-height: 64px;
+    min-height: 39px;
     border-top: 1px solid var(--line);
-    padding: 14px 20px;
+    padding: 7px 18px;
   }
 
   .compare-column li span {
     display: grid;
     place-items: center;
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     border: 1px solid currentColor;
     border-radius: 50%;
     color: #3d4343;
     font-weight: 900;
+  }
+
+  .compare-column strong {
+    font-size: 0.76rem;
   }
 
   .compare-after li span {
@@ -1014,35 +1138,43 @@ const jsonLd = {
     display: grid;
     place-items: center;
     color: var(--ink);
-    font-size: 1.8rem;
+    font-size: 1.35rem;
     font-weight: 950;
     text-transform: uppercase;
   }
 
   .courses {
     background: #ffffff;
+    padding-top: 8px;
+    padding-bottom: 10px;
+  }
+
+  .courses .section-heading {
+    margin-bottom: 14px;
   }
 
   .course-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 16px;
+    gap: 0;
   }
 
   .course-card {
     display: flex;
     min-width: 0;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    border-top: 4px solid var(--teal);
-    border-radius: 8px;
-    background: var(--paper);
+    border-left: 1px solid var(--line);
+    background: transparent;
     flex-direction: column;
+  }
+
+  .course-card:first-child {
+    border-left: 0;
   }
 
   .course-card > img {
     width: 100%;
-    aspect-ratio: 1.35;
+    height: 92px;
+    aspect-ratio: auto;
     object-fit: cover;
   }
 
@@ -1050,53 +1182,54 @@ const jsonLd = {
     display: flex;
     flex: 1;
     min-width: 0;
-    padding: 22px;
+    padding: 12px 12px 4px;
     flex-direction: column;
   }
 
   .course-icon {
-    width: 42px;
-    height: 42px;
-    margin-bottom: 12px;
+    width: 30px;
+    height: 30px;
+    margin-bottom: 6px;
     color: var(--teal);
   }
 
   .course-card h3 {
-    min-height: 3em;
+    min-height: 2.55em;
     color: var(--teal);
-    font-size: 1.06rem;
+    font-size: 0.82rem;
     word-break: keep-all;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
   }
 
   .course-card p {
     display: -webkit-box;
-    margin-top: 12px;
-    font-size: 0.92rem;
+    margin-top: 6px;
+    font-size: 0.6rem;
+    line-height: 1.55;
     overflow: hidden;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 5;
+    -webkit-line-clamp: 2;
   }
 
   .course-card ul {
     display: grid;
-    gap: 8px;
-    margin-top: 16px;
+    gap: 3px;
+    margin-top: 6px;
   }
 
   .course-card li {
     position: relative;
-    padding-left: 14px;
-    font-size: 0.88rem;
+    padding-left: 11px;
+    font-size: 0.6rem;
+    line-height: 1.45;
     overflow-wrap: anywhere;
   }
 
   .course-card li::before {
-    position: absolute;
-    top: 0.72em;
+    top: 0.78em;
     left: 0;
-    width: 5px;
-    height: 5px;
+    width: 3px;
+    height: 3px;
     border-radius: 50%;
     background: currentColor;
     content: "";
@@ -1104,12 +1237,12 @@ const jsonLd = {
 
   .course-card a {
     display: inline-flex;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
     margin-top: auto;
-    padding-top: 18px;
+    padding-top: 6px;
     color: var(--teal);
-    font-size: 0.9rem;
+    font-size: 0.68rem;
     font-weight: 900;
     text-decoration: none;
   }
@@ -1156,23 +1289,29 @@ const jsonLd = {
 
   .pricing {
     background: linear-gradient(180deg, #ffffff 0%, #fbfcfc 100%), var(--page);
+    padding-top: 4px;
+    padding-bottom: 8px;
   }
 
   .pricing-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 22px;
-    max-width: 1080px;
+    gap: 16px;
+    max-width: 1120px;
     margin-inline: auto;
+  }
+
+  .pricing .section-heading {
+    margin-bottom: 16px;
   }
 
   .pricing-card {
     display: grid;
-    gap: 13px;
+    gap: 7px;
     min-width: 0;
     border: 1px solid rgba(0, 143, 138, 0.3);
     border-radius: 8px;
-    padding: 28px;
+    padding: 12px 20px;
     background: var(--paper);
   }
 
@@ -1185,8 +1324,8 @@ const jsonLd = {
   }
 
   .pricing-icon {
-    width: 54px;
-    height: 54px;
+    width: 30px;
+    height: 30px;
     color: var(--teal);
   }
 
@@ -1201,32 +1340,34 @@ const jsonLd = {
   }
 
   .pricing-icon :global(svg) {
-    width: 38px;
-    height: 38px;
+    width: 26px;
+    height: 26px;
   }
 
   .pricing-card h3 {
     color: var(--teal);
-    font-size: 1.22rem;
+    font-size: 0.96rem;
   }
 
   .price {
     color: var(--ink);
-    font-size: 1.9rem;
+    font-size: clamp(0.98rem, 1.8vw, 1.35rem);
     font-weight: 950;
     line-height: 1.12;
     overflow-wrap: anywhere;
+    white-space: nowrap;
   }
 
   .pricing-card p:not(.price) {
-    font-size: 0.92rem;
+    font-size: 0.68rem;
+    line-height: 1.58;
   }
 
   .pricing-note {
     max-width: 900px;
-    margin: 22px auto 0;
+    margin: 12px auto 0;
     color: var(--muted);
-    font-size: 0.92rem;
+    font-size: 0.75rem;
     text-align: center;
   }
 
@@ -1234,11 +1375,11 @@ const jsonLd = {
     position: relative;
     display: grid;
     align-items: center;
-    min-height: 300px;
-    margin: 0 max(22px, calc((100vw - 1320px) / 2)) 72px;
+    min-height: 122px;
+    margin: 0 max(22px, calc((100vw - 1320px) / 2)) 0;
     overflow: hidden;
     border-radius: 8px;
-    padding: 48px;
+    padding: 26px 58px;
     isolation: isolate;
   }
 
@@ -1277,19 +1418,19 @@ const jsonLd = {
 
   .final-cta h2 {
     color: white;
-    font-size: 2.25rem;
+    font-size: 1.85rem;
   }
 
   .final-cta p {
     max-width: 620px;
-    margin-top: 12px;
+    margin-top: 8px;
     color: rgba(255, 255, 255, 0.86);
   }
 
   footer {
     justify-content: space-between;
     gap: 24px;
-    padding: 24px max(22px, calc((100vw - 1320px) / 2));
+    padding: 18px max(22px, calc((100vw - 1320px) / 2));
     background: var(--footer);
     color: rgba(255, 255, 255, 0.78);
   }
@@ -1333,7 +1474,7 @@ const jsonLd = {
     }
   }
 
-  @media (max-width: 1180px) {
+  @media (max-width: 760px) {
     .site-header {
       grid-template-columns: minmax(0, 1fr) auto;
     }
@@ -1343,7 +1484,7 @@ const jsonLd = {
     }
 
     .hero {
-      min-height: 760px;
+      min-height: 720px;
     }
 
     h1 {
@@ -1353,6 +1494,7 @@ const jsonLd = {
     .flow-grid,
     .course-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
     }
 
     .flow-card + .flow-card::before {
@@ -1388,7 +1530,7 @@ const jsonLd = {
     }
 
     .hero {
-      min-height: 720px;
+      min-height: 700px;
       padding: 102px 20px 74px;
     }
 
@@ -1434,9 +1576,54 @@ const jsonLd = {
       font-size: 2.05rem;
     }
 
+    #flow-title {
+      max-width: 14em;
+      margin-inline: auto;
+      font-size: clamp(1.52rem, 6.8vw, 2.05rem);
+      line-height: 1.18;
+      word-break: normal;
+      overflow-wrap: anywhere;
+      text-wrap: wrap;
+    }
+
+    .compare-title {
+      display: grid;
+      gap: 4px;
+      justify-items: center;
+      font-size: clamp(1.45rem, 7vw, 2rem);
+      line-height: 1.12;
+    }
+
+    .compare-title small {
+      font-size: 0.48em;
+      line-height: 1;
+    }
+
     .compare-grid,
     .pricing-grid {
       grid-template-columns: 1fr;
+    }
+
+    .language-strip {
+      gap: 10px;
+      justify-content: flex-start;
+      min-height: 40px;
+      padding-inline: 20px;
+    }
+
+    .language-list {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .language-list span {
+      min-height: 20px;
+      padding-inline: 12px;
+      font-size: 0.72rem;
+    }
+
+    .language-list::-webkit-scrollbar {
+      display: none;
     }
 
     .compare-divider {
@@ -1445,7 +1632,7 @@ const jsonLd = {
     }
 
     .final-cta {
-      min-height: 360px;
+      min-height: 300px;
       margin-inline: 20px;
       padding: 34px 24px;
     }
@@ -1490,7 +1677,7 @@ const jsonLd = {
     }
 
     .hero {
-      min-height: 680px;
+      min-height: 660px;
       padding-top: 94px;
     }
 
@@ -1517,10 +1704,9 @@ const jsonLd = {
       word-break: break-all;
     }
 
-    .hero-copy {
-      max-width: min(320px, calc(100vw - 40px));
-      font-size: 0.97rem;
-      word-break: break-all;
+    #flow-title {
+      max-width: 10.8em;
+      font-size: 1.64rem;
     }
 
     .button,
@@ -1536,6 +1722,11 @@ const jsonLd = {
     .course-card {
       display: flex;
       grid-template-columns: none;
+      border-left: 0;
+      border-top: 4px solid var(--teal);
+      border-radius: 8px;
+      background: var(--paper);
+      overflow: hidden;
     }
 
     .course-card > img {
