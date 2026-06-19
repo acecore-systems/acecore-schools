@@ -11,7 +11,7 @@ state: public landing page at local Astro dev server
 
 - Page architecture: The implementation follows the AG comic-sheet structure: sticky top navigation, a large left hero copy panel, a right-side asymmetric five-panel manga board, 01-07 numbered information panels, and an 08 final CTA strip.
 - Course separation: ロボット工作・制御 is presented as physical robot assembly, sensors, motors, and movement/control. 実践プログラミング is presented separately with laptop code, Git/API/database/cloud copy, and no robot imagery.
-- Panel layout: The desktop composition now keeps the AG-style one-sheet density. The extra hero study panel and separate audience panel were removed from the desktop comic sheet, and the final CTA was renumbered from 09 to 08.
+- Panel layout: The desktop composition keeps the AG-style one-sheet density, including the angled hero/manga boundary, 01-03 / 04-07 row structure, and the 08 final CTA strip.
 - Typography and color: Heavy black display type, true-white paper, thick black panel gutters, navy numbering, green LINE CTA, and restrained course accents match the accepted AG direction.
 - Responsive behavior: Desktop keeps the comic sheet density without clipped H1 or broken pricing labels. Mobile stacks the same panels vertically and keeps CTA/buttons within the viewport.
 
@@ -26,4 +26,4 @@ state: public landing page at local Astro dev server
 **Intentional Deviations**
 
 - The implementation uses generated production panel assets rather than the original concept screenshot as UI, so all user-facing text remains HTML and source-controlled.
-- The schedule panel uses the current source schedule rows instead of inventing an availability matrix.
+- The schedule panel uses a compact availability matrix to match the selected AG reference layout.
