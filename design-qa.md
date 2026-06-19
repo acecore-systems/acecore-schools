@@ -1,7 +1,7 @@
-source visual reference: generated Workshop Journey concept 3
-implementation checks: desktop Chrome and mobile headless Edge
-viewports: desktop Chrome 1486x802, mobile headless Edge 390x844
-state: public landing page at local Astro dev server
+source visual reference: AG manga panel concept
+implementation checks: Browser/IAB interaction check, Playwright Chromium screenshots against Astro preview
+viewports: desktop 1536x1024, mobile 390x844
+state: public landing page at local Astro preview server
 
 **Findings**
 
@@ -9,29 +9,20 @@ state: public landing page at local Astro dev server
 
 **Comparison Notes**
 
-- Fonts and typography: The implementation keeps the heavy rounded sans display treatment, strong Japanese heading weight, compact nav type, and readable body type from the Workshop Journey reference. Mobile H1 and lead copy were adjusted to wrap without clipping.
-- Spacing and layout rhythm: Hero, four-step flow, comparison section, course cards, pricing, and final CTA follow the reference order and open white spacing. Header was changed from fixed to top-only absolute positioning so it no longer overlaps mid-page content.
-- Colors and visual tokens: Teal, coral, lime, charcoal, white base, and light teal surfaces match the selected direction. CTA colors and course accent colors remain consistent across sections.
-- Image quality and asset fidelity: Hero, flow, course, and CTA images use generated classroom/workshop photography matching the hands-on robotics/coding direction. All project images loaded in Chrome after scrolling.
-- Copy and content: Existing source copy is preserved for hero, learning flow, comparison, course, pricing, and CTA content. The current implementation is Japanese-only, using a single root route and one content object.
+- Page architecture: The implementation follows the AG comic-sheet structure: sticky top navigation, a large left hero copy panel, a right-side asymmetric manga panel board, numbered service panels, pricing, FAQ, audience block, and final LINE CTA.
+- Course separation: ロボット工作・制御 is presented as physical robot assembly, sensors, motors, and movement/control. 実践プログラミング is presented separately with laptop code, Git/API/database/cloud copy, and no robot imagery.
+- Audience fit: The page no longer reads child-only. It explicitly includes 高校生, 保護者, 社会人・大人の学び直し, シニア・PC/スマホ初心者, and 高卒認定 learners.
+- Typography and color: Heavy black display type, true-white paper, thick black panel gutters, navy numbering, green LINE CTA, and restrained course accents match the accepted AG direction.
+- Responsive behavior: Desktop keeps the comic sheet density without clipped H1 or broken pricing labels. Mobile stacks the same panels vertically and keeps CTA/buttons within the viewport.
 
-**Patches Made Since QA Started**
+**Verification**
 
-- Replaced the old green editorial layout with the Workshop Journey page structure and local generated image assets.
-- Changed the header from fixed to absolute to avoid overlapping course and comparison sections while scrolling.
-- Tightened course card title wrapping and clamped long descriptions to preserve the five-column layout.
-- Fixed mobile header and hero typography: header CTA is hidden on small screens, H1 wraps to two lines, and hero lead/body copy can wrap safely.
+- `npm run format:check` passed.
+- `npm run build` passed.
+- Browser/IAB verified FAQ open behavior and CTA link targets.
+- Playwright Chromium screenshots were captured from Astro preview for desktop, mobile, and full-page checks. Temporary screenshot files were removed after visual inspection.
 
-**Implementation Checklist**
+**Intentional Deviations**
 
-- Build passes with `npm run build`.
-- Format passes with `npm run format:check`.
-- Desktop top, mid-page, and course/pricing regions were checked in Chrome.
-- Mobile 390px screenshot was checked in headless Edge.
-- CTA links resolve to `https://acecore.net/contact/` and `https://lin.ee/DjIrdqj`.
-
-**Follow-up Polish**
-
-- Optional: replace the code-native brand mark with an official Acecore Schools logo asset if one exists.
-
-final result: passed
+- The implementation uses generated production panel assets rather than the original concept screenshot as UI, so all user-facing text remains HTML and source-controlled.
+- The schedule panel uses the current source schedule rows instead of inventing an availability matrix.
