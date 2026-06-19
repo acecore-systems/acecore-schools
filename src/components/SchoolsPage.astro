@@ -63,13 +63,6 @@ const heroPanels = [
     caption: "未来の選択肢を、しっかり広げる。",
   },
   {
-    area: "panel-study",
-    image: mangaImages.study,
-    alt: "学習ノートと教材の漫画調イラスト",
-    label: "学習塾",
-    caption: "基礎から応用まで、一人ひとりに合わせる。",
-  },
-  {
     area: "panel-consultation",
     image: mangaImages.consultation,
     alt: "相談シートと学習計画を作る漫画調イラスト",
@@ -157,14 +150,6 @@ const learningSteps = [
     body: "生活で活かす。学んだことを日常や将来に活かす。",
   },
 ] as const;
-
-const targetAudiences = [
-  "高校生",
-  "保護者の方",
-  "社会人・大人の学び直し",
-  "シニア・PC/スマホ初心者",
-  "高卒認定を目指す方",
-];
 
 const iconMap = {
   search: `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4 4"/></svg>`,
@@ -507,19 +492,9 @@ const jsonLd = {
           </div>
         </section>
 
-        <section class="panel audience-panel" aria-labelledby="audience-title">
-          <header class="panel-heading">
-            <span class="panel-number">08</span>
-            <h2 id="audience-title">対象となる方</h2>
-          </header>
-          <ul class="audience-list">
-            {targetAudiences.map((item) => <li>{item}</li>)}
-          </ul>
-        </section>
-
         <section class="final-panel" aria-labelledby="final-title">
           <div class="final-copy">
-            <span class="panel-number">09</span>
+            <span class="panel-number">08</span>
             <h2 id="final-title">次の一歩を、ここから。</h2>
             <p>
               あなた専用の学びのプランで、「できる！」を増やしていきましょう。
@@ -528,6 +503,13 @@ const jsonLd = {
           <div class="final-strip-images" aria-hidden="true">
             <img
               src={mangaImages.robot}
+              alt=""
+              width="1536"
+              height="1024"
+              loading="lazy"
+            />
+            <img
+              src={mangaImages.consultation}
               alt=""
               width="1536"
               height="1024"
@@ -548,16 +530,22 @@ const jsonLd = {
               loading="lazy"
             />
           </div>
-          <a
-            class="final-cta"
-            href={trialInquiryUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span class="line-badge" aria-hidden="true">LINE</span>
-            <span>{detail.finalCta.primary}</span>
-            <span aria-hidden="true">›</span>
-          </a>
+          <div class="final-cta">
+            <a
+              class="final-cta-primary"
+              href={trialInquiryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="line-badge" aria-hidden="true">LINE</span>
+              <span>{detail.finalCta.primary}</span>
+              <span aria-hidden="true">›</span>
+            </a>
+            <a class="final-cta-secondary" href={pricingUrl}>
+              <span>{detail.finalCta.secondary}</span>
+              <span aria-hidden="true">›</span>
+            </a>
+          </div>
         </section>
       </section>
     </main>
@@ -584,7 +572,7 @@ const jsonLd = {
     --red: #d94135;
     --muted: #4f5961;
     --line: #0a0d0f;
-    --panel-gap: 6px;
+    --panel-gap: 5px;
     font-family:
       "Arial",
       "Noto Sans JP",
@@ -705,8 +693,7 @@ const jsonLd = {
   }
 
   .header-cta,
-  .button,
-  .final-cta {
+  .button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -746,7 +733,7 @@ const jsonLd = {
   }
 
   .comic-page {
-    width: min(1540px, 100%);
+    width: min(1536px, 100%);
     border-right: 3px solid var(--line);
     border-left: 3px solid var(--line);
     margin: 0 auto;
@@ -755,8 +742,9 @@ const jsonLd = {
 
   .hero {
     display: grid;
-    grid-template-columns: minmax(330px, 0.35fr) minmax(0, 0.65fr);
+    grid-template-columns: minmax(420px, 0.345fr) minmax(0, 0.655fr);
     gap: var(--panel-gap);
+    height: 390px;
     background: var(--line);
   }
 
@@ -769,8 +757,8 @@ const jsonLd = {
   }
 
   .panel-hero-copy {
-    min-height: 394px;
-    padding: clamp(24px, 3.1vw, 52px) clamp(22px, 2.4vw, 34px);
+    min-height: 0;
+    padding: clamp(22px, 2.25vw, 36px) clamp(22px, 2.25vw, 34px);
     isolation: isolate;
   }
 
@@ -793,7 +781,7 @@ const jsonLd = {
   h1 {
     max-width: 7.5ch;
     color: #050709;
-    font-size: clamp(3.8rem, 5.6vw, 5.6rem);
+    font-size: clamp(3.75rem, 5.35vw, 5.25rem);
     font-weight: 950;
     line-height: 0.84;
     letter-spacing: 0;
@@ -801,31 +789,31 @@ const jsonLd = {
 
   .hero-lead {
     max-width: 620px;
-    margin-top: 24px;
+    margin-top: 18px;
     color: #111;
-    font-size: clamp(1.16rem, 1.65vw, 1.7rem);
+    font-size: clamp(1.08rem, 1.45vw, 1.36rem);
     font-weight: 950;
     line-height: 1.45;
   }
 
   .hero-body {
     max-width: 520px;
-    margin-top: 18px;
+    margin-top: 12px;
     color: #111;
     font-size: 1rem;
     font-weight: 760;
-    line-height: 1.85;
+    line-height: 1.68;
   }
 
   .hero-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-top: 26px;
+    margin-top: 18px;
   }
 
   .button-line,
-  .final-cta {
+  .final-cta-primary {
     gap: 9px;
     border-color: var(--green-dark);
     background: var(--green);
@@ -840,12 +828,12 @@ const jsonLd = {
 
   .hero-board {
     display: grid;
-    min-height: 394px;
+    min-height: 0;
     grid-template-areas:
       "programming programming robot robot pc"
-      "ged ged study consultation consultation";
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    grid-template-rows: minmax(188px, 1fr) minmax(188px, 0.95fr);
+      "ged ged consultation consultation consultation";
+    grid-template-columns: 1.12fr 0.9fr 1.02fr 1fr 0.82fr;
+    grid-template-rows: minmax(0, 1.05fr) minmax(0, 0.9fr);
     gap: var(--panel-gap);
     background: var(--line);
   }
@@ -883,41 +871,36 @@ const jsonLd = {
 
   .panel-programming {
     grid-area: programming;
-    clip-path: polygon(0 0, 100% 0, 94% 100%, 0 100%);
+    clip-path: polygon(0 0, 100% 0, 99% 100%, 0 100%);
   }
 
   .panel-robot {
     grid-area: robot;
-    clip-path: polygon(7% 0, 100% 0, 94% 100%, 0 100%);
+    clip-path: polygon(1% 0, 100% 0, 99% 100%, 0 100%);
   }
 
   .panel-pc {
     grid-area: pc;
-    clip-path: polygon(11% 0, 100% 0, 100% 100%, 0 100%);
+    clip-path: polygon(3% 0, 100% 0, 100% 100%, 0 100%);
   }
 
   .panel-ged {
     grid-area: ged;
-    clip-path: polygon(0 0, 93% 0, 100% 100%, 0 100%);
-  }
-
-  .panel-study {
-    grid-area: study;
-    clip-path: polygon(6% 0, 100% 0, 94% 100%, 0 100%);
+    clip-path: polygon(0 0, 99% 0, 100% 100%, 0 100%);
   }
 
   .panel-consultation {
     grid-area: consultation;
-    clip-path: polygon(5% 0, 100% 0, 100% 100%, 0 100%);
+    clip-path: polygon(1% 0, 100% 0, 100% 100%, 0 100%);
   }
 
   .panel-caption {
     position: absolute;
-    right: 18px;
-    bottom: 18px;
-    max-width: min(300px, calc(100% - 36px));
+    right: 16px;
+    bottom: 14px;
+    max-width: min(310px, calc(100% - 32px));
     border: 2px solid var(--line);
-    padding: 9px 12px;
+    padding: 8px 11px;
     background: rgba(255, 255, 255, 0.94);
     color: #111;
     box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.14);
@@ -930,13 +913,13 @@ const jsonLd = {
 
   .panel-caption strong {
     color: var(--navy);
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 950;
   }
 
   .panel-caption span {
     margin-top: 3px;
-    font-size: 0.95rem;
+    font-size: 0.88rem;
     font-weight: 950;
     line-height: 1.35;
   }
@@ -944,6 +927,7 @@ const jsonLd = {
   .sheet-grid {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: 220px 225px 105px;
     gap: var(--panel-gap);
     background: var(--line);
   }
@@ -951,12 +935,36 @@ const jsonLd = {
   .sheet-grid > .panel,
   .final-panel {
     min-width: 0;
-    padding: clamp(16px, 1.65vw, 24px);
+    min-height: 0;
+    overflow: hidden;
+    padding: 14px 16px;
     background: #fff;
   }
 
   .trial-panel {
     grid-column: span 3;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(108px, 42%);
+    column-gap: 12px;
+    align-content: start;
+  }
+
+  .trial-panel .panel-heading {
+    grid-column: 1 / -1;
+  }
+
+  .trial-panel > p,
+  .trial-panel .check-list,
+  .trial-panel .small-note {
+    grid-column: 1;
+  }
+
+  .trial-panel .panel-figure {
+    grid-column: 2;
+    grid-row: 2 / span 4;
+    align-self: stretch;
+    height: auto;
+    margin-top: 0;
   }
 
   .flow-panel {
@@ -983,16 +991,12 @@ const jsonLd = {
     grid-column: span 3;
   }
 
-  .audience-panel {
-    grid-column: span 4;
-  }
-
   .final-panel {
     display: grid;
-    grid-column: span 8;
-    grid-template-columns: minmax(180px, 0.85fr) minmax(220px, 1.25fr) minmax(
-        230px,
-        1fr
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(360px, 0.95fr) minmax(430px, 1.35fr) minmax(
+        500px,
+        1.45fr
       );
     gap: var(--panel-gap);
     align-items: stretch;
@@ -1001,15 +1005,15 @@ const jsonLd = {
 
   .panel-heading {
     display: flex;
-    gap: 10px;
+    gap: 9px;
     align-items: baseline;
     min-width: 0;
-    margin-bottom: 14px;
+    margin-bottom: 7px;
   }
 
   .panel-number {
     color: var(--navy);
-    font-size: clamp(1.75rem, 2.6vw, 2.5rem);
+    font-size: clamp(1.65rem, 2.22vw, 2.18rem);
     font-weight: 950;
     line-height: 0.9;
   }
@@ -1017,14 +1021,14 @@ const jsonLd = {
   .panel-heading h2,
   .final-copy h2 {
     color: #111;
-    font-size: clamp(1.18rem, 1.6vw, 1.55rem);
+    font-size: clamp(1.02rem, 1.28vw, 1.24rem);
     font-weight: 950;
     line-height: 1.2;
   }
 
   .panel-heading small {
     color: #333;
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     font-weight: 900;
   }
 
@@ -1034,30 +1038,28 @@ const jsonLd = {
   .course-card p,
   .faq-list p {
     color: #111;
-    font-size: 0.88rem;
+    font-size: 0.76rem;
     font-weight: 680;
-    line-height: 1.65;
+    line-height: 1.45;
   }
 
   .check-list,
-  .compare-grid ul,
-  .audience-list {
-    margin: 14px 0 0;
+  .compare-grid ul {
+    margin: 10px 0 0;
     padding: 0;
     list-style: none;
   }
 
   .check-list {
     display: grid;
-    gap: 8px;
+    gap: 5px;
   }
 
-  .check-list li,
-  .audience-list li {
+  .check-list li {
     position: relative;
     padding-left: 24px;
     color: #111;
-    font-size: 0.88rem;
+    font-size: 0.76rem;
     font-weight: 850;
     line-height: 1.5;
   }
@@ -1074,28 +1076,35 @@ const jsonLd = {
 
   .panel-figure {
     position: relative;
-    height: 160px;
+    height: 118px;
     border: 2px solid var(--line);
-    margin-top: 14px;
+    margin-top: 10px;
     overflow: hidden;
   }
 
   .small-note {
-    margin-top: 10px;
-    font-size: 0.78rem;
+    margin-top: 8px;
+    font-size: 0.72rem;
+  }
+
+  .schedule-panel .small-note,
+  .pricing-panel .small-note {
+    margin-top: 4px;
+    font-size: 0.56rem;
+    line-height: 1.18;
   }
 
   .flow-list {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
   }
 
   .flow-step {
     position: relative;
     min-width: 0;
     border-right: 1px solid #b9bec2;
-    padding-right: 10px;
+    padding-right: 8px;
   }
 
   .flow-step:last-child {
@@ -1104,10 +1113,10 @@ const jsonLd = {
 
   .flow-step + .flow-step::before {
     position: absolute;
-    top: 44px;
-    left: -11px;
+    top: 38px;
+    left: -10px;
     color: var(--navy);
-    font-size: 1.9rem;
+    font-size: 1.55rem;
     font-weight: 950;
     content: "›";
   }
@@ -1115,21 +1124,21 @@ const jsonLd = {
   .step-number {
     display: inline-grid;
     place-items: center;
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     border-radius: 5px;
     background: var(--navy);
     color: white;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     font-weight: 950;
   }
 
   .step-icon {
     display: grid;
-    width: 44px;
-    height: 44px;
+    width: 38px;
+    height: 38px;
     place-items: center;
-    margin-top: 14px;
+    margin-top: 10px;
     color: #111;
   }
 
@@ -1150,24 +1159,24 @@ const jsonLd = {
   }
 
   .flow-step h3 {
-    margin-top: 10px;
+    margin-top: 8px;
     color: #111;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 950;
   }
 
   .flow-step p {
-    margin-top: 6px;
+    margin-top: 4px;
     color: #111;
-    font-size: 0.76rem;
+    font-size: 0.68rem;
     font-weight: 680;
-    line-height: 1.55;
+    line-height: 1.45;
   }
 
   .course-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 9px;
+    gap: 7px;
   }
 
   .course-card {
@@ -1178,33 +1187,35 @@ const jsonLd = {
 
   .course-kicker {
     display: block;
-    padding: 7px 8px;
+    min-height: 30px;
+    padding: 5px;
     background: var(--course-tone);
     color: white;
-    font-size: 0.82rem;
+    font-size: 0.64rem;
     font-weight: 950;
-    line-height: 1.25;
+    line-height: 1.18;
     text-align: center;
   }
 
   .course-card figure {
     position: relative;
-    aspect-ratio: 1.25;
+    height: 70px;
+    aspect-ratio: auto;
     overflow: hidden;
     border-bottom: 2px solid var(--line);
     background: #eee;
   }
 
   .course-card p {
-    padding: 10px;
-    font-size: 0.76rem;
-    line-height: 1.55;
+    padding: 6px;
+    font-size: 0.62rem;
+    line-height: 1.34;
   }
 
   .compare-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 10px;
+    gap: 8px;
     align-items: stretch;
   }
 
@@ -1215,10 +1226,10 @@ const jsonLd = {
 
   .compare-grid h3 {
     border-bottom: 2px solid var(--line);
-    padding: 8px;
+    padding: 5px 7px;
     background: #f3f5f7;
     color: #111;
-    font-size: 0.9rem;
+    font-size: 0.72rem;
     font-weight: 950;
     text-align: center;
   }
@@ -1228,11 +1239,11 @@ const jsonLd = {
     grid-template-columns: 22px minmax(0, 1fr);
     gap: 8px;
     align-items: start;
-    padding: 8px 10px;
+    padding: 5px 7px;
     border-bottom: 1px solid #ccd1d5;
     color: #111;
-    font-size: 0.78rem;
-    line-height: 1.35;
+    font-size: 0.62rem;
+    line-height: 1.22;
   }
 
   .compare-grid li:last-child {
@@ -1253,7 +1264,7 @@ const jsonLd = {
     display: grid;
     place-items: center;
     color: #111;
-    font-size: 1.7rem;
+    font-size: 1.55rem;
     font-weight: 950;
   }
 
@@ -1273,10 +1284,10 @@ const jsonLd = {
   td {
     border-right: 1px solid #c4c9ce;
     border-bottom: 1px solid #c4c9ce;
-    padding: 8px;
+    padding: 5px;
     color: #111;
-    font-size: 0.76rem;
-    line-height: 1.45;
+    font-size: 0.61rem;
+    line-height: 1.24;
     text-align: left;
     vertical-align: top;
   }
@@ -1293,7 +1304,7 @@ const jsonLd = {
 
   .price-list {
     display: grid;
-    gap: 8px;
+    gap: 6px;
   }
 
   .pricing-panel .panel-heading {
@@ -1302,7 +1313,7 @@ const jsonLd = {
 
   .pricing-panel .panel-heading h2 {
     flex: 0 0 auto;
-    font-size: clamp(1.05rem, 1.35vw, 1.25rem);
+    font-size: clamp(0.88rem, 1.05vw, 1rem);
     white-space: nowrap;
   }
 
@@ -1313,12 +1324,12 @@ const jsonLd = {
 
   .price-list article {
     display: grid;
-    grid-template-columns: 34px minmax(0, 1fr);
-    gap: 8px 10px;
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 4px 7px;
     align-items: center;
     min-width: 0;
     border-bottom: 1px solid #c7ccd0;
-    padding-bottom: 8px;
+    padding-bottom: 4px;
   }
 
   .price-list article:last-child {
@@ -1327,20 +1338,20 @@ const jsonLd = {
 
   .price-icon {
     grid-row: span 2;
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
     color: #111;
   }
 
   .price-list h3 {
     color: #111;
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     font-weight: 950;
   }
 
   .price-list strong {
     color: #111;
-    font-size: 1.24rem;
+    font-size: 0.96rem;
     font-weight: 950;
     line-height: 1.15;
     word-break: keep-all;
@@ -1349,7 +1360,7 @@ const jsonLd = {
 
   .faq-list {
     display: grid;
-    gap: 7px;
+    gap: 3px;
   }
 
   details {
@@ -1362,12 +1373,12 @@ const jsonLd = {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
     align-items: center;
-    padding: 8px 10px;
+    padding: 4px 7px;
     color: #111;
     cursor: pointer;
-    font-size: 0.78rem;
+    font-size: 0.59rem;
     font-weight: 950;
-    line-height: 1.45;
+    line-height: 1.22;
   }
 
   summary::-webkit-details-marker {
@@ -1385,65 +1396,89 @@ const jsonLd = {
 
   .faq-list p {
     border-top: 1px solid #d5d9dd;
-    padding: 8px 10px 10px;
-    font-size: 0.74rem;
-  }
-
-  .audience-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .audience-list li {
-    border: 2px solid #d1d5d9;
-    padding: 10px 10px 10px 30px;
-    min-height: 48px;
-    background: #fff;
-  }
-
-  .audience-list li::before {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: var(--navy);
-    content: "■";
+    padding: 5px 7px 7px;
+    font-size: 0.59rem;
   }
 
   .final-copy {
-    padding: 20px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 14px;
+    align-content: center;
+    padding: 18px 22px;
     background: #fff;
   }
 
+  .final-copy .panel-number {
+    grid-row: 1 / span 2;
+    font-size: clamp(2.2rem, 3.2vw, 3.2rem);
+  }
+
   .final-copy h2 {
-    margin-top: 8px;
-    font-size: clamp(1.35rem, 2vw, 1.9rem);
+    align-self: end;
+    margin-top: 0;
+    font-size: clamp(1.22rem, 1.52vw, 1.48rem);
   }
 
   .final-copy p {
-    margin-top: 8px;
+    grid-column: 2;
+    margin-top: 0;
+    font-size: 0.72rem;
+    line-height: 1.42;
   }
 
   .final-strip-images {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--panel-gap);
-    min-height: 140px;
+    min-height: 0;
+    height: 100%;
     overflow: hidden;
     background: var(--line);
   }
 
   .final-cta {
-    gap: 14px;
+    display: grid;
+    gap: 8px;
+    place-items: center;
     align-self: stretch;
     justify-self: stretch;
-    min-height: 120px;
+    min-height: 0;
     border: 0;
     border-left: var(--panel-gap) solid var(--line);
     border-radius: 0;
-    padding: 18px;
-    font-size: clamp(1.18rem, 2vw, 1.85rem);
+    padding: 14px 22px;
+    background: var(--green);
+    color: white;
+  }
+
+  .final-cta-primary,
+  .final-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    font-weight: 950;
+    line-height: 1.12;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .final-cta-primary {
+    gap: 14px;
+    font-size: clamp(1.18rem, 1.9vw, 1.68rem);
+  }
+
+  .final-cta-secondary {
+    gap: 10px;
+    width: min(320px, 84%);
+    min-height: 30px;
+    border: 2px solid var(--line);
+    border-radius: 4px;
+    background: #fff;
+    color: #111;
+    font-size: 0.78rem;
   }
 
   .site-footer {
@@ -1484,6 +1519,7 @@ const jsonLd = {
 
     .hero {
       grid-template-columns: 1fr;
+      height: auto;
     }
 
     .panel-hero-copy {
@@ -1494,6 +1530,10 @@ const jsonLd = {
       min-height: 460px;
     }
 
+    .sheet-grid {
+      grid-template-rows: none;
+    }
+
     .trial-panel,
     .flow-panel,
     .courses-panel,
@@ -1501,7 +1541,6 @@ const jsonLd = {
     .schedule-panel,
     .pricing-panel,
     .faq-panel,
-    .audience-panel,
     .final-panel {
       grid-column: span 12;
     }
@@ -1546,6 +1585,15 @@ const jsonLd = {
       padding: 24px 20px 28px;
     }
 
+    .trial-panel {
+      display: block;
+    }
+
+    .trial-panel .panel-figure {
+      height: 180px;
+      margin-top: 14px;
+    }
+
     h1 {
       font-size: clamp(3.2rem, 19vw, 4.8rem);
     }
@@ -1560,10 +1608,9 @@ const jsonLd = {
         "robot"
         "pc"
         "ged"
-        "study"
         "consultation";
       grid-template-columns: 1fr;
-      grid-template-rows: repeat(6, minmax(210px, 1fr));
+      grid-template-rows: repeat(5, minmax(210px, 1fr));
       min-height: 0;
     }
 
@@ -1585,7 +1632,6 @@ const jsonLd = {
     .flow-list,
     .course-grid,
     .compare-grid,
-    .audience-list,
     .pricing-panel .price-list,
     .final-panel {
       grid-template-columns: 1fr;
