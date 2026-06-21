@@ -20,7 +20,9 @@ state: public landing page at local Astro dev server and production preview
 - Hero boundary: The left hero copy panel now extends into a white diagonal wedge with a black slanted gutter, matching the reference's stronger manga cut between the copy panel and the right image board.
 - Primary row cuts: The 01/02/03 row uses fixed reference-aligned cuts at x=10, 336, 346, 826, and 836 on the 1536px desktop canvas.
 - Trial panel: The 01 free-trial consultation image frame was widened and extended downward to match the reference panel balance while keeping the left checklist and duration note in the panel.
-- Trial panel refinement: The 01 image column was shifted back to the right and narrowed so the consultation image no longer overwhelms the text column.
+- Trial panel refinement: The 01 text column is tightened and the consultation image column is widened back toward the reference crop so the right-side image has the same visual weight.
+- Trial checklist: The 01 checklist markers now render as red outlined check boxes rather than plain check marks, matching the reference detail.
+- Final CTA strip: The final image strip now uses slight diagonal clips on the small image panels, and the green CTA content is shifted down to match the reference vertical balance.
 - Overflow: The hero copy, all numbered desktop panels, and the final CTA strip render with `scrollHeight <= clientHeight`; no hidden panel content remains.
 - Typography and color: Heavy black display type, true-white paper, thick black panel gutters, navy numbering, green LINE CTA, and restrained course accents match the accepted AG direction.
 - Responsive behavior: Desktop keeps the comic sheet density without clipped H1 or broken pricing labels. Mobile stacks the same panels vertically and keeps CTA/buttons within the viewport.
@@ -32,7 +34,9 @@ state: public landing page at local Astro dev server and production preview
 - Browser/IAB could not be used. The latest attempt failed while connecting to the in-app browser with `failed to write kernel assets: 指定されたパスが見つかりません`.
 - Playwright-managed Chromium desktop screenshot captured at 1536x1024.
 - Latest desktop fidelity screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-final-desktop-pass2.png`.
-- Latest production preview screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-preview-final-desktop-2.png`.
+- Latest production preview screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-preview-final-desktop-3.png`.
+- Latest row-one comparison crop: `C:/Users/gnish/AppData/Local/Temp/preview-row1-final-3.png`.
+- Latest final strip comparison crop: `C:/Users/gnish/AppData/Local/Temp/preview-final-strip-final-3.png`.
 - Latest hero-caption comparison crop: `C:/Users/gnish/AppData/Local/Temp/current-hero-captions-crop-5.png`.
 - Playwright-managed Chromium mobile screenshot captured at 390x844 with no horizontal overflow.
 - Latest mobile initial screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-mobile-top-pass2.png`.

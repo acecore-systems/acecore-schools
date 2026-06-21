@@ -1006,6 +1006,19 @@ const jsonLd = {
     filter: contrast(1.03) saturate(0.94);
   }
 
+  .final-strip-images img:nth-child(1) {
+    clip-path: polygon(0 0, 96% 0, 100% 100%, 5% 100%);
+  }
+
+  .final-strip-images img:nth-child(2),
+  .final-strip-images img:nth-child(3) {
+    clip-path: polygon(2% 0, 96% 0, 100% 100%, 0 100%);
+  }
+
+  .final-strip-images img:nth-child(4) {
+    clip-path: polygon(2% 0, 100% 0, 100% 100%, 0 100%);
+  }
+
   .panel-programming {
     top: 0;
     left: 0;
@@ -1183,7 +1196,7 @@ const jsonLd = {
 
   .trial-panel {
     display: grid;
-    grid-template-columns: minmax(152px, 1fr) minmax(132px, 0.82fr);
+    grid-template-columns: 105px minmax(0, 1fr);
     column-gap: 8px;
     align-content: start;
   }
@@ -1293,11 +1306,23 @@ const jsonLd = {
 
   .check-list li::before {
     position: absolute;
-    top: 0.15em;
+    top: 0.28em;
     left: 0;
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid var(--red);
+    background: #fff;
+    content: "";
+  }
+
+  .check-list li::after {
+    position: absolute;
+    top: 0.01em;
+    left: 2px;
     color: var(--red);
     font-size: 1rem;
     font-weight: 950;
+    line-height: 1;
     content: "✓";
   }
 
@@ -1766,6 +1791,7 @@ const jsonLd = {
   .final-cta > * {
     position: relative;
     z-index: 1;
+    transform: translateY(5px);
   }
 
   .final-cta-primary,
@@ -2002,6 +2028,10 @@ const jsonLd = {
     .final-cta {
       border-top: var(--panel-gap) solid var(--line);
       border-left: 0;
+    }
+
+    .final-cta > * {
+      transform: none;
     }
 
     .final-cta-primary {
