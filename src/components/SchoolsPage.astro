@@ -39,14 +39,14 @@ const heroPanels = [
     image: mangaImages.programming,
     alt: "コードエディタと設計ノートの漫画調イラスト",
     label: "実践プログラミング",
-    caption: "コードを書いて、仕組みをつくる。",
+    caption: "コードを書いて、\n仕組みをつくる。",
   },
   {
     area: "panel-robot",
     image: mangaImages.robot,
     alt: "ロボット工作キットとセンサー部品の漫画調イラスト",
     label: "ロボット工作・制御",
-    caption: "組み立てて、動かして、考える。",
+    caption: "組み立てて、\n動かして、考える。",
   },
   {
     area: "panel-pc",
@@ -60,14 +60,14 @@ const heroPanels = [
     image: mangaImages.ged,
     alt: "高卒認定の学習教材と計画表の漫画調イラスト",
     label: "高卒認定",
-    caption: "未来の選択肢を、しっかり広げる。",
+    caption: "未来の選択肢を、\nしっかり広げる。",
   },
   {
     area: "panel-consultation",
     image: mangaImages.consultation,
     alt: "相談シートと学習計画を作る漫画調イラスト",
-    label: "まずは相談から",
-    caption: "毎週の学びの快適さを一緒に描きます。",
+    label: "まずは相談から。",
+    caption: "毎週の学びの快適さを\n一緒に描きます。",
   },
 ];
 
@@ -816,6 +816,7 @@ const jsonLd = {
     border-bottom: 3px solid var(--line);
     border-left: 3px solid var(--line);
     margin: 0 auto;
+    padding: 0 7px 7px;
     background: var(--line);
   }
 
@@ -976,15 +977,15 @@ const jsonLd = {
   .panel-programming {
     top: 0;
     left: 0;
-    width: 41%;
+    width: 41.4%;
     height: 226px;
     clip-path: polygon(8% 0, 100% 0, 99% 100%, 0 100%);
   }
 
   .panel-robot {
     top: 0;
-    left: calc(41% + var(--panel-gap));
-    width: 37.2%;
+    left: calc(41.4% + var(--panel-gap));
+    width: 37.8%;
     height: 255px;
     clip-path: polygon(1% 0, 100% 0, 96% 100%, 0 100%);
   }
@@ -992,7 +993,7 @@ const jsonLd = {
   .panel-pc {
     top: 0;
     right: 0;
-    width: 21.1%;
+    width: 19.8%;
     height: 255px;
     clip-path: polygon(3% 0, 100% 0, 100% 100%, 0 100%);
   }
@@ -1004,7 +1005,7 @@ const jsonLd = {
   .panel-ged {
     bottom: 0;
     left: 0;
-    width: 41%;
+    width: 41.4%;
     height: 156px;
     clip-path: polygon(0 0, 99% 0, 100% 100%, 0 100%);
   }
@@ -1026,7 +1027,6 @@ const jsonLd = {
     padding: 8px 11px;
     background: rgba(255, 255, 255, 0.94);
     color: #111;
-    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.14);
   }
 
   .panel-caption strong,
@@ -1047,6 +1047,65 @@ const jsonLd = {
     line-height: 1.35;
   }
 
+  .hero-board .panel-caption strong {
+    display: none;
+  }
+
+  .hero-board .panel-caption {
+    padding: 7px 10px;
+  }
+
+  .hero-board .panel-caption span {
+    margin-top: 0;
+    font-size: 0.86rem;
+    line-height: 1.25;
+    white-space: pre-line;
+  }
+
+  .panel-programming .panel-caption {
+    right: auto;
+    bottom: 14px;
+    left: 36px;
+    max-width: 158px;
+  }
+
+  .panel-robot .panel-caption {
+    right: auto;
+    bottom: 32px;
+    left: 28px;
+    max-width: 190px;
+  }
+
+  .panel-pc .panel-caption {
+    display: none;
+  }
+
+  .panel-ged .panel-caption {
+    right: auto;
+    bottom: 14px;
+    left: 10px;
+    max-width: 174px;
+  }
+
+  .panel-consultation .panel-caption {
+    right: 80px;
+    bottom: 14px;
+    max-width: 178px;
+  }
+
+  .panel-consultation .panel-caption strong {
+    display: block;
+    color: #111;
+    font-size: 0.82rem;
+    line-height: 1.22;
+  }
+
+  .panel-consultation .panel-caption span {
+    margin-top: 0;
+    font-size: 0.82rem;
+    line-height: 1.22;
+  }
+
   .sheet-grid {
     display: grid;
     gap: 8px;
@@ -1061,7 +1120,8 @@ const jsonLd = {
   }
 
   .sheet-row-primary {
-    grid-template-columns: minmax(0, 336fr) minmax(0, 490fr) minmax(0, 700fr);
+    grid-template-columns: minmax(0, 326px) minmax(0, 480px) minmax(0, 1fr);
+    gap: 10px;
     height: 227px;
   }
 
@@ -1091,8 +1151,8 @@ const jsonLd = {
 
   .trial-panel {
     display: grid;
-    grid-template-columns: minmax(108px, 0.75fr) minmax(184px, 58%);
-    column-gap: 10px;
+    grid-template-columns: minmax(152px, 1fr) minmax(132px, 0.82fr);
+    column-gap: 8px;
     align-content: start;
   }
 
