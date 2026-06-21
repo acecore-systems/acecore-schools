@@ -17,6 +17,7 @@ state: public landing page at local Astro dev server and production preview
 - Paper inset: The comic sheet now keeps the same inner black gutter as the reference, placing the desktop panel field at x=10..1526 instead of stretching panels to the browser edge.
 - Hero caption fidelity: The hero manga captions now use the reference-style short white text boxes, hide the extra course-category label in the top panels, remove the drop shadow, and preserve deliberate line breaks.
 - Hero panel widths: The robot panel is widened and the PC/smartphone panel is narrowed so the upper-right manga cuts match the reference proportions more closely.
+- Hero boundary: The left hero copy panel now extends into a white diagonal wedge with a black slanted gutter, matching the reference's stronger manga cut between the copy panel and the right image board.
 - Primary row cuts: The 01/02/03 row uses fixed reference-aligned cuts at x=10, 336, 346, 826, and 836 on the 1536px desktop canvas.
 - Trial panel: The 01 free-trial consultation image frame was widened and extended downward to match the reference panel balance while keeping the left checklist and duration note in the panel.
 - Trial panel refinement: The 01 image column was shifted back to the right and narrowed so the consultation image no longer overwhelms the text column.
@@ -31,7 +32,7 @@ state: public landing page at local Astro dev server and production preview
 - Browser/IAB could not be used. The latest attempt failed while connecting to the in-app browser with `failed to write kernel assets: 指定されたパスが見つかりません`.
 - Playwright-managed Chromium desktop screenshot captured at 1536x1024.
 - Latest desktop fidelity screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-final-desktop-pass2.png`.
-- Latest production preview screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-preview-final-desktop.png`.
+- Latest production preview screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-preview-final-desktop-2.png`.
 - Latest hero-caption comparison crop: `C:/Users/gnish/AppData/Local/Temp/current-hero-captions-crop-5.png`.
 - Playwright-managed Chromium mobile screenshot captured at 390x844 with no horizontal overflow.
 - Latest mobile initial screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-mobile-top-pass2.png`.

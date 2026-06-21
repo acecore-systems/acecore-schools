@@ -837,17 +837,49 @@ const jsonLd = {
   }
 
   .panel-hero-copy {
+    z-index: 2;
     min-height: 0;
+    overflow: visible;
     padding: 14px 32px 28px;
-    clip-path: polygon(0 0, 100% 0, 99% 100%, 0 100%);
+    clip-path: none;
     isolation: isolate;
+  }
+
+  .panel-hero-copy::after {
+    position: absolute;
+    top: 0;
+    right: -45px;
+    z-index: 0;
+    width: 45px;
+    height: 100%;
+    background: #fff;
+    clip-path: polygon(0 0, 100% 0, 5% 100%, 0 100%);
+    content: "";
+  }
+
+  .panel-hero-copy::before {
+    position: absolute;
+    top: 0;
+    right: -52px;
+    z-index: 1;
+    width: 52px;
+    height: 100%;
+    background: var(--line);
+    clip-path: polygon(82% 0, 100% 0, 19% 100%, 2% 100%);
+    content: "";
+  }
+
+  .panel-hero-copy > :not(.speed-lines) {
+    position: relative;
+    z-index: 2;
   }
 
   .speed-lines {
     position: absolute;
-    inset: 0;
+    inset: 0 -45px 0 0;
     z-index: -1;
     opacity: 0.62;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 43px) 100%, 0 100%);
     background:
       repeating-conic-gradient(
         from 228deg at 97% 48%,
@@ -1807,6 +1839,17 @@ const jsonLd = {
 
     .panel-hero-copy {
       min-height: 0;
+      overflow: hidden;
+    }
+
+    .panel-hero-copy::before,
+    .panel-hero-copy::after {
+      display: none;
+    }
+
+    .speed-lines {
+      inset: 0;
+      clip-path: none;
     }
 
     .hero-board {
