@@ -23,6 +23,14 @@ const mangaImages = {
   pc: "/images/schools/manga-pc-smartphone.png",
   ged: "/images/schools/manga-ged.png",
   consultation: "/images/schools/manga-consultation.png",
+  agHeroBoard: "/images/schools/ag-hero-board.png",
+  agTrial: "/images/schools/ag-trial-figure.png",
+  agCourseTutoring: "/images/schools/ag-course-tutoring.png",
+  agCourseRobot: "/images/schools/ag-course-robot.png",
+  agCourseProgramming: "/images/schools/ag-course-programming.png",
+  agCoursePc: "/images/schools/ag-course-pc-smartphone.png",
+  agCourseGed: "/images/schools/ag-course-ged.png",
+  agFinalStrip: "/images/schools/ag-final-strip.png",
 } as const;
 
 const navItems = [
@@ -78,7 +86,7 @@ const courseSections = [
     tone: "#0f4d8b",
     title: content.juku.title,
     body: "基礎学力から応用まで、一人ひとりに合わせた学習をサポート。",
-    image: mangaImages.study,
+    image: mangaImages.agCourseTutoring,
     imageAlt: "学習ノートと教材",
     items: content.juku.features.slice(0, 2),
   },
@@ -88,7 +96,7 @@ const courseSections = [
     tone: "#e06e00",
     title: content.robotProgramming.title,
     body: "センサーやモーターを使い、組み立てて動かす制御の仕組みを学ぶ。",
-    image: mangaImages.robot,
+    image: mangaImages.agCourseRobot,
     imageAlt: "ロボット工作キット",
     items: content.robotProgramming.courses.map((course) => course.title),
   },
@@ -98,7 +106,7 @@ const courseSections = [
     tone: "#0f4d8b",
     title: content.practicalProgramming.title,
     body: "Web・アプリ開発、Git、API、データベース、クラウドまで実践的に学ぶ。",
-    image: mangaImages.programming,
+    image: mangaImages.agCourseProgramming,
     imageAlt: "コードエディタと設計ノート",
     items: content.practicalProgramming.contents.slice(0, 3),
   },
@@ -108,7 +116,7 @@ const courseSections = [
     tone: "#d9473d",
     title: content.pcSmartphone.title,
     body: "基本操作から仕事や日常で役立つ活用まで、やさしく丁寧にサポート。",
-    image: mangaImages.pc,
+    image: mangaImages.agCoursePc,
     imageAlt: "スマートフォンとパソコン",
     items: content.pcSmartphone.levels.slice(0, 3),
   },
@@ -118,7 +126,7 @@ const courseSections = [
     tone: "#6b3aa0",
     title: content.ged.title,
     body: "高卒認定試験の学習を個別に合わせて、しっかりサポート。",
-    image: mangaImages.ged,
+    image: mangaImages.agCourseGed,
     imageAlt: "高卒認定の教材",
     items: content.ged.supports.slice(0, 3),
   },
@@ -360,7 +368,7 @@ const jsonLd = {
           </ul>
           <figure class="panel-figure">
             <img
-              src={mangaImages.consultation}
+              src={mangaImages.agTrial}
               alt="無料体験の相談シート"
               width="1536"
               height="1024"
@@ -697,7 +705,7 @@ const jsonLd = {
     align-items: center;
     min-height: 60px;
     border-top: 2px solid var(--line);
-    border-bottom: 3px solid var(--line);
+    border-bottom: 2px solid var(--line);
     padding: 0 24px;
     width: min(1536px, 100vw);
     margin: 0 auto;
@@ -812,35 +820,49 @@ const jsonLd = {
 
   .comic-page {
     width: min(1536px, 100vw);
-    border-right: 3px solid var(--line);
-    border-bottom: 3px solid var(--line);
-    border-left: 3px solid var(--line);
+    border-right: 2px solid var(--line);
+    border-bottom: 2px solid var(--line);
+    border-left: 2px solid var(--line);
     margin: 0 auto;
-    padding: 0 7px 7px;
-    background: var(--line);
+    padding: 0 8px 8px;
+    background: #fff;
   }
 
   .hero {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 480fr) minmax(0, 1046fr);
     gap: var(--panel-gap);
     height: 389px;
+    background: #fff;
+  }
+
+  .hero::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    z-index: 4;
+    height: 1px;
     background: var(--line);
+    content: "";
+    pointer-events: none;
   }
 
   .panel,
   .manga-panel {
     position: relative;
     overflow: hidden;
-    border: 0;
+    border: 2px solid var(--line);
     background: #fff;
   }
 
   .panel-hero-copy {
     z-index: 2;
     min-height: 0;
+    border-bottom: 0;
     overflow: visible;
-    padding: 14px 32px 28px;
+    padding: 14px 32px 28px 23px;
     clip-path: none;
     isolation: isolate;
   }
@@ -898,7 +920,7 @@ const jsonLd = {
     font-weight: 950;
     line-height: 0.84;
     letter-spacing: 0;
-    transform: scaleX(0.9);
+    transform: scaleX(0.94);
     transform-origin: left top;
   }
 
@@ -946,11 +968,11 @@ const jsonLd = {
   }
 
   .panel-hero-copy > .hero-actions .button-line {
-    flex: 0 0 250px;
+    flex: 0 0 260px;
   }
 
   .panel-hero-copy > .hero-actions .button-plain {
-    flex: 0 0 154px;
+    flex: 0 0 164px;
   }
 
   .button-line,
@@ -972,6 +994,16 @@ const jsonLd = {
     display: block;
     min-height: 0;
     background: var(--line);
+  }
+
+  @media (min-width: 761px) {
+    .hero-board {
+      background: url("/images/schools/ag-hero-board.png") center / 100% 100% no-repeat;
+    }
+
+    .hero-board .manga-panel {
+      display: none;
+    }
   }
 
   .manga-panel {
@@ -1004,6 +1036,11 @@ const jsonLd = {
     height: 100%;
     object-fit: cover;
     filter: contrast(1.03) saturate(0.94);
+  }
+
+  .trial-panel .panel-figure img,
+  .course-card img[src*="ag-course"] {
+    filter: none;
   }
 
   .final-strip-images img:nth-child(1) {
@@ -1155,13 +1192,26 @@ const jsonLd = {
     display: grid;
     gap: 8px;
     margin-top: 9px;
-    background: var(--line);
+    background: #fff;
   }
 
   .sheet-row {
+    position: relative;
     display: grid;
     gap: var(--panel-gap);
     min-width: 0;
+  }
+
+  .sheet-row::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    z-index: 4;
+    height: 1px;
+    background: var(--line);
+    content: "";
+    pointer-events: none;
   }
 
   .sheet-row-primary {
@@ -1187,17 +1237,19 @@ const jsonLd = {
   }
 
   .sheet-row-primary > .panel {
+    border-bottom: 0;
     padding: 10px 16px;
   }
 
   .sheet-row-secondary > .panel {
+    border-bottom: 0;
     padding: 8px 16px 8px;
   }
 
   .trial-panel {
     display: grid;
     grid-template-columns: 105px minmax(0, 1fr);
-    column-gap: 8px;
+    column-gap: 6px;
     align-content: start;
   }
 
@@ -1230,17 +1282,44 @@ const jsonLd = {
     grid-column: 2;
     grid-row: 2 / 5;
     align-self: start;
-    height: 166px;
-    margin-top: 0;
+    height: 176px;
+    border: 0;
+    margin-top: -10px;
+  }
+
+  .trial-panel .panel-figure::after {
+    display: none;
   }
 
   .final-panel {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 380fr) minmax(0, 565fr) minmax(0, 580fr);
     gap: var(--panel-gap);
     height: 109px;
     align-items: stretch;
+    overflow: visible;
     padding: 0;
+  }
+
+  .final-panel::before,
+  .final-panel::after {
+    position: absolute;
+    right: 0;
+    left: 0;
+    z-index: 5;
+    height: 1px;
+    background: var(--line);
+    content: "";
+    pointer-events: none;
+  }
+
+  .final-panel::before {
+    top: -1px;
+  }
+
+  .final-panel::after {
+    bottom: -1px;
   }
 
   .panel-heading {
@@ -1751,6 +1830,17 @@ const jsonLd = {
     height: 100%;
     overflow: hidden;
     background: var(--line);
+  }
+
+  @media (min-width: 761px) {
+    .final-strip-images {
+      background: url("/images/schools/ag-final-strip.png") center / 100% 100% no-repeat;
+    }
+
+    .final-strip-images img,
+    .final-strip-images::after {
+      opacity: 0;
+    }
   }
 
   .final-cta {
