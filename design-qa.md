@@ -14,6 +14,7 @@ state: public landing page at local Astro dev server
 - Panel layout: The desktop composition keeps the AG-style one-sheet density, including the angled hero/manga boundary, a staggered right-side hero manga board, 01-03 / 04-07 row structure, and the 08 final CTA strip.
 - Panel alignment: At 1536x1024, the major horizontal cuts align to the reference: hero bottom y=449, first detail row bottom y=685, second detail row bottom y=897, final CTA bottom y=1014.
 - Hero board: The right hero board uses desktop-specific staggered panel placement so the robot and PC/smartphone panels extend lower than the programming panel, with the consultation panel shorter at the bottom right.
+- Trial panel: The 01 free-trial consultation image frame was widened and extended downward to match the reference panel balance while keeping the left checklist and duration note in the panel.
 - Overflow: The hero copy, all numbered desktop panels, and the final CTA strip render with `scrollHeight <= clientHeight`; no hidden panel content remains.
 - Typography and color: Heavy black display type, true-white paper, thick black panel gutters, navy numbering, green LINE CTA, and restrained course accents match the accepted AG direction.
 - Responsive behavior: Desktop keeps the comic sheet density without clipped H1 or broken pricing labels. Mobile stacks the same panels vertically and keeps CTA/buttons within the viewport.
