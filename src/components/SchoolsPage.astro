@@ -837,7 +837,7 @@ const jsonLd = {
 
   .panel-hero-copy {
     min-height: 0;
-    padding: 18px 32px 28px;
+    padding: 14px 32px 28px;
     clip-path: polygon(0 0, 100% 0, 99% 100%, 0 100%);
     isolation: isolate;
   }
@@ -935,18 +935,14 @@ const jsonLd = {
   }
 
   .hero-board {
-    display: grid;
+    position: relative;
+    display: block;
     min-height: 0;
-    grid-template-areas:
-      "programming programming robot robot pc"
-      "ged ged consultation consultation consultation";
-    grid-template-columns: 1.15fr 1.05fr 1fr 1fr 1.15fr;
-    grid-template-rows: 224px 160px;
-    gap: var(--panel-gap);
     background: var(--line);
   }
 
   .manga-panel {
+    position: absolute;
     min-height: 0;
   }
 
@@ -978,17 +974,26 @@ const jsonLd = {
   }
 
   .panel-programming {
-    grid-area: programming;
+    top: 0;
+    left: 0;
+    width: 41%;
+    height: 226px;
     clip-path: polygon(8% 0, 100% 0, 99% 100%, 0 100%);
   }
 
   .panel-robot {
-    grid-area: robot;
-    clip-path: polygon(1% 0, 100% 0, 99% 100%, 0 100%);
+    top: 0;
+    left: calc(41% + var(--panel-gap));
+    width: 37.2%;
+    height: 255px;
+    clip-path: polygon(1% 0, 100% 0, 96% 100%, 0 100%);
   }
 
   .panel-pc {
-    grid-area: pc;
+    top: 0;
+    right: 0;
+    width: 21.1%;
+    height: 255px;
     clip-path: polygon(3% 0, 100% 0, 100% 100%, 0 100%);
   }
 
@@ -997,12 +1002,18 @@ const jsonLd = {
   }
 
   .panel-ged {
-    grid-area: ged;
+    bottom: 0;
+    left: 0;
+    width: 41%;
+    height: 156px;
     clip-path: polygon(0 0, 99% 0, 100% 100%, 0 100%);
   }
 
   .panel-consultation {
-    grid-area: consultation;
+    right: 0;
+    bottom: 0;
+    width: 58.4%;
+    height: 126px;
     clip-path: polygon(1% 0, 100% 0, 100% 100%, 0 100%);
   }
 
@@ -1739,7 +1750,7 @@ const jsonLd = {
     }
 
     .hero-board {
-      min-height: 460px;
+      min-height: 389px;
     }
 
     .sheet-row-primary,
@@ -1818,6 +1829,7 @@ const jsonLd = {
     }
 
     .hero-board {
+      display: grid;
       grid-template-areas:
         "programming"
         "robot"
@@ -1830,6 +1842,10 @@ const jsonLd = {
     }
 
     .manga-panel {
+      position: relative;
+      inset: auto;
+      width: auto;
+      height: auto;
       clip-path: none;
     }
 
