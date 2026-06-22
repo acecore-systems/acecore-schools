@@ -920,7 +920,7 @@ const jsonLd = {
     font-weight: 950;
     line-height: 0.84;
     letter-spacing: 0;
-    transform: scaleX(0.94);
+    transform: scaleX(0.9);
     transform-origin: left top;
   }
 
@@ -1222,8 +1222,9 @@ const jsonLd = {
 
   .sheet-row-secondary {
     grid-template-columns:
-      minmax(0, 486fr) minmax(0, 373fr) minmax(0, 289fr)
-      minmax(0, 372fr);
+      minmax(0, 478fr) minmax(0, 358fr) minmax(0, 280fr)
+      minmax(0, 370fr);
+    gap: 10px;
     height: 204px;
   }
 
@@ -1255,11 +1256,15 @@ const jsonLd = {
 
   .trial-panel .panel-heading {
     grid-column: 1 / -1;
+    grid-row: 1;
+    z-index: 2;
+    margin-bottom: 3px;
   }
 
   .trial-panel > p {
-    font-size: 0.68rem;
-    line-height: 1.35;
+    grid-row: 2;
+    font-size: 0.62rem;
+    line-height: 1.28;
   }
 
   .trial-panel > p,
@@ -1269,7 +1274,12 @@ const jsonLd = {
   }
 
   .trial-panel .check-list {
+    grid-row: 3;
     gap: 3px;
+  }
+
+  .trial-panel .small-note {
+    grid-row: 4;
   }
 
   .trial-panel .check-list li {
@@ -1280,9 +1290,9 @@ const jsonLd = {
 
   .trial-panel .panel-figure {
     grid-column: 2;
-    grid-row: 2 / 5;
+    grid-row: 1 / 5;
     align-self: start;
-    height: 176px;
+    height: 217px;
     border: 0;
     margin-top: -10px;
   }
@@ -1294,7 +1304,7 @@ const jsonLd = {
   .final-panel {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 380fr) minmax(0, 565fr) minmax(0, 580fr);
+    grid-template-columns: 375px 563px minmax(0, 1fr);
     gap: var(--panel-gap);
     height: 109px;
     align-items: stretch;
@@ -1794,12 +1804,18 @@ const jsonLd = {
   .final-copy::after {
     position: absolute;
     right: 18px;
-    bottom: 18px;
+    bottom: 26px;
     color: var(--navy);
     font-size: 2rem;
     font-weight: 950;
     line-height: 1;
     content: "›››";
+  }
+
+  @media (min-width: 761px) {
+    .final-copy > * {
+      transform: translateY(-7px);
+    }
   }
 
   .final-copy .panel-number {
@@ -1854,10 +1870,12 @@ const jsonLd = {
     min-height: 0;
     height: 100%;
     border: 0;
-    border-left: var(--panel-gap) solid var(--line);
+    border-right: 2px solid var(--line);
     border-radius: 0;
+    margin-left: -14px;
     padding: 14px 22px;
     background: var(--green);
+    clip-path: polygon(19px 0, 100% 0, 100% 100%, 0 100%);
     color: white;
     overflow: hidden;
   }
@@ -1977,6 +1995,12 @@ const jsonLd = {
     .final-panel {
       grid-template-columns: 1fr;
       height: auto;
+    }
+
+    .final-cta {
+      border-right: 0;
+      margin-left: 0;
+      clip-path: none;
     }
 
     .courses-panel .course-grid {
