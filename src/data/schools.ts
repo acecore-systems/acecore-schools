@@ -1,9 +1,10 @@
 export const schoolsContent = {
   title: "Acecore Schools",
   description:
-    "Acecore Schoolsは、学習塾・ロボットプログラミング・実践プログラミング・パソコン/スマホ・高卒認定など幅広い教育プログラムを提供するITスクールです。",
+    "Acecore Schoolsは、学習塾・ロボット工作/制御・実践プログラミング・パソコン/スマホ・高卒認定など幅広い教育プログラムを提供するITスクールです。",
   heroTitle: "Acecore Schools",
-  heroSubtitle: "一人ひとりに合わせた指導で、確かなスキルを",
+  heroSubtitle:
+    "一人ひとりに合わせたサポートで、ITを「わかる」から「できる」へ。",
   heroImgAlt: "教室での学習風景",
   learningFlowEyebrow: "Learning Flow",
   learningFlowTitle: "Acecore Schoolsの学びを流れで見る",
@@ -23,25 +24,25 @@ export const schoolsContent = {
     ],
   },
   robotProgramming: {
-    title: "ロボット / プログラミング",
-    desc: "最先端の技術を取り入れたロボットプログラミングの授業を提供しています。実際のロボットを使用して、プログラミングの基礎を学ぶことができます。",
-    imgAlt: "プログラミング学習に取り組む生徒",
+    title: "ロボット工作・制御",
+    desc: "実際のロボットキットを組み立て、センサーやモーターの動きを確かめながら、ものづくりと制御の仕組みを学びます。",
+    imgAlt: "ロボット工作キットを組み立てる様子",
     progImgAlt: "プログラミング学習のイメージ",
     courses: [
       {
-        title: "ロボットコース",
+        title: "ロボット工作",
         description:
           "タミヤ工作シリーズなどを使用した実際のロボット工作を通じて、ものづくりの楽しさと基本的な仕組みを学びます。",
       },
       {
-        title: "ロボット プログラミングコース",
+        title: "センサー・モーター制御",
         description:
-          "ロボットをプログラムで制御する技術を学びます。センサーやモーターの制御を通じて、論理的思考力を育みます。",
+          "センサーやモーターの反応を見ながら、動きの原因と結果を確かめて制御の考え方を学びます。",
       },
       {
-        title: "マインクラフトプログラミングコース",
+        title: "動作テスト・改善",
         description:
-          "マインクラフトの世界でプログラミングの基礎を楽しく学びます。ゲーム感覚で論理的思考力を養います。",
+          "組み立てたロボットを動かして、うまくいかない原因を探し、改善する流れを身につけます。",
       },
     ],
   },
@@ -120,14 +121,14 @@ export const schoolsContent = {
   learningSteps: [
     {
       title: "興味を見つける",
-      description: "学習塾やロボット体験を通して、学ぶ入口を個別に探します。",
+      description: "相談と体験を通して、学ぶ入口を個別に探します。",
       icon: "sparkles",
       accent: "amber",
     },
     {
       title: "手を動かして理解する",
       description:
-        "実機、マインクラフト、プログラミング演習で体験と理解を結び付けます。",
+        "教材、ロボット工作、コード演習を目的別に分け、体験と理解を結び付けます。",
       icon: "bot",
       accent: "brand",
     },
