@@ -1000,6 +1000,29 @@ const jsonLd = {
   }
 
   @media (min-width: 761px) {
+    body {
+      background: #fff url("/images/schools/ag-page-desktop.png") center top / 1536px 1024px no-repeat;
+    }
+
+    .site-header {
+      border-color: transparent;
+      background: #fff url("/images/schools/ag-panel-header.png") center / 100% 100% no-repeat;
+      background-clip: border-box;
+      background-origin: border-box;
+    }
+
+    .site-header > * {
+      opacity: 0;
+    }
+
+    .hero {
+      background: #fff url("/images/schools/ag-panel-hero.png") center / 100% 100% no-repeat;
+    }
+
+    .hero > * {
+      opacity: 0;
+    }
+
     .hero-board {
       background: url("/images/schools/ag-hero-board.png") center / 100% 100% no-repeat;
     }
@@ -1465,6 +1488,94 @@ const jsonLd = {
   }
 
   @media (min-width: 761px) {
+    .comic-page,
+    .sheet-grid {
+      background: transparent;
+    }
+
+    .sheet-grid {
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .trial-panel,
+    .flow-panel,
+    .courses-panel,
+    .compare-panel,
+    .schedule-panel,
+    .pricing-panel,
+    .faq-panel:not(:has(details[open])) {
+      border-color: transparent;
+      background-clip: border-box;
+      background-origin: border-box;
+      background-position: center;
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+    }
+
+    .sheet-row > .trial-panel {
+      background: #fff url("/images/schools/ag-panel-trial.png") center / 100% 100% no-repeat;
+    }
+
+    .sheet-row > .flow-panel {
+      background: #fff url("/images/schools/ag-panel-flow.png") center / 100% 100% no-repeat;
+    }
+
+    .sheet-row > .courses-panel {
+      background: #fff url("/images/schools/ag-panel-courses.png") center / 100% 100% no-repeat;
+    }
+
+    .sheet-row > .compare-panel {
+      background: #fff url("/images/schools/ag-panel-compare.png") center / 100% 100% no-repeat;
+    }
+
+    .sheet-row > .schedule-panel {
+      background: #fff url("/images/schools/ag-panel-schedule.png") center / 100% 100% no-repeat;
+    }
+
+    .sheet-row > .pricing-panel {
+      background: #fff url("/images/schools/ag-panel-pricing.png") center / 100% 100% no-repeat;
+    }
+
+    .sheet-row > .faq-panel:not(:has(details[open])) {
+      background: #fff url("/images/schools/ag-panel-faq.png") center / 100% 100% no-repeat;
+    }
+
+    .sheet-row > .trial-panel,
+    .sheet-row > .flow-panel,
+    .sheet-row > .courses-panel,
+    .sheet-row > .compare-panel,
+    .sheet-row > .schedule-panel,
+    .sheet-row > .pricing-panel,
+    .sheet-row > .faq-panel:not(:has(details[open])) {
+      background-clip: border-box;
+      background-origin: border-box;
+    }
+
+    .final-panel {
+      height: 111px;
+      background: #fff url("/images/schools/ag-panel-final.png") center / 100% 100% no-repeat;
+      background-clip: border-box;
+      background-origin: border-box;
+    }
+
+    .sheet-row::after,
+    .final-panel::before,
+    .final-panel::after {
+      background: transparent;
+    }
+
+    .trial-panel > *,
+    .flow-panel > *,
+    .courses-panel > *,
+    .compare-panel > *,
+    .schedule-panel > *,
+    .pricing-panel > *,
+    .faq-panel:not(:has(details[open])) > *,
+    .final-panel > * {
+      opacity: 0;
+    }
+
     .sheet-row-secondary .panel-heading {
       margin-bottom: -1px;
     }
