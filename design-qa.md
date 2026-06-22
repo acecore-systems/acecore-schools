@@ -20,7 +20,9 @@ state: public landing page at local Astro dev server and production preview
 - Hero boundary: The left hero copy panel now extends into a white diagonal wedge with a black slanted gutter, matching the reference's stronger manga cut between the copy panel and the right image board.
 - Primary row cuts: The 01/02/03 row uses fixed reference-aligned cuts at x=10, 336, 346, 826, and 836 on the 1536px desktop canvas.
 - Hero title: The desktop H1 horizontal scale now matches the AG reference more closely; the H1 comparison area improved from MAE 54.15 to 26.48 against the reference crop.
+- Hero speed lines: The left hero copy panel speed-line intensity was reduced so the body-copy area has nearly the same line density as the AG reference. Measured light-gray line pixels in the hero body area are now `3551` vs reference `3496` (previous implementation: `6495`), and the hero-copy panel MAE improved from `27.77 -> 27.07`.
 - Trial panel: The 01 free-trial consultation image now uses the AG clipboard/consultation crop, removes the extra photo-card border, and sits at x=139/y=460/w=195/h=217 so the plant/clipboard artwork begins at the same top cut and reaches the right panel edge more like the AG reference while keeping the left checklist and duration note readable.
+- Trial intro copy: The 01 intro sentence now uses the AG-style two-line break: `まずは相談から。` / `学びの地図を一緒に描きます。`; the 01 panel MAE improved from `53.11 -> 51.84` in the latest preview comparison.
 - Trial checklist: The 01 checklist markers now render as red outlined check boxes rather than plain check marks, matching the reference detail.
 - Course cards: The 03 course-card image crops now come from the AG reference, while the course titles and explanatory copy remain HTML.
 - Secondary row cuts: The 04/05/06/07 row now uses reference-aligned desktop cuts at x=10, 488, 498, 856, 866, 1146, and 1156, with the same wider comic gutter rhythm as the AG concept.
@@ -39,9 +41,9 @@ state: public landing page at local Astro dev server and production preview
 - `npm run build` passed after rerunning outside the sandbox because Vite hit `spawn EPERM` inside the sandbox.
 - Browser/IAB connected successfully for the Cloudflare preview. Use `load` for the wait state because this Browser runtime does not support `networkidle`.
 - Playwright-managed Chromium desktop screenshot captured at 1536x1024.
-- Latest desktop fidelity screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-local-final-waited-1536.png`.
-- Latest side-by-side comparison: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-side-by-side-schedule-final-vs-ag.png`.
-- Latest diff heatmap: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-diff-schedule-final-vs-ag.png`.
+- Latest desktop fidelity screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-preview-speedlines-trial-1536.png`.
+- Latest side-by-side comparison: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-side-by-side-preview-speedlines-trial-vs-ag.png`.
+- Latest diff heatmap: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-diff-preview-speedlines-trial-vs-ag.png`.
 - Latest production preview desktop screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-preview-row2-balanced-1536.png`.
 - Playwright-managed Chromium mobile screenshot captured at 390x1200 with no horizontal overflow.
 - Latest mobile FAQ screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-row2-final-mobile.png`.

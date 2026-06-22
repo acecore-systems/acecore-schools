@@ -360,7 +360,10 @@ const jsonLd = {
             <span class="panel-number">01</span>
             <h2 id="trial-title">無料体験</h2>
           </header>
-          <p>まずは相談から。学びの地図を一緒に描きます。</p>
+          <p class="trial-intro">
+            <span>まずは相談から。</span>
+            <span>学びの地図を一緒に描きます。</span>
+          </p>
           <ul class="check-list">
             <li>ヒアリング</li>
             <li>体験レッスン</li>
@@ -900,7 +903,7 @@ const jsonLd = {
     position: absolute;
     inset: 0 -45px 0 0;
     z-index: -1;
-    opacity: 0.62;
+    opacity: 0.34;
     clip-path: polygon(0 0, 100% 0, calc(100% - 43px) 100%, 0 100%);
     background:
       repeating-conic-gradient(
@@ -1265,6 +1268,18 @@ const jsonLd = {
     grid-row: 2;
     font-size: 0.62rem;
     line-height: 1.28;
+  }
+
+  .trial-panel > .trial-intro {
+    width: 132px;
+    font-size: 0.6rem;
+    line-height: 1.35;
+    transform: translateY(-8px);
+  }
+
+  .trial-intro span {
+    display: block;
+    white-space: nowrap;
   }
 
   .trial-panel > p,
