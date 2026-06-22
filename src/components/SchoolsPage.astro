@@ -1343,7 +1343,7 @@ const jsonLd = {
 
   .panel-number {
     color: var(--navy);
-    font-size: clamp(1.65rem, 2.22vw, 2.18rem);
+    font-size: clamp(1.55rem, 2vw, 1.95rem);
     font-weight: 950;
     line-height: 0.9;
   }
@@ -1444,9 +1444,14 @@ const jsonLd = {
     line-height: 1.14;
   }
 
+  .schedule-panel .small-note {
+    margin-top: 1px;
+    line-height: 1.05;
+  }
+
   @media (min-width: 761px) {
     .sheet-row-secondary .panel-heading {
-      margin-bottom: -3px;
+      margin-bottom: -1px;
     }
   }
 
@@ -1639,6 +1644,12 @@ const jsonLd = {
 
   .schedule-matrix {
     table-layout: fixed;
+  }
+
+  .schedule-matrix th,
+  .schedule-matrix td {
+    padding-top: 5px;
+    padding-bottom: 5px;
   }
 
   th,
@@ -1906,7 +1917,7 @@ const jsonLd = {
   .final-cta > * {
     position: relative;
     z-index: 1;
-    transform: translateY(5px);
+    transform: translateY(10px);
   }
 
   .final-cta-primary,

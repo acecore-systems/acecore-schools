@@ -24,7 +24,10 @@ state: public landing page at local Astro dev server and production preview
 - Trial checklist: The 01 checklist markers now render as red outlined check boxes rather than plain check marks, matching the reference detail.
 - Course cards: The 03 course-card image crops now come from the AG reference, while the course titles and explanatory copy remain HTML.
 - Secondary row cuts: The 04/05/06/07 row now uses reference-aligned desktop cuts at x=10, 488, 498, 856, 866, 1146, and 1156, with the same wider comic gutter rhythm as the AG concept.
-- Secondary row content: The 04/05/06/07 body grids now begin at y=732-733 instead of y=741-743, closer to the AG reference y=730-731 while avoiding title overlap. Row 2 MAE improved from 44.03 to 41.18; FAQ improved from 37.14 to 31.66.
+- Panel numbering: The numbered panel labels were reduced from the earlier oversized desktop treatment to better match the AG reference heading scale and to pull adjacent headings back toward the reference x-position.
+- Secondary row content: The 04/05/06/07 body grids now begin at y=731-732, close to the AG reference y=730-731 while avoiding title overlap. Row 2 panel MAE improved further in the latest pass: 04 `43.02 -> 42.33`, 05 `47.95 -> 44.57`, 07 `31.61 -> 30.85`.
+- Schedule panel: The 05 availability matrix was expanded vertically so the table density matches the reference better; the table area now measures y=731.6/h=132.4, with the note kept inside the panel.
+- Final CTA: The 08 green CTA text/button group was shifted down to match the reference button vertical position; the CTA MAE improved from `43.68 -> 40.89`.
 - Final CTA strip: The final image strip uses the AG reference crop at its native 563px desktop width, and the LINE CTA overlaps it with a diagonal green cut instead of a vertical divider.
 - Overflow: The hero copy, all numbered desktop panels, and the final CTA strip render with `scrollHeight <= clientHeight`; no hidden panel content remains.
 - Typography and color: Heavy black display type, true-white paper, thick black panel gutters, navy numbering, green LINE CTA, and restrained course accents match the accepted AG direction.
@@ -36,8 +39,9 @@ state: public landing page at local Astro dev server and production preview
 - `npm run build` passed after rerunning outside the sandbox because Vite hit `spawn EPERM` inside the sandbox.
 - Browser/IAB connected successfully for the Cloudflare preview. Use `load` for the wait state because this Browser runtime does not support `networkidle`.
 - Playwright-managed Chromium desktop screenshot captured at 1536x1024.
-- Latest desktop fidelity screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-row2-balanced-1536.png`.
-- Latest side-by-side comparison: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-row2-balanced-side-by-side.png`.
+- Latest desktop fidelity screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-local-final-waited-1536.png`.
+- Latest side-by-side comparison: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-side-by-side-schedule-final-vs-ag.png`.
+- Latest diff heatmap: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-diff-schedule-final-vs-ag.png`.
 - Latest production preview desktop screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-preview-row2-balanced-1536.png`.
 - Playwright-managed Chromium mobile screenshot captured at 390x1200 with no horizontal overflow.
 - Latest mobile FAQ screenshot: `C:/Users/gnish/AppData/Local/Temp/acecore-schools-row2-final-mobile.png`.
