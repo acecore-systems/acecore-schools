@@ -10,6 +10,7 @@ import { schoolsDetailContent } from "../data/schools-details";
 const content = schoolsContent;
 const canonicalPath = "/";
 const canonicalUrl = new URL(canonicalPath, schoolsOrigin).href;
+const pageTitle = `${content.title} | 学習塾・ロボットプログラミング・ITスクール`;
 const contactUrl = acecoreOrigin + "/contact/";
 const pricingUrl = "#pricing";
 const trialInquiryUrl = lineUrl;
@@ -17,6 +18,7 @@ const trialUrl = "#trial";
 const detail = schoolsDetailContent;
 
 const heroImage = "/images/schools/hero-workshop.webp";
+const heroImageUrl = new URL(heroImage, schoolsOrigin).href;
 const jukuImage = "/images/schools/course-tutoring.webp";
 const robotImage = "/images/schools/course-robot.webp";
 const programmingImage = "/images/schools/course-programming.webp";
@@ -130,29 +132,58 @@ const getCourseHighlights = (section: (typeof courseSections)[number]) => {
   return [];
 };
 
+const organizationId = `${canonicalUrl}#organization`;
+const websiteId = `${canonicalUrl}#website`;
+const webpageId = `${canonicalUrl}#webpage`;
+const faqId = `${canonicalUrl}#faq`;
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "EducationalOrganization",
+      "@id": organizationId,
       name: "Acecore Schools",
       description: content.description,
       url: canonicalUrl,
+      image: heroImageUrl,
+      inLanguage: "ja",
       parentOrganization: {
         "@type": "Organization",
         name: "Acecore",
         url: acecoreOrigin,
       },
     },
+    {
+      "@type": "WebSite",
+      "@id": websiteId,
+      name: "Acecore Schools",
+      url: canonicalUrl,
+      description: content.description,
+      inLanguage: "ja",
+      publisher: { "@id": organizationId },
+    },
+    {
+      "@type": "WebPage",
+      "@id": webpageId,
+      url: canonicalUrl,
+      name: pageTitle,
+      description: content.description,
+      image: heroImageUrl,
+      inLanguage: "ja",
+      isPartOf: { "@id": websiteId },
+      about: { "@id": organizationId },
+    },
     ...courseSections.map((section) => ({
       "@type": "Course",
       name: section.title,
       description: section.body,
-      provider: { "@type": "EducationalOrganization", name: "Acecore Schools" },
+      inLanguage: "ja",
+      provider: { "@id": organizationId },
       url: `${canonicalUrl}#${section.id}`,
     })),
     {
       "@type": "FAQPage",
+      "@id": faqId,
       mainEntity: detail.faqs.map((item) => ({
         "@type": "Question",
         name: item.question,
@@ -168,18 +199,22 @@ const jsonLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{content.title} | Acecore</title>
+    <title>{pageTitle}</title>
     <meta name="description" content={content.description} />
+    <meta name="robots" content="index, follow" />
     <link rel="canonical" href={canonicalUrl} />
-    <meta property="og:title" content={`${content.title} | Acecore`} />
+    <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={content.description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
-    <meta
-      property="og:image"
-      content={new URL(heroImage, schoolsOrigin).href}
-    />
+    <meta property="og:site_name" content="Acecore Schools" />
+    <meta property="og:image" content={heroImageUrl} />
+    <meta property="og:image:alt" content={content.heroImgAlt} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={content.description} />
+    <meta name="twitter:image" content={heroImageUrl} />
+    <meta name="twitter:image:alt" content={content.heroImgAlt} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
