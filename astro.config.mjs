@@ -11,7 +11,9 @@ export default defineConfig({
   site: "https://schools.acecore.net",
   integrations: [
     sitemap({
-      lastmod: new Date(),
+      filter(page) {
+        return new URL(page).pathname !== "/404";
+      },
       serialize(item) {
         if (item.url === "https://schools.acecore.net/") {
           item.changefreq = "weekly";
