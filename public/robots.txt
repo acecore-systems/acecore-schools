@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://schools.acecore.net/sitemap-index.xml
