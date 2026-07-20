@@ -4,7 +4,8 @@ export const schoolsContent = {
     "Acecore Schoolsは、学習塾・ロボットプログラミング・実践プログラミング・パソコン/スマホ・高卒認定など幅広い教育プログラムを提供するITスクールです。",
   heroTitle: "Acecore Schools",
   heroSubtitle: "一人ひとりに合わせた指導で、確かなスキルを",
-  heroImgAlt: "教室での学習風景",
+  heroImgAlt: "講師とロボットの組み立てに取り組む生徒",
+  ctaImgAlt: "講師と学習内容を相談する生徒たち",
   learningFlowEyebrow: "Learning Flow",
   learningFlowTitle: "Acecore Schoolsの学びを流れで見る",
   learningFlowDesc:

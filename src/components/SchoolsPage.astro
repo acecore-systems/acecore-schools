@@ -65,7 +65,12 @@ const getCourseIcon = (icon: string) => {
   return iconMap.book;
 };
 
-const stepImages = [jukuImage, robotImage, programmingImage, ctaImage];
+const stepImages = [
+  { src: jukuImage, alt: content.juku.imgAlt },
+  { src: robotImage, alt: content.robotProgramming.imgAlt },
+  { src: programmingImage, alt: content.robotProgramming.progImgAlt },
+  { src: ctaImage, alt: content.ctaImgAlt },
+];
 
 const courseSections = [
   {
@@ -199,10 +204,7 @@ const jsonLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="msvalidate.01"
-      content="B670753BF4A50FA5437E5694CB04BAFD"
-    />
+    <meta name="msvalidate.01" content="B670753BF4A50FA5437E5694CB04BAFD" />
     <title>{pageTitle}</title>
     <meta name="description" content={content.description} />
     <meta name="robots" content="index, follow" />
@@ -239,10 +241,10 @@ const jsonLd = {
 
     <main>
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-media" aria-hidden="true">
+        <div class="hero-media">
           <img
             src={heroImage}
-            alt=""
+            alt={content.heroImgAlt}
             width="1800"
             height="1013"
             loading="eager"
@@ -381,8 +383,8 @@ const jsonLd = {
               <article class="flow-card">
                 <figure>
                   <img
-                    src={stepImages[index]}
-                    alt=""
+                    src={stepImages[index].src}
+                    alt={stepImages[index].alt}
                     width="640"
                     height="420"
                     loading="lazy"
@@ -540,8 +542,14 @@ const jsonLd = {
       </section>
 
       <section class="final-cta" aria-labelledby="cta-title">
-        <div class="final-media" aria-hidden="true">
-          <img src={ctaImage} alt="" width="1800" height="900" loading="lazy" />
+        <div class="final-media">
+          <img
+            src={ctaImage}
+            alt={content.ctaImgAlt}
+            width="1800"
+            height="900"
+            loading="lazy"
+          />
         </div>
         <div class="final-content">
           <h2 id="cta-title">{detail.finalCta.title}</h2>
