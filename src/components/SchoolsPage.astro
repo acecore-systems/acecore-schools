@@ -1,157 +1,38 @@
 ---
+import "@phosphor-icons/web/regular";
 import {
   acecoreOrigin,
   lineUrl,
   schoolsContent,
   schoolsOrigin,
 } from "../data/schools";
-import { schoolsDetailContent } from "../data/schools-details";
 
 const content = schoolsContent;
 const canonicalPath = "/";
 const canonicalUrl = new URL(canonicalPath, schoolsOrigin).href;
-const pageTitle = `${content.title} | 学習塾・ロボットプログラミング・ITスクール`;
-const contactUrl = acecoreOrigin + "/contact/";
-const pricingUrl = "#pricing";
-const trialInquiryUrl = lineUrl;
-const trialUrl = "#trial";
-const detail = schoolsDetailContent;
-
-const heroImage = "/images/schools/hero-workshop.webp";
+const pageTitle = `${content.title} | 目的から学びを組み立てるスクール`;
+const heroImage = "/images/schools/purpose-city/hero-city.webp";
 const heroImageUrl = new URL(heroImage, schoolsOrigin).href;
-const jukuImage = "/images/schools/course-tutoring.webp";
-const robotImage = "/images/schools/course-robot.webp";
-const programmingImage = "/images/schools/course-programming.webp";
-const pcImage = "/images/schools/course-pc-smartphone.webp";
-const gedImage = "/images/schools/course-ged.webp";
-const ctaImage = "/images/schools/cta-consultation.webp";
-
-const heroKicker = "つくる。理解する。未来につなげる。";
-const detailLabel = "詳しく見る";
-const scrollLabel = "Scroll";
-
-const iconMap = {
-  mail: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6.5h15v11h-15z"/><path d="m5 7 7 6 7-6"/></svg>`,
-  chat: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.75c0-1.24 1.01-2.25 2.25-2.25h9.5c1.24 0 2.25 1.01 2.25 2.25v6.5c0 1.24-1.01 2.25-2.25 2.25h-4.5L8 19.5v-4H7.25C6.01 15.5 5 14.49 5 13.25z"/><path d="M8.5 9.5h7M8.5 12.25h4.75"/></svg>`,
-  sparkles: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.7 5.2L19 10l-5.3 1.8L12 17l-1.7-5.2L5 10l5.3-1.8z"/><path d="m18.5 15 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>`,
-  bot: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8.5h8a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3Z"/><path d="M12 8.5V5M9 5h6M9.25 13h.01M14.75 13h.01M9 16h6"/></svg>`,
-  code: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 8-4 4 4 4M15 8l4 4-4 4"/><path d="m13 6-2 12"/></svg>`,
-  flag: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4.5"/><path d="M6 5h10.5l-1.8 4 1.8 4H6"/></svg>`,
-  login: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4"/><path d="m10 8 4 4-4 4M14 12H4"/></svg>`,
-  calendar: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v14H5z"/><path d="M8 3.5v4M16 3.5v4M5 9h14"/></svg>`,
-  book: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5.5A3.5 3.5 0 0 1 8 2h11v17H8a3.5 3.5 0 0 0-3.5 3.5z"/><path d="M8 2v17"/></svg>`,
-  devices: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 5.5h12v8h-12z"/><path d="M8 17.5h3M6.5 17.5h6M17.5 9.5h3v8h-3z"/><path d="M18.25 15.5h1.5"/></svg>`,
-  grad: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 8.5 8.5-4 8.5 4-8.5 4z"/><path d="M6.5 10.25v4.25c1.6 1.4 3.35 2.1 5.5 2.1s3.9-.7 5.5-2.1v-4.25"/></svg>`,
-} as const;
-
-const getStepIcon = (icon: string) => {
-  if (icon === "bot") return iconMap.bot;
-  if (icon === "code-xml") return iconMap.code;
-  if (icon === "flag") return iconMap.flag;
-  return iconMap.sparkles;
-};
-
-const getPricingIcon = (icon: string) => {
-  if (icon === "calendar-days") return iconMap.calendar;
-  if (icon === "book-open") return iconMap.book;
-  return iconMap.login;
-};
-
-const getCourseIcon = (icon: string) => {
-  if (icon === "bot") return iconMap.bot;
-  if (icon === "code") return iconMap.code;
-  if (icon === "devices") return iconMap.devices;
-  if (icon === "grad") return iconMap.grad;
-  return iconMap.book;
-};
-
-const stepImages = [
-  { src: jukuImage, alt: content.juku.imgAlt },
-  { src: robotImage, alt: content.robotProgramming.imgAlt },
-  { src: programmingImage, alt: content.robotProgramming.progImgAlt },
-  { src: ctaImage, alt: content.ctaImgAlt },
-];
-
-const courseSections = [
-  {
-    id: "juku",
-    tone: "blue",
-    icon: "book",
-    title: content.juku.title,
-    body: content.juku.desc,
-    image: jukuImage,
-    imageAlt: content.juku.imgAlt,
-    listTitle: content.juku.featuresLabel,
-    items: content.juku.features,
-  },
-  {
-    id: "robot-programming",
-    tone: "lime",
-    icon: "bot",
-    title: content.robotProgramming.title,
-    body: content.robotProgramming.desc,
-    image: robotImage,
-    imageAlt: content.robotProgramming.imgAlt,
-    courses: content.robotProgramming.courses,
-  },
-  {
-    id: "practical-programming",
-    tone: "teal",
-    icon: "code",
-    title: content.practicalProgramming.title,
-    body: content.practicalProgramming.desc,
-    image: programmingImage,
-    imageAlt: content.robotProgramming.progImgAlt,
-    listTitle: content.practicalProgramming.contentsLabel,
-    items: content.practicalProgramming.contents,
-  },
-  {
-    id: "pc-smartphone",
-    tone: "coral",
-    icon: "devices",
-    title: content.pcSmartphone.title,
-    body: content.pcSmartphone.desc,
-    image: pcImage,
-    imageAlt: content.pcSmartphone.imgAlt,
-    listTitle: content.pcSmartphone.levelsLabel,
-    items: content.pcSmartphone.levels,
-  },
-  {
-    id: "ged",
-    tone: "red",
-    icon: "grad",
-    title: content.ged.title,
-    body: content.ged.desc,
-    image: gedImage,
-    imageAlt: content.ged.title,
-    listTitle: content.ged.supportLabel,
-    items: content.ged.supports,
-  },
-];
-
-const getCourseHighlights = (section: (typeof courseSections)[number]) => {
-  if ("items" in section && section.items) return section.items.slice(0, 3);
-  if ("courses" in section && section.courses) {
-    return section.courses.map((course) => course.title);
-  }
-  return [];
-};
+const supportImage = "/images/schools/purpose-city/support-call.webp";
+const workshopImage =
+  "/images/schools/purpose-city/workshop-robot-summer.webp";
 
 const organizationId = `${canonicalUrl}#organization`;
 const websiteId = `${canonicalUrl}#website`;
 const webpageId = `${canonicalUrl}#webpage`;
-const faqId = `${canonicalUrl}#faq`;
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "EducationalOrganization",
       "@id": organizationId,
-      name: "Acecore Schools",
+      name: content.title,
       description: content.description,
       url: canonicalUrl,
       image: heroImageUrl,
       inLanguage: "ja",
+      knowsAbout: content.areas.map((area) => area.title),
       parentOrganization: {
         "@type": "Organization",
         name: "Acecore",
@@ -161,7 +42,7 @@ const jsonLd = {
     {
       "@type": "WebSite",
       "@id": websiteId,
-      name: "Acecore Schools",
+      name: content.title,
       url: canonicalUrl,
       description: content.description,
       inLanguage: "ja",
@@ -178,21 +59,16 @@ const jsonLd = {
       isPartOf: { "@id": websiteId },
       about: { "@id": organizationId },
     },
-    ...courseSections.map((section) => ({
-      "@type": "Course",
-      name: section.title,
-      description: section.body,
-      inLanguage: "ja",
-      provider: { "@id": organizationId },
-      url: `${canonicalUrl}#${section.id}`,
-    })),
     {
       "@type": "FAQPage",
-      "@id": faqId,
-      mainEntity: detail.faqs.map((item) => ({
+      "@id": `${canonicalUrl}#faq-schema`,
+      mainEntity: content.faq.items.map((item) => ({
         "@type": "Question",
         name: item.question,
-        acceptedAnswer: { "@type": "Answer", text: item.answer },
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.answer,
+        },
       })),
     },
   ],
@@ -213,431 +89,474 @@ const jsonLd = {
     <meta property="og:description" content={content.description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:site_name" content="Acecore Schools" />
+    <meta property="og:site_name" content={content.title} />
     <meta property="og:image" content={heroImageUrl} />
-    <meta property="og:image:alt" content={content.heroImgAlt} />
+    <meta property="og:image:alt" content={content.hero.imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={content.description} />
     <meta name="twitter:image" content={heroImageUrl} />
-    <meta name="twitter:image:alt" content={content.heroImgAlt} />
+    <meta name="twitter:image:alt" content={content.hero.imageAlt} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href={canonicalPath} aria-label="Acecore Schools">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span class="brand-text">Acecore <small>Schools</small></span>
+    <header class="site-header" data-header>
+      <a class="brand" href={canonicalPath} aria-label="Acecore Schools ホーム">
+        <span>Acecore Schools</span>
       </a>
-      <nav class="primary-nav" aria-label="School sections">
-        <a href="#trial">{detail.trial.eyebrow}</a>
-        <a href="#course-fit">{detail.courses.eyebrow}</a>
-        <a href="#schedule">{detail.schedule.eyebrow}</a>
-        <a href="#pricing">{content.pricing.title}</a>
-        <a href="#faq">{detail.faqEyebrow}</a>
+
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-controls="site-navigation"
+        aria-expanded="false"
+        data-menu-toggle
+      >
+        <span class="sr-only">メニューを開く</span>
+        <i class="ph ph-list" aria-hidden="true"></i>
+      </button>
+
+      <nav
+        class="primary-nav"
+        id="site-navigation"
+        aria-label="メインメニュー"
+        data-navigation
+      >
+        {
+          content.nav.map((item) => (
+            <a href={item.href}>{item.label}</a>
+          ))
+        }
+        <a class="nav-about" href={`${acecoreOrigin}/about/`}>
+          Acecore Schoolsについて
+        </a>
       </nav>
-      <a class="header-cta" href={trialUrl}>{detail.trial.primaryCta}</a>
+
+      <a
+        class="header-cta"
+        href={lineUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        無料相談を申し込む
+      </a>
     </header>
 
     <main>
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-media">
-          <img
-            src={heroImage}
-            alt={content.heroImgAlt}
-            width="1800"
-            height="1013"
-            loading="eager"
-            fetchpriority="high"
-          />
-        </div>
-        <div class="hero-content">
-          <p class="hero-kicker">{heroKicker}</p>
-          <h1 id="hero-title">{content.heroTitle}</h1>
-          <p class="hero-lead">{content.heroSubtitle}</p>
-          <p class="hero-copy">{content.intro}</p>
-          <div class="hero-actions">
-            <a class="button primary" href={trialUrl}
-              >{detail.trial.primaryCta}</a
-            >
-            <a class="button secondary" href={pricingUrl}>
-              {detail.trial.secondaryCta}
-            </a>
-          </div>
-        </div>
-        <a class="scroll-cue" href="#learning-flow">
-          <span aria-hidden="true">↓</span>
-          <span>{scrollLabel}</span>
-        </a>
-      </section>
-
-      <section class="trial-section" id="trial" aria-labelledby="trial-title">
-        <div class="section-heading">
-          <p>{detail.trial.eyebrow}</p>
-          <h2 id="trial-title">{detail.trial.title}</h2>
-          <span>{detail.trial.body}</span>
-        </div>
-        <div class="trial-grid">
-          <div class="trial-copy">
-            <ul class="check-list">
-              {detail.trial.points.map((point) => <li>{point}</li>)}
-            </ul>
-            <p>{detail.trial.note}</p>
-          </div>
-          <div class="trial-actions-panel">
-            <a
-              class="button primary"
-              href={trialInquiryUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {detail.trial.primaryCta}
-            </a>
-            <a class="button secondary" href={pricingUrl}>
-              {detail.trial.secondaryCta}
-            </a>
+        <img
+          class="hero-image"
+          src={heroImage}
+          alt={content.hero.imageAlt}
+          width="2048"
+          height="1152"
+          loading="eager"
+          fetchpriority="high"
+        />
+        <div class="hero-layout page-shell">
+          <h1 id="hero-title">{content.hero.title}</h1>
+          <div class="hero-message">
+            <p class="hero-lead">{content.hero.lead}</p>
+            <p class="hero-body">{content.hero.body}</p>
+            <div class="hero-actions">
+              <a
+                class="button button-primary"
+                href={lineUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {content.hero.primary}
+                <i class="ph ph-arrow-right" aria-hidden="true"></i>
+              </a>
+              <a class="button button-secondary" href="#areas">
+                {content.hero.secondary}
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
-      <section
-        class="target-section"
-        id="course-fit"
-        aria-labelledby="course-fit-title"
-      >
-        <div class="section-heading compact">
-          <p>{detail.courses.eyebrow}</p>
-          <h2 id="course-fit-title">{detail.courses.title}</h2>
-          <span>{detail.courses.body}</span>
-        </div>
-        <div class="target-grid">
-          {
-            detail.courses.items.map((course) => (
-              <article class="target-card">
-                <h3>{course.title}</h3>
-                <p>{course.body}</p>
-                <dl class="meta-grid">
-                  <div>
-                    <dt>{detail.courses.audienceLabel}</dt>
-                    <dd>{course.audience}</dd>
-                  </div>
-                  <div>
-                    <dt>{detail.courses.frequencyLabel}</dt>
-                    <dd>{course.frequency}</dd>
-                  </div>
-                </dl>
-              </article>
-            ))
-          }
+      <section class="purpose-selector" aria-labelledby="purpose-title">
+        <div class="page-shell">
+          <p class="section-label" id="purpose-title">今日の目的から選ぶ</p>
+          <div class="purpose-grid">
+            {
+              content.purposes.map((purpose) => (
+                <a
+                  class:list={["purpose-card", `purpose-${purpose.tone}`]}
+                  href={purpose.href}
+                >
+                  <i class:list={["ph", purpose.icon]} aria-hidden="true" />
+                  <strong>{purpose.title}</strong>
+                  <i class="ph ph-arrow-right purpose-arrow" aria-hidden="true" />
+                </a>
+              ))
+            }
+          </div>
         </div>
       </section>
 
-      <section
-        class="schedule-section"
-        id="schedule"
-        aria-labelledby="schedule-title"
-      >
-        <div class="section-heading">
-          <p>{detail.schedule.eyebrow}</p>
-          <h2 id="schedule-title">{detail.schedule.title}</h2>
-          <span>{detail.schedule.body}</span>
-        </div>
-        <div class="schedule-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>{detail.schedule.dayLabel}</th>
-                <th>{detail.schedule.timeLabel}</th>
-                <th>{detail.schedule.noteLabel}</th>
-              </tr>
-            </thead>
-            <tbody>
+      <section class="support section-block" id="support" aria-labelledby="support-title">
+        <div class="support-layout page-shell">
+          <div class="support-copy">
+            <div class="section-heading">
+              <p class="section-label">INDIVIDUAL SUPPORT</p>
+              <h2 id="support-title">{content.support.title}</h2>
+              <p>{content.support.body}</p>
+            </div>
+            <div class="support-list">
               {
-                detail.schedule.items.map((item) => (
-                  <tr>
-                    <td>{item.day}</td>
-                    <td>{item.time}</td>
-                    <td>{item.note}</td>
-                  </tr>
+                content.support.points.map((point) => (
+                  <article class="support-item">
+                    <i class:list={["ph", point.icon]} aria-hidden="true" />
+                    <div>
+                      <h3>{point.title}</h3>
+                      <p>{point.body}</p>
+                    </div>
+                  </article>
                 ))
               }
-            </tbody>
-          </table>
+            </div>
+          </div>
+          <figure class="support-media">
+            <img
+              src={supportImage}
+              alt={content.support.imageAlt}
+              width="1536"
+              height="1024"
+              loading="lazy"
+            />
+          </figure>
         </div>
-        <p class="schedule-note">{detail.schedule.note}</p>
       </section>
 
-      <section
-        class="flow-section"
-        id="learning-flow"
-        aria-labelledby="flow-title"
-      >
-        <div class="section-heading centered">
-          <p>{content.learningFlowEyebrow}</p>
-          <h2 id="flow-title">{content.learningFlowTitle}</h2>
-          <span>{content.learningFlowDesc}</span>
+      <section class="learning-areas section-block" id="areas" aria-labelledby="areas-title">
+        <div class="page-shell">
+          <div class="section-heading heading-row">
+            <div>
+              <p class="section-label">LEARNING AREAS</p>
+              <h2 id="areas-title">学べる4つの領域</h2>
+            </div>
+            <p>
+              固定講座の一覧ではありません。目的に合わせて、扱う領域と実施方法を相談しながら組み立てます。
+            </p>
+          </div>
+          <div class="area-grid">
+            {
+              content.areas.map((area) => (
+                <article class="area-card" id={area.id}>
+                  <figure>
+                    <img
+                      src={area.image}
+                      alt={area.imageAlt}
+                      width="1536"
+                      height="1024"
+                      loading="lazy"
+                    />
+                  </figure>
+                  <div class="area-body">
+                    <div class="area-meta">
+                      <span>{area.number}</span>
+                      <i class:list={["ph", area.icon]} aria-hidden="true" />
+                    </div>
+                    <p class="area-purpose">{area.purpose}</p>
+                    <h3>{area.title}</h3>
+                    <p>{area.body}</p>
+                    <a href="#consultation">
+                      内容と実施方法を相談
+                      <i class="ph ph-arrow-right" aria-hidden="true" />
+                    </a>
+                  </div>
+                </article>
+              ))
+            }
+          </div>
         </div>
-        <div class="flow-grid">
-          {
-            content.learningSteps.map((step, index) => (
-              <article class="flow-card">
-                <figure>
+      </section>
+
+      <section class="process section-block" id="process" aria-labelledby="process-title">
+        <div class="page-shell">
+          <div class="section-heading process-heading">
+            <p class="section-label">{content.process.eyebrow}</p>
+            <h2 id="process-title">{content.process.title}</h2>
+            <p>{content.process.body}</p>
+          </div>
+          <div class="process-grid">
+            {
+              content.process.steps.map((step) => (
+                <article class="process-step">
+                  <span class="process-number">{step.number}</span>
+                  <i class:list={["ph", step.icon]} aria-hidden="true" />
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </article>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="support-system section-block" aria-labelledby="support-system-title">
+        <div class="page-shell">
+          <div class="section-heading heading-row compact-heading">
+            <div>
+              <p class="section-label">SUPPORT</p>
+              <h2 id="support-system-title">{content.supportSystem.title}</h2>
+            </div>
+          </div>
+          <div class="system-grid">
+            {
+              content.supportSystem.items.map((item) => (
+                <article>
+                  <i class:list={["ph", item.icon]} aria-hidden="true" />
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </article>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="outcomes section-block" id="outcomes" aria-labelledby="outcomes-title">
+        <div class="page-shell">
+          <div class="section-heading heading-row">
+            <div>
+              <p class="section-label">{content.outcomes.eyebrow}</p>
+              <h2 id="outcomes-title">{content.outcomes.title}</h2>
+            </div>
+            <p>{content.outcomes.body}</p>
+          </div>
+          <div class="outcome-grid">
+            {
+              content.outcomes.items.map((item) => (
+                <article class="outcome-card">
                   <img
-                    src={stepImages[index].src}
-                    alt={stepImages[index].alt}
-                    width="640"
-                    height="420"
+                    src={item.image}
+                    alt={item.imageAlt}
+                    width="1536"
+                    height="1024"
                     loading="lazy"
                   />
-                </figure>
-                <div class="step-heading">
-                  <span class="step-number">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span
-                    class:list={["step-icon", `accent-${step.accent}`]}
-                    set:html={getStepIcon(step.icon)}
-                  />
-                </div>
-                <h3>{step.title}</h3>
-                <p>{step.description}</p>
-              </article>
-            ))
-          }
+                  <div>
+                    <span>{item.label}</span>
+                    <h3>{item.title}</h3>
+                  </div>
+                </article>
+              ))
+            }
+          </div>
         </div>
       </section>
 
-      <section class="compare-section" aria-labelledby="compare-title">
-        <div class="section-heading centered">
-          <p>VS</p>
-          <h2 id="compare-title">{content.compareTitle}</h2>
-        </div>
-        <div class="compare-grid">
-          <div class="compare-column compare-before">
-            <h3>{content.compareBefore}</h3>
+      <section class="facts section-block" id="activity" aria-label="取り組みと受講方法">
+        <div class="facts-grid page-shell">
+          <article class="activity-card">
+            <div class="fact-copy">
+              <p class="section-label">{content.activity.eyebrow}</p>
+              <h2>{content.activity.title}</h2>
+              <p class="fact-lead">{content.activity.body}</p>
+              <p class="fact-note">{content.activity.note}</p>
+            </div>
+            <img
+              src={workshopImage}
+              alt={content.activity.imageAlt}
+              width="1536"
+              height="1024"
+              loading="lazy"
+            />
+          </article>
+
+          <article class="delivery-card" id="delivery">
+            <div class="fact-copy">
+              <p class="section-label">{content.delivery.eyebrow}</p>
+              <h2>{content.delivery.title}</h2>
+              <p class="fact-lead">{content.delivery.body}</p>
+              <p class="fact-note">{content.delivery.note}</p>
+            </div>
             <ul>
               {
-                content.compareBeforeItems.map((item) => (
+                content.delivery.items.map((item) => (
                   <li>
-                    <span aria-hidden="true">?</span>
-                    <strong>{item}</strong>
+                    <i class:list={["ph", item.icon]} aria-hidden="true" />
+                    <span>{item.label}</span>
                   </li>
                 ))
               }
             </ul>
-          </div>
-          <div class="compare-divider" aria-hidden="true">vs</div>
-          <div class="compare-column compare-after">
-            <h3>{content.compareAfter}</h3>
-            <ul>
-              {
-                content.compareAfterItems.map((item) => (
-                  <li>
-                    <span aria-hidden="true">✓</span>
-                    <strong>{item}</strong>
-                  </li>
-                ))
-              }
-            </ul>
-          </div>
+          </article>
         </div>
       </section>
 
-      <section class="courses" aria-labelledby="courses-title">
-        <div class="section-heading centered">
-          <p>Courses</p>
-          <h2 id="courses-title">目的に合わせて選べる、5つのコース</h2>
-        </div>
-        <div class="course-grid">
-          {
-            courseSections.map((section) => (
-              <article
-                class:list={["course-card", `tone-${section.tone}`]}
-                id={section.id}
-              >
-                <img
-                  src={section.image}
-                  alt={section.imageAlt}
-                  width="620"
-                  height="420"
-                  loading="lazy"
-                />
-                <div class="course-card-body">
-                  <span
-                    class="course-icon"
-                    set:html={getCourseIcon(section.icon)}
-                  />
-                  <h3>{section.title}</h3>
-                  <p>{section.body}</p>
-                  <ul>
-                    {getCourseHighlights(section).map((item) => (
-                      <li>{item}</li>
-                    ))}
-                  </ul>
-                  <a href={contactUrl}>
-                    {detailLabel} <span aria-hidden="true">→</span>
-                  </a>
-                </div>
-              </article>
-            ))
-          }
-        </div>
-      </section>
-
-      <section class="pricing" id="pricing" aria-labelledby="pricing-title">
-        <div class="section-heading centered">
-          <p>Pricing</p>
-          <h2 id="pricing-title">{content.pricing.title}</h2>
-          <span>{content.pricing.body}</span>
-        </div>
-        <div class="pricing-grid">
-          {
-            content.pricing.items.map((item, index) => (
-              <article class:list={["pricing-card", `price-tone-${index + 1}`]}>
-                <span
-                  class="pricing-icon"
-                  set:html={getPricingIcon(item.icon)}
-                />
-                <h3>{item.label}</h3>
-                <p class="price">{item.price}</p>
-                <p>{item.note}</p>
-              </article>
-            ))
-          }
-        </div>
-        <div class="pricing-cta">
-          <div>
-            <h3>{content.pricing.ctaHeading}</h3>
-            <p>{content.pricing.ctaBody}</p>
+      <section class="consultation section-block" id="consultation" aria-labelledby="consultation-title">
+        <div class="page-shell">
+          <div class="section-heading consultation-heading">
+            <p class="section-label">{content.consultation.eyebrow}</p>
+            <h2 id="consultation-title">{content.consultation.title}</h2>
+            <p>{content.consultation.body}</p>
           </div>
-          <div class="hero-actions compact-actions">
-            <a class="button secondary" href={trialUrl}
-              >{detail.trial.primaryCta}</a
-            >
-            <a
-              class="button primary"
-              href={trialInquiryUrl}
-              target="_blank"
-              rel="noopener noreferrer">{content.pricing.ctaContact}</a
-            >
+          <ol class="consultation-steps">
+            {
+              content.consultation.steps.map((step) => (
+                <li>
+                  <span>{step.number}</span>
+                  <div>
+                    <h3>{step.title}</h3>
+                    <p>{step.body}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+          <a
+            class="button button-primary consultation-button"
+            href={lineUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {content.consultation.cta}
+            <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>
+          </a>
+        </div>
+      </section>
+
+      <section class="faq section-block" id="faq" aria-labelledby="faq-title">
+        <div class="faq-layout page-shell">
+          <div class="section-heading faq-heading">
+            <p class="section-label">FAQ</p>
+            <h2 id="faq-title">{content.faq.title}</h2>
+            <p>
+              ここにない内容も、無料相談で気軽に聞いてください。
+            </p>
           </div>
-        </div>
-      </section>
-
-      <section class="faq-section" id="faq" aria-labelledby="faq-title">
-        <div class="section-heading compact">
-          <p>{detail.faqEyebrow}</p>
-          <h2 id="faq-title">{detail.faqTitle}</h2>
-        </div>
-        <div class="faq-list">
-          {
-            detail.faqs.map((item) => (
-              <article class="faq-item">
-                <h3>{item.question}</h3>
-                <p>{item.answer}</p>
-              </article>
-            ))
-          }
-        </div>
-      </section>
-
-      <section class="final-cta" aria-labelledby="cta-title">
-        <div class="final-media">
-          <img
-            src={ctaImage}
-            alt={content.ctaImgAlt}
-            width="1800"
-            height="900"
-            loading="lazy"
-          />
-        </div>
-        <div class="final-content">
-          <h2 id="cta-title">{detail.finalCta.title}</h2>
-          <p>{detail.finalCta.body}</p>
-          <div class="hero-actions">
-            <a
-              class="button primary"
-              href={trialInquiryUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span class="button-icon" set:html={iconMap.chat} />
-              <span>{detail.finalCta.primary}</span>
-            </a>
-            <a class="button secondary" href={pricingUrl}>
-              {detail.finalCta.secondary}
-            </a>
+          <div class="faq-list">
+            {
+              content.faq.items.map((item) => (
+                <details>
+                  <summary>
+                    <span>{item.question}</span>
+                    <i class="ph ph-plus" aria-hidden="true" />
+                  </summary>
+                  <p>{item.answer}</p>
+                </details>
+              ))
+            }
           </div>
         </div>
       </section>
     </main>
 
     <footer>
-      <a class="footer-brand" href={acecoreOrigin}>
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span>Acecore Schools</span>
-      </a>
-      <nav aria-label="Footer navigation">
-        <a href="#juku">{content.juku.title}</a>
-        <a href="#robot-programming">{content.robotProgramming.title}</a>
-        <a href="#pricing">{content.pricing.title}</a>
-        <a href={contactUrl}>{content.ctaForm}</a>
-      </nav>
+      <div class="footer-layout page-shell">
+        <div class="footer-brand">
+          <a href={canonicalPath}>Acecore Schools</a>
+          <p>{content.footer.tagline}</p>
+        </div>
+        <nav aria-label="フッターメニュー">
+          {
+            content.nav.map((item) => (
+              <a href={item.href}>{item.label}</a>
+            ))
+          }
+          <a href={`${acecoreOrigin}/about/`}>Acecore Schoolsについて</a>
+          <a href={`${acecoreOrigin}/privacy-policy/`}>プライバシーポリシー</a>
+        </nav>
+      </div>
     </footer>
+
+    <script>
+      const header = document.querySelector("[data-header]");
+      const toggle = document.querySelector("[data-menu-toggle]");
+      const navigation = document.querySelector("[data-navigation]");
+
+      const closeMenu = () => {
+        if (!(header instanceof HTMLElement) || !(toggle instanceof HTMLElement)) {
+          return;
+        }
+        header.classList.remove("menu-open");
+        toggle.setAttribute("aria-expanded", "false");
+        const label = toggle.querySelector(".sr-only");
+        if (label) label.textContent = "メニューを開く";
+        const icon = toggle.querySelector("i");
+        if (icon) icon.className = "ph ph-list";
+      };
+
+      toggle?.addEventListener("click", () => {
+        if (!(header instanceof HTMLElement) || !(toggle instanceof HTMLElement)) {
+          return;
+        }
+        const open = header.classList.toggle("menu-open");
+        toggle.setAttribute("aria-expanded", String(open));
+        const label = toggle.querySelector(".sr-only");
+        if (label) label.textContent = open ? "メニューを閉じる" : "メニューを開く";
+        const icon = toggle.querySelector("i");
+        if (icon) icon.className = open ? "ph ph-x" : "ph ph-list";
+      });
+
+      navigation?.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", closeMenu);
+      });
+
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 980) closeMenu();
+      });
+    </script>
   </body>
 </html>
 
-<style>
+<style is:global>
   :root {
     color-scheme: light;
-    --page: #fbfcfc;
     --paper: #ffffff;
-    --ink: #111717;
-    --text: #263434;
-    --muted: #667574;
-    --line: rgba(17, 23, 23, 0.12);
-    --line-strong: rgba(17, 23, 23, 0.18);
-    --teal: #008f8a;
-    --teal-deep: #006b69;
-    --teal-soft: #dff5f2;
-    --coral: #ff624f;
-    --coral-deep: #e84635;
-    --lime: #80bc18;
-    --blue: #208cc8;
-    --amber: #ffb23f;
-    --footer: #0c2e33;
-    --shadow: 0 18px 54px rgba(12, 46, 51, 0.14);
-    font-family:
-      Inter,
-      "Noto Sans JP",
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
+    --canvas: #f7f8f5;
+    --canvas-blue: #f3f7fa;
+    --ink: #102433;
+    --navy: #0a3569;
+    --navy-dark: #05284f;
+    --green: #087d62;
+    --green-dark: #065a49;
+    --muted: #53616b;
+    --line: #ccd6df;
+    --line-strong: #9fb0bf;
+    --shadow: 0 18px 44px rgba(20, 50, 73, 0.09);
+    --sans:
+      "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo,
       sans-serif;
-    background: var(--page);
-    color: var(--text);
-    scroll-behavior: smooth;
+    --serif:
+      "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
   }
 
-  * {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
   }
 
-  html,
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 84px;
+  }
+
   body {
-    min-width: 320px;
     margin: 0;
-    overflow-x: hidden;
-    background: var(--page);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
   }
 
-  body {
-    min-height: 100vh;
-  }
-
+  body,
+  button,
   a {
-    color: inherit;
+    font-family: var(--sans);
   }
 
   img {
@@ -645,1066 +564,874 @@ const jsonLd = {
     max-width: 100%;
   }
 
+  a {
+    color: inherit;
+  }
+
+  button {
+    color: inherit;
+  }
+
   h1,
   h2,
   h3,
   p,
-  figure {
+  figure,
+  ul,
+  ol {
     margin: 0;
   }
 
-  .site-header {
+  ul,
+  ol {
+    padding: 0;
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.42;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 3.2vw, 3.35rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  h3 {
+    font-size: 1.05rem;
+  }
+
+  .sr-only {
     position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    z-index: 30;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 18px;
-    align-items: center;
-    min-height: 74px;
-    padding: 12px max(22px, calc((100vw - 1320px) / 2));
-    pointer-events: none;
-  }
-
-  .brand,
-  .primary-nav,
-  .hero-actions,
-  footer,
-  .footer-brand {
-    display: flex;
-    align-items: center;
-  }
-
-  .brand,
-  .header-cta,
-  .primary-nav {
-    pointer-events: auto;
-  }
-
-  .brand {
-    justify-self: start;
-    min-width: 0;
-    gap: 10px;
-    color: var(--teal-deep);
-    font-size: 1.46rem;
-    font-weight: 900;
-    line-height: 0.98;
-    text-decoration: none;
-  }
-
-  .brand-text {
-    display: grid;
-  }
-
-  .brand small {
-    color: #657171;
-    font-size: 0.9rem;
-    font-weight: 760;
-  }
-
-  .brand-mark {
-    position: relative;
-    display: block;
-    flex: 0 0 auto;
-    width: 34px;
-    height: 40px;
-  }
-
-  .brand-mark::before,
-  .brand-mark::after {
-    position: absolute;
-    bottom: 0;
-    width: 12px;
-    border-radius: 2px 2px 0 0;
-    content: "";
-  }
-
-  .brand-mark::before {
-    left: 5px;
-    height: 38px;
-    background: var(--teal);
-    transform: skew(-28deg);
-  }
-
-  .brand-mark::after {
-    right: 5px;
-    height: 26px;
-    background: var(--coral);
-    transform: skew(28deg);
-  }
-
-  .primary-nav {
-    justify-self: center;
-    gap: 2px;
-    border: 1px solid rgba(255, 255, 255, 0.72);
-    border-radius: 8px;
-    padding: 4px;
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 10px 30px rgba(12, 46, 51, 0.1);
-    backdrop-filter: blur(18px);
-  }
-
-  .primary-nav a,
-  .header-cta {
-    border-radius: 6px;
-    padding: 11px 20px;
-    color: var(--ink);
-    font-size: 0.95rem;
-    font-weight: 860;
-    line-height: 1.15;
-    text-decoration: none;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
     white-space: nowrap;
   }
 
-  .primary-nav a:hover {
-    background: var(--teal-soft);
-    color: var(--teal-deep);
+  .page-shell {
+    width: min(1360px, calc(100% - 72px));
+    margin-inline: auto;
   }
 
-  .header-cta {
-    display: inline-flex;
-    justify-self: end;
-    align-items: center;
-    justify-content: center;
-    max-width: 100%;
-    background: var(--coral);
-    color: white;
-    box-shadow: 0 12px 28px rgba(255, 98, 79, 0.24);
+  .section-block {
+    padding-block: 96px;
   }
 
-  .hero {
-    position: relative;
-    display: grid;
-    align-items: center;
-    min-height: 820px;
-    padding: 130px max(22px, calc((100vw - 1320px) / 2)) 92px;
-    overflow: hidden;
-    isolation: isolate;
-  }
-
-  .hero-media {
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    background: #edf4f4;
-  }
-
-  .hero-media::after {
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.99) 0%,
-        rgba(255, 255, 255, 0.86) 35%,
-        rgba(255, 255, 255, 0.2) 65%,
-        rgba(255, 255, 255, 0.02) 100%
-      ),
-      linear-gradient(0deg, var(--page) 0%, rgba(251, 252, 252, 0) 18%);
-    content: "";
-  }
-
-  .hero-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 64% 50%;
-  }
-
-  .hero-content {
-    width: min(650px, 100%);
-    min-width: 0;
-    padding-top: 18px;
-  }
-
-  .hero-kicker {
-    display: inline-flex;
-    max-width: 100%;
-    border-radius: 8px;
-    padding: 11px 18px;
-    background: var(--teal);
-    color: white;
-    font-size: 0.94rem;
-    font-weight: 900;
-    line-height: 1.2;
-    overflow-wrap: anywhere;
-  }
-
-  h1 {
-    max-width: 620px;
-    margin-top: 24px;
-    color: var(--ink);
-    font-size: 5.9rem;
-    font-weight: 950;
-    line-height: 0.92;
-    letter-spacing: 0;
-    overflow-wrap: anywhere;
-  }
-
-  .hero-lead {
-    max-width: 610px;
-    margin-top: 24px;
-    color: var(--ink);
-    font-size: 1.72rem;
-    font-weight: 900;
-    line-height: 1.42;
-    text-wrap: balance;
-  }
-
-  .hero-copy {
-    max-width: 560px;
-    margin-top: 18px;
-    color: var(--muted);
-    font-size: 1.02rem;
-    line-height: 1.9;
-    overflow-wrap: anywhere;
-  }
-
-  .hero-actions {
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-top: 34px;
-  }
-
-  .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 52px;
-    max-width: 100%;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    padding: 14px 21px;
-    font-size: 0.95rem;
-    font-weight: 900;
-    line-height: 1.18;
-    text-align: center;
-    text-decoration: none;
-    transition:
-      transform 160ms ease,
-      box-shadow 160ms ease,
-      background 160ms ease;
-  }
-
-  .button:hover {
-    transform: translateY(-1px);
-  }
-
-  .button.primary {
-    background: var(--coral);
-    color: white;
-    box-shadow: 0 16px 32px rgba(255, 98, 79, 0.26);
-  }
-
-  .button.secondary {
-    border-color: var(--line-strong);
-    background: rgba(255, 255, 255, 0.92);
-    color: var(--ink);
-    box-shadow: 0 12px 28px rgba(12, 46, 51, 0.1);
-  }
-
-  .button.line {
-    background: #16b83e;
-    color: white;
-    box-shadow: 0 16px 32px rgba(22, 184, 62, 0.2);
-  }
-
-  .button-icon,
-  .pricing-icon,
-  .step-icon,
-  .course-icon {
-    display: inline-grid;
-    flex: 0 0 auto;
-    place-items: center;
-  }
-
-  .button-icon {
-    width: 19px;
-    height: 19px;
-    margin-right: 8px;
-  }
-
-  .button-icon :global(svg),
-  .pricing-icon :global(svg),
-  .step-icon :global(svg),
-  .course-icon :global(svg) {
-    width: 100%;
-    height: 100%;
-  }
-
-  .button-icon :global(path),
-  .pricing-icon :global(path),
-  .step-icon :global(path),
-  .course-icon :global(path) {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.85;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .scroll-cue {
-    position: absolute;
-    right: 50%;
-    bottom: 34px;
-    display: grid;
-    gap: 2px;
-    place-items: center;
-    color: white;
-    font-size: 0.8rem;
-    font-weight: 850;
-    text-decoration: none;
-    text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35);
-    transform: translateX(50%);
-  }
-
-  .scroll-cue span:first-child {
-    font-size: 1.45rem;
-    line-height: 1;
-  }
-
-  section {
-    padding: 92px max(22px, calc((100vw - 1320px) / 2));
+  .section-label {
+    color: var(--green);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
   }
 
   .section-heading {
     display: grid;
-    gap: 12px;
-    max-width: 800px;
-    margin-bottom: 42px;
+    gap: 15px;
   }
 
-  .section-heading.centered {
-    margin-inline: auto;
-    text-align: center;
-  }
-
-  .section-heading p {
-    color: var(--teal);
-    font-size: 0.88rem;
-    font-weight: 950;
-    letter-spacing: 0;
-    text-transform: uppercase;
-  }
-
-  .section-heading h2,
-  .final-cta h2 {
-    color: var(--ink);
-    font-size: 2.65rem;
-    font-weight: 950;
-    line-height: 1.12;
-    letter-spacing: 0;
-    text-wrap: balance;
-  }
-
-  .section-heading h2::after {
-    display: block;
-    width: 42px;
-    height: 4px;
-    border-radius: 8px;
-    margin: 16px auto 0;
-    background: var(--teal);
-    content: "";
-  }
-
-  .section-heading span,
-  .pricing-note,
-  .final-cta p {
+  .section-heading > p:last-child {
+    max-width: 690px;
     color: var(--muted);
-    line-height: 1.82;
   }
 
-  .flow-section {
-    background: linear-gradient(180deg, #ffffff 0%, #fbfcfc 100%), var(--page);
+  .heading-row {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
+    gap: 56px;
+    align-items: end;
+    margin-bottom: 40px;
   }
 
-  .flow-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 28px;
-  }
-
-  .trial-section,
-  .target-section,
-  .schedule-section,
-  .faq-section {
-    scroll-margin-top: 96px;
-  }
-
-  .trial-section,
-  .schedule-section,
-  .faq-section {
-    background: #ffffff;
-  }
-
-  .trial-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
-    gap: 22px;
-    align-items: stretch;
-    max-width: 1120px;
-    margin-inline: auto;
-  }
-
-  .trial-copy,
-  .trial-actions-panel,
-  .target-card,
-  .faq-item {
-    border: 1px solid #d8dfd8;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.86);
-  }
-
-  .trial-copy,
-  .trial-actions-panel,
-  .target-card,
-  .faq-item {
-    padding: 24px;
-  }
-
-  .check-list {
-    display: grid;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .check-list li {
-    position: relative;
-    padding-left: 18px;
-    color: #405047;
-    line-height: 1.75;
-  }
-
-  .check-list li::before {
-    position: absolute;
-    top: 0.72em;
-    left: 0;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--teal);
-    content: "";
-  }
-
-  .trial-copy > p,
-  .schedule-note {
-    margin-top: 18px;
-    color: #526056;
-    line-height: 1.75;
-  }
-
-  .trial-actions-panel {
-    display: grid;
-    align-content: center;
-    gap: 12px;
-    background: #eef7ef;
-  }
-
-  .trial-actions-panel .button {
-    text-align: center;
-  }
-
-  .target-section {
-    background: #f0fbf9;
-  }
-
-  .target-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .target-card h3,
-  .faq-item h3 {
-    color: var(--ink);
-  }
-
-  .target-card > p,
-  .faq-item p {
-    margin-top: 10px;
-    color: var(--muted);
-    line-height: 1.75;
-  }
-
-  .meta-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin: 18px 0 0;
-  }
-
-  .meta-grid div {
-    border-radius: 8px;
-    padding: 14px;
-    background: rgba(255, 255, 255, 0.7);
-  }
-
-  .meta-grid dt {
-    color: var(--teal-deep);
-    font-size: 0.86rem;
-    font-weight: 900;
-  }
-
-  .meta-grid dd {
-    margin: 6px 0 0;
-    color: #56625a;
-    line-height: 1.55;
-  }
-
-  .schedule-table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: white;
-  }
-
-  table {
-    width: 100%;
-    min-width: 720px;
-    border-collapse: collapse;
-    text-align: left;
-  }
-
-  th,
-  td {
-    padding: 16px;
-    vertical-align: top;
-  }
-
-  th {
-    background: var(--footer);
-    color: white;
-  }
-
-  td {
-    border-top: 1px solid var(--line);
-    color: var(--muted);
-    line-height: 1.65;
-  }
-
-  td:first-child,
-  td:nth-child(2) {
-    color: var(--ink);
-    font-weight: 900;
-  }
-
-  .faq-list {
-    display: grid;
-    gap: 12px;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .flow-card {
-    position: relative;
-    min-width: 0;
-  }
-
-  .flow-card + .flow-card::before {
-    position: absolute;
-    top: 94px;
-    left: -22px;
-    z-index: 2;
-    color: var(--teal);
-    font-size: 3rem;
-    font-weight: 300;
-    line-height: 1;
-    content: "›";
-  }
-
-  .flow-card figure {
-    aspect-ratio: 1.52;
-    overflow: hidden;
-    border-radius: 8px;
-    background: #e8eeee;
-    box-shadow: 0 12px 28px rgba(12, 46, 51, 0.11);
-  }
-
-  .flow-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .step-heading {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    margin-top: 22px;
-  }
-
-  .step-number {
-    color: var(--teal);
-    font-size: 2.1rem;
-    font-weight: 950;
-    line-height: 1;
-  }
-
-  .step-icon {
-    width: 34px;
-    height: 34px;
-    color: var(--teal);
-  }
-
-  .step-icon.accent-amber {
-    color: var(--amber);
-  }
-
-  .step-icon.accent-emerald {
-    color: var(--lime);
-  }
-
-  .step-icon.accent-slate {
-    color: #495559;
-  }
-
-  .flow-card h3,
-  .course-card h3,
-  .compare-column h3,
-  .pricing-card h3 {
-    color: var(--ink);
-    font-size: 1.08rem;
-    font-weight: 920;
-    line-height: 1.45;
-    overflow-wrap: anywhere;
-  }
-
-  .flow-card h3 {
-    margin-top: 10px;
-  }
-
-  .flow-card p,
-  .course-card p,
-  .course-card li,
-  .compare-column strong,
-  .pricing-card p {
-    color: var(--muted);
-    line-height: 1.75;
-  }
-
-  .flow-card p {
-    margin-top: 10px;
-    font-size: 0.94rem;
-  }
-
-  .compare-section {
-    background:
-      linear-gradient(180deg, #fbfcfc 0%, #ffffff 45%, #fbfcfc 100%),
-      var(--page);
-  }
-
-  .compare-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 18px;
-    align-items: stretch;
-    max-width: 1100px;
-    margin-inline: auto;
-  }
-
-  .compare-column {
-    overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--paper);
-  }
-
-  .compare-before h3 {
-    background: #363636;
-    color: white;
-  }
-
-  .compare-after {
-    border-color: rgba(0, 143, 138, 0.28);
-    background: #f0fbf9;
-  }
-
-  .compare-after h3 {
-    background: var(--teal);
-    color: white;
-  }
-
-  .compare-column h3 {
-    padding: 16px 20px;
-    text-align: center;
-  }
-
-  .compare-column ul,
-  .course-card ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .compare-column li {
-    display: grid;
-    grid-template-columns: 38px minmax(0, 1fr);
-    gap: 14px;
-    align-items: center;
-    min-height: 64px;
-    border-top: 1px solid var(--line);
-    padding: 14px 20px;
-  }
-
-  .compare-column li span {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border: 1px solid currentColor;
-    border-radius: 50%;
-    color: #3d4343;
-    font-weight: 900;
-  }
-
-  .compare-after li span {
-    color: var(--teal);
-  }
-
-  .compare-divider {
-    display: grid;
-    place-items: center;
-    color: var(--ink);
-    font-size: 1.8rem;
-    font-weight: 950;
-    text-transform: uppercase;
-  }
-
-  .courses {
-    background: #ffffff;
-  }
-
-  .course-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .course-card {
-    display: flex;
-    min-width: 0;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    border-top: 4px solid var(--teal);
-    border-radius: 8px;
-    background: var(--paper);
-    flex-direction: column;
-  }
-
-  .course-card > img {
-    width: 100%;
-    aspect-ratio: 1.35;
-    object-fit: cover;
-  }
-
-  .course-card-body {
-    display: flex;
-    flex: 1;
-    min-width: 0;
-    padding: 22px;
-    flex-direction: column;
-  }
-
-  .course-icon {
-    width: 42px;
-    height: 42px;
-    margin-bottom: 12px;
-    color: var(--teal);
-  }
-
-  .course-card h3 {
-    min-height: 3em;
-    color: var(--teal);
-    font-size: 1.06rem;
-    word-break: keep-all;
-    overflow-wrap: anywhere;
-  }
-
-  .course-card p {
-    display: -webkit-box;
-    margin-top: 12px;
-    font-size: 0.92rem;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 5;
-  }
-
-  .course-card ul {
-    display: grid;
-    gap: 8px;
-    margin-top: 16px;
-  }
-
-  .course-card li {
-    position: relative;
-    padding-left: 14px;
-    font-size: 0.88rem;
-  }
-
-  .course-card li::before {
-    position: absolute;
-    top: 0.72em;
-    left: 0;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: currentColor;
-    content: "";
-  }
-
-  .course-card a {
-    display: inline-flex;
-    gap: 8px;
-    align-items: center;
-    margin-top: auto;
-    padding-top: 18px;
-    color: var(--teal);
-    font-size: 0.9rem;
-    font-weight: 900;
-    text-decoration: none;
-  }
-
-  .course-card.tone-blue {
-    border-top-color: var(--blue);
-  }
-
-  .course-card.tone-blue h3,
-  .course-card.tone-blue a,
-  .course-card.tone-blue .course-icon {
-    color: var(--blue);
-  }
-
-  .course-card.tone-lime {
-    border-top-color: var(--lime);
-  }
-
-  .course-card.tone-lime h3,
-  .course-card.tone-lime a,
-  .course-card.tone-lime .course-icon {
-    color: var(--lime);
-  }
-
-  .course-card.tone-coral {
-    border-top-color: #ff7b22;
-  }
-
-  .course-card.tone-coral h3,
-  .course-card.tone-coral a,
-  .course-card.tone-coral .course-icon {
-    color: #f2661f;
-  }
-
-  .course-card.tone-red {
-    border-top-color: var(--coral);
-  }
-
-  .course-card.tone-red h3,
-  .course-card.tone-red a,
-  .course-card.tone-red .course-icon {
-    color: var(--coral-deep);
-  }
-
-  .pricing {
-    background: linear-gradient(180deg, #ffffff 0%, #fbfcfc 100%), var(--page);
-  }
-
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 22px;
-    max-width: 1080px;
-    margin-inline: auto;
-  }
-
-  .pricing-card {
+  .heading-row > div {
     display: grid;
     gap: 13px;
-    min-width: 0;
-    border: 1px solid rgba(0, 143, 138, 0.3);
-    border-radius: 8px;
-    padding: 28px;
-    background: var(--paper);
   }
 
-  .pricing-card.price-tone-2 {
-    border-color: rgba(128, 188, 24, 0.42);
+  .compact-heading {
+    margin-bottom: 30px;
   }
 
-  .pricing-card.price-tone-3 {
-    border-color: rgba(255, 98, 79, 0.42);
-  }
-
-  .pricing-icon {
-    width: 54px;
-    height: 54px;
-    color: var(--teal);
-  }
-
-  .price-tone-2 .pricing-icon,
-  .price-tone-2 h3 {
-    color: var(--lime);
-  }
-
-  .price-tone-3 .pricing-icon,
-  .price-tone-3 h3 {
-    color: var(--coral-deep);
-  }
-
-  .pricing-icon :global(svg) {
-    width: 38px;
-    height: 38px;
-  }
-
-  .pricing-card h3 {
-    color: var(--teal);
-    font-size: 1.22rem;
-  }
-
-  .price {
-    color: var(--ink);
-    font-size: 1.9rem;
-    font-weight: 950;
-    line-height: 1.12;
-    overflow-wrap: anywhere;
-  }
-
-  .pricing-card p:not(.price) {
-    font-size: 0.92rem;
-  }
-
-  .pricing-note {
-    max-width: 900px;
-    margin: 22px auto 0;
-    color: var(--muted);
-    font-size: 0.92rem;
-    text-align: center;
-  }
-
-  .pricing-cta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    max-width: 1080px;
-    border: 1px solid rgba(0, 143, 138, 0.22);
-    border-radius: 8px;
-    margin: 22px auto 0;
-    padding: 24px;
-    background: #eef7ef;
-  }
-
-  .pricing-cta h3 {
-    color: var(--ink);
-    font-size: 1.12rem;
-    font-weight: 920;
-  }
-
-  .pricing-cta p {
-    margin-top: 8px;
-    color: var(--muted);
-    line-height: 1.75;
-  }
-
-  .compact-actions {
-    margin-top: 0;
-  }
-
-  .final-cta {
-    position: relative;
+  .site-header {
+    position: sticky;
+    z-index: 50;
+    top: 0;
     display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 30px;
     align-items: center;
-    min-height: 300px;
-    margin: 0 max(22px, calc((100vw - 1320px) / 2)) 72px;
-    overflow: hidden;
-    border-radius: 8px;
-    padding: 48px;
-    isolation: isolate;
+    min-height: 76px;
+    border-bottom: 1px solid rgba(10, 53, 105, 0.12);
+    padding: 0 max(30px, calc((100vw - 1450px) / 2));
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 5px 24px rgba(10, 53, 105, 0.05);
   }
 
-  .final-media {
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    background: var(--teal-deep);
-  }
-
-  .final-media::after {
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(
-        90deg,
-        rgba(0, 143, 138, 0.98) 0%,
-        rgba(0, 143, 138, 0.92) 40%,
-        rgba(0, 143, 138, 0.28) 76%,
-        rgba(0, 143, 138, 0.08) 100%
-      ),
-      linear-gradient(0deg, rgba(8, 47, 51, 0.15), rgba(8, 47, 51, 0.15));
-    content: "";
-  }
-
-  .final-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 72% 50%;
-  }
-
-  .final-content {
-    width: min(660px, 100%);
-  }
-
-  .final-cta h2 {
-    color: white;
-    font-size: 2.25rem;
-  }
-
-  .final-cta p {
-    max-width: 620px;
-    margin-top: 12px;
-    color: rgba(255, 255, 255, 0.86);
-  }
-
-  footer {
-    justify-content: space-between;
-    gap: 24px;
-    padding: 24px max(22px, calc((100vw - 1320px) / 2));
-    background: var(--footer);
-    color: rgba(255, 255, 255, 0.78);
-  }
-
-  .footer-brand {
-    gap: 10px;
-    color: white;
-    font-weight: 900;
+  .brand {
+    font-size: 1.38rem;
+    font-weight: 700;
+    letter-spacing: -0.045em;
     text-decoration: none;
     white-space: nowrap;
   }
 
-  .footer-brand .brand-mark {
-    width: 28px;
-    height: 32px;
+  .primary-nav {
+    display: flex;
+    gap: clamp(16px, 2vw, 30px);
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .primary-nav a {
+    color: #344654;
+    font-size: 0.79rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .primary-nav a:hover,
+  .primary-nav a:focus-visible {
+    color: var(--green);
+  }
+
+  .nav-about {
+    color: var(--muted) !important;
+    font-size: 0.72rem !important;
+  }
+
+  .header-cta,
+  .button {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 12px 22px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.4;
+    text-decoration: none;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .header-cta,
+  .button-primary {
+    background: var(--navy);
+    color: white;
+  }
+
+  .header-cta:hover,
+  .header-cta:focus-visible,
+  .button-primary:hover,
+  .button-primary:focus-visible {
+    background: var(--navy-dark);
+    transform: translateY(-2px);
+  }
+
+  .button-secondary {
+    border-color: var(--navy);
+    background: rgba(255, 255, 255, 0.84);
+    color: var(--navy);
+  }
+
+  .button-secondary:hover,
+  .button-secondary:focus-visible {
+    background: var(--navy);
+    color: white;
+  }
+
+  .menu-toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--paper);
+    cursor: pointer;
+    font-size: 1.55rem;
+  }
+
+  .hero {
+    position: relative;
+    min-height: clamp(570px, 64vw, 760px);
+    overflow: hidden;
+    background: #edf0ef;
+  }
+
+  .hero-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .hero-layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 220px minmax(310px, 460px);
+    gap: 48px;
+    align-items: center;
+    min-height: inherit;
+  }
+
+  .hero h1 {
+    width: fit-content;
+    padding: 24px 18px;
+    background: rgba(255, 255, 255, 0.82);
+    font-family: var(--serif);
+    font-size: clamp(4rem, 6vw, 6.7rem);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.12;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+  }
+
+  .hero-message {
+    align-self: center;
+    width: min(100%, 460px);
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.86);
+  }
+
+  .hero-lead {
+    font-family: var(--serif);
+    font-size: clamp(1.45rem, 2.1vw, 2.1rem);
+    font-weight: 600;
+    line-height: 1.65;
+  }
+
+  .hero-body {
+    margin-top: 18px;
+    color: #3d4b55;
+    font-size: 0.95rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .purpose-selector {
+    position: relative;
+    z-index: 2;
+    border-bottom: 1px solid var(--line);
+    padding-block: 28px 42px;
+    background: var(--paper);
+  }
+
+  .purpose-selector .section-label {
+    margin-bottom: 14px;
+    color: var(--ink);
+    font-size: 0.88rem;
+    letter-spacing: 0.02em;
+  }
+
+  .purpose-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .purpose-card {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    min-height: 106px;
+    border: 1px solid var(--navy);
+    padding: 20px;
+    background: var(--paper);
+    color: var(--navy);
+    text-decoration: none;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .purpose-card > .ph:first-child {
+    font-size: 2rem;
+  }
+
+  .purpose-card strong {
+    font-size: 0.9rem;
+    line-height: 1.75;
+    white-space: pre-line;
+  }
+
+  .purpose-green {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .purpose-card:hover,
+  .purpose-card:focus-visible {
+    background: var(--navy);
+    color: white;
+    transform: translateY(-3px);
+  }
+
+  .purpose-green:hover,
+  .purpose-green:focus-visible {
+    background: var(--green);
+  }
+
+  .purpose-arrow {
+    font-size: 1rem;
+  }
+
+  .support {
+    background: var(--paper);
+  }
+
+  .support-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(500px, 1.1fr);
+    gap: 64px;
+    align-items: center;
+  }
+
+  .support-copy {
+    display: grid;
+    gap: 34px;
+  }
+
+  .support-copy h2 {
+    white-space: pre-line;
+  }
+
+  .support-list {
+    display: grid;
+    gap: 17px;
+  }
+
+  .support-item {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 17px;
+    align-items: start;
+  }
+
+  .support-item > .ph {
+    padding-top: 4px;
+    color: var(--navy);
+    font-size: 1.7rem;
+  }
+
+  .support-item h3 {
+    font-size: 1rem;
+  }
+
+  .support-item p {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 0.89rem;
+  }
+
+  .support-media {
+    min-height: 480px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .support-media img {
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    object-fit: cover;
+  }
+
+  .learning-areas {
+    border-block: 1px solid var(--line);
+    background: var(--canvas-blue);
+  }
+
+  .area-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .area-card {
+    display: flex;
+    min-width: 0;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    flex-direction: column;
+  }
+
+  .area-card figure {
+    overflow: hidden;
+    aspect-ratio: 1.38;
+  }
+
+  .area-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 280ms ease;
+  }
+
+  .area-card:hover img {
+    transform: scale(1.025);
+  }
+
+  .area-body {
+    display: flex;
+    flex: 1;
+    padding: 24px;
+    flex-direction: column;
+  }
+
+  .area-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--navy);
+  }
+
+  .area-meta span {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .area-meta .ph {
+    font-size: 1.45rem;
+  }
+
+  .area-purpose {
+    margin-top: 18px;
+    color: var(--green);
+    font-family: var(--serif);
+    font-size: 1.32rem;
+    font-weight: 600;
+  }
+
+  .area-body h3 {
+    min-height: 3.05em;
+    margin-top: 10px;
+    color: var(--navy);
+    font-size: 1.08rem;
+  }
+
+  .area-body > p:not(.area-purpose) {
+    margin-top: 13px;
+    color: var(--muted);
+    font-size: 0.86rem;
+  }
+
+  .area-body > a {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 20px;
+    color: var(--navy);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .process {
+    background: var(--paper);
+  }
+
+  .process-heading {
+    max-width: 800px;
+    margin-bottom: 42px;
+  }
+
+  .process-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 1px solid var(--line-strong);
+  }
+
+  .process-step {
+    position: relative;
+    min-height: 260px;
+    border-right: 1px solid var(--line);
+    padding: 26px;
+  }
+
+  .process-step:last-child {
+    border-right: 0;
+  }
+
+  .process-number {
+    display: block;
+    color: var(--navy);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .process-step > .ph {
+    display: block;
+    margin-top: 34px;
+    color: var(--green);
+    font-size: 2.15rem;
+  }
+
+  .process-step h3 {
+    margin-top: 16px;
+  }
+
+  .process-step p {
+    margin-top: 9px;
+    color: var(--muted);
+    font-size: 0.87rem;
+  }
+
+  .support-system {
+    padding-top: 0;
+    background: var(--paper);
+  }
+
+  .system-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-block: 1px solid var(--line);
+  }
+
+  .system-grid article {
+    min-height: 188px;
+    border-right: 1px solid var(--line);
+    padding: 28px;
+  }
+
+  .system-grid article:last-child {
+    border-right: 0;
+  }
+
+  .system-grid .ph {
+    color: var(--navy);
+    font-size: 1.8rem;
+  }
+
+  .system-grid h3 {
+    margin-top: 16px;
+  }
+
+  .system-grid p {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 0.84rem;
+  }
+
+  .outcomes {
+    border-block: 1px solid var(--line);
+    background: var(--canvas);
+  }
+
+  .outcome-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .outcome-card {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+
+  .outcome-card img {
+    width: 100%;
+    aspect-ratio: 1.55;
+    object-fit: cover;
+  }
+
+  .outcome-card > div {
+    padding: 20px;
+  }
+
+  .outcome-card span {
+    color: var(--green);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .outcome-card h3 {
+    margin-top: 7px;
+    font-size: 0.94rem;
+  }
+
+  .facts {
+    background: var(--paper);
+  }
+
+  .facts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .activity-card,
+  .delivery-card {
+    min-height: 390px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+
+  .activity-card {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.72fr) minmax(300px, 1.28fr);
+  }
+
+  .activity-card img {
+    width: 100%;
+    height: 100%;
+    min-height: 388px;
+    object-fit: cover;
+  }
+
+  .fact-copy {
+    padding: 34px;
+  }
+
+  .fact-copy h2 {
+    margin-top: 11px;
+    font-size: clamp(1.65rem, 2.25vw, 2.45rem);
+  }
+
+  .fact-lead {
+    margin-top: 22px;
+    font-family: var(--serif);
+    font-size: 1.18rem;
+    font-weight: 600;
+    line-height: 1.8;
+  }
+
+  .fact-note {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .delivery-card {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    background: var(--canvas-blue);
+  }
+
+  .delivery-card ul {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--line);
+    list-style: none;
+  }
+
+  .delivery-card li {
+    display: grid;
+    gap: 9px;
+    min-height: 105px;
+    align-content: center;
+    border-right: 1px solid var(--line);
+    padding: 18px;
+    color: var(--navy);
+    text-align: center;
+  }
+
+  .delivery-card li:last-child {
+    border-right: 0;
+  }
+
+  .delivery-card li .ph {
+    font-size: 1.55rem;
+  }
+
+  .delivery-card li span {
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .consultation {
+    background: var(--navy-dark);
+    color: white;
+  }
+
+  .consultation-heading {
+    max-width: 820px;
+  }
+
+  .consultation .section-label {
+    color: #8fd8c3;
+  }
+
+  .consultation-heading > p:last-child {
+    color: rgba(255, 255, 255, 0.74);
+  }
+
+  .consultation-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 42px;
+    border-block: 1px solid rgba(255, 255, 255, 0.28);
+    list-style: none;
+  }
+
+  .consultation-steps li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 18px;
+    min-height: 155px;
+    align-items: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.24);
+    padding: 25px;
+  }
+
+  .consultation-steps li:last-child {
+    border-right: 0;
+  }
+
+  .consultation-steps li > span {
+    color: #8fd8c3;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .consultation-steps p {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.84rem;
+  }
+
+  .consultation-button {
+    margin-top: 34px;
+    background: white;
+    color: var(--navy);
+  }
+
+  .consultation-button:hover,
+  .consultation-button:focus-visible {
+    background: #eaf3f8;
+    color: var(--navy-dark);
+  }
+
+  .faq {
+    background: var(--paper);
+  }
+
+  .faq-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.58fr) minmax(0, 1.42fr);
+    gap: 70px;
+    align-items: start;
+  }
+
+  .faq-heading {
+    position: sticky;
+    top: 110px;
+  }
+
+  .faq-list {
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .faq-list details {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .faq-list summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px 4px;
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+  }
+
+  .faq-list summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-list summary .ph {
+    flex: 0 0 auto;
+    color: var(--green);
+    font-size: 1.35rem;
+    transition: transform 180ms ease;
+  }
+
+  .faq-list details[open] summary .ph {
+    transform: rotate(45deg);
+  }
+
+  .faq-list details > p {
+    max-width: 760px;
+    padding: 0 4px 23px;
+    color: var(--muted);
+    font-size: 0.91rem;
+  }
+
+  footer {
+    padding-block: 56px;
+    background: var(--navy-dark);
+    color: white;
+  }
+
+  .footer-layout {
+    display: grid;
+    grid-template-columns: minmax(270px, 0.9fr) minmax(0, 1.1fr);
+    gap: 70px;
+    align-items: end;
+  }
+
+  .footer-brand > a {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+  }
+
+  .footer-brand p {
+    max-width: 460px;
+    margin-top: 12px;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.82rem;
   }
 
   footer nav {
     display: flex;
     flex-wrap: wrap;
-    gap: 18px;
+    gap: 12px 24px;
     justify-content: flex-end;
   }
 
   footer nav a {
-    font-size: 0.86rem;
-    font-weight: 760;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.76rem;
     text-decoration: none;
   }
 
-  footer nav a:hover {
+  footer nav a:hover,
+  footer nav a:focus-visible {
     color: white;
+  }
+
+  :focus-visible {
+    outline: 3px solid #31b997;
+    outline-offset: 3px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1718,137 +1445,151 @@ const jsonLd = {
 
   @media (max-width: 1180px) {
     .site-header {
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: auto auto minmax(160px, auto);
     }
 
     .primary-nav {
+      gap: 15px;
+    }
+
+    .primary-nav .nav-about {
       display: none;
     }
 
-    .hero {
-      min-height: 760px;
+    .support-layout {
+      grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+      gap: 40px;
     }
 
-    .trial-grid,
-    .target-grid,
-    .meta-grid,
-    .pricing-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .pricing-cta {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    h1 {
-      font-size: 4.8rem;
-    }
-
-    .flow-grid,
-    .course-grid {
+    .area-grid,
+    .outcome-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .flow-card + .flow-card::before {
-      display: none;
-    }
-
-    .course-card h3 {
+    .area-body h3 {
       min-height: 0;
     }
-  }
 
-  @media (max-width: 820px) {
-    .site-header {
-      gap: 12px;
-      min-height: 66px;
-      padding-inline: 16px;
-    }
-
-    .brand {
-      font-size: 1.16rem;
-    }
-
-    .brand-mark {
-      width: 29px;
-      height: 35px;
-    }
-
-    .header-cta {
-      max-width: 44vw;
-      padding-inline: 12px;
-      font-size: 0.84rem;
-      overflow-wrap: anywhere;
-    }
-
-    .hero {
-      min-height: 720px;
-      padding: 102px 20px 74px;
-    }
-
-    .hero-media::after {
-      background:
-        linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.98) 0%,
-          rgba(255, 255, 255, 0.84) 54%,
-          rgba(255, 255, 255, 0.4) 100%
-        ),
-        linear-gradient(0deg, var(--page) 0%, rgba(251, 252, 252, 0) 18%);
-    }
-
-    .hero-media img {
-      object-position: 62% 50%;
-    }
-
-    h1 {
-      font-size: 4.05rem;
-    }
-
-    .hero-lead {
-      font-size: 1.38rem;
-    }
-
-    section {
-      padding: 72px 20px;
-    }
-
-    .section-heading h2,
-    .final-cta h2 {
-      font-size: 2.05rem;
-    }
-
-    .compare-grid,
-    .pricing-grid {
+    .activity-card {
       grid-template-columns: 1fr;
     }
 
-    .compare-divider {
-      min-height: 38px;
-      font-size: 1.2rem;
+    .activity-card img {
+      min-height: 250px;
+      max-height: 300px;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .page-shell {
+      width: min(100% - 40px, 760px);
     }
 
-    .final-cta {
-      min-height: 360px;
-      margin-inline: 20px;
-      padding: 34px 24px;
+    .site-header {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      min-height: 68px;
+      padding-inline: 20px;
     }
 
-    .final-media::after {
-      background:
-        linear-gradient(
-          180deg,
-          rgba(0, 143, 138, 0.98) 0%,
-          rgba(0, 143, 138, 0.9) 54%,
-          rgba(0, 143, 138, 0.36) 100%
-        ),
-        linear-gradient(0deg, rgba(8, 47, 51, 0.12), rgba(8, 47, 51, 0.12));
+    .menu-toggle {
+      display: grid;
+      place-items: center;
     }
 
-    footer {
-      align-items: flex-start;
+    .primary-nav {
+      position: absolute;
+      top: calc(100% + 1px);
+      right: 20px;
+      left: 20px;
+      display: none;
+      align-items: stretch;
+      border: 1px solid var(--line);
+      padding: 12px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
       flex-direction: column;
+    }
+
+    .menu-open .primary-nav {
+      display: flex;
+    }
+
+    .primary-nav a,
+    .primary-nav .nav-about {
+      display: block;
+      padding: 10px 12px;
+      font-size: 0.9rem !important;
+    }
+
+    .hero {
+      min-height: 680px;
+    }
+
+    .hero-image {
+      object-position: 64% center;
+    }
+
+    .hero-layout {
+      grid-template-columns: 140px minmax(270px, 410px);
+      gap: 24px;
+      align-items: end;
+      padding-bottom: 48px;
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+    }
+
+    .hero-message {
+      padding: 24px;
+    }
+
+    .purpose-grid,
+    .process-grid,
+    .system-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .support-layout,
+    .facts-grid,
+    .faq-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .support-media {
+      min-height: 360px;
+    }
+
+    .process-step:nth-child(2),
+    .system-grid article:nth-child(2) {
+      border-right: 0;
+    }
+
+    .process-step:nth-child(-n + 2),
+    .system-grid article:nth-child(-n + 2) {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .facts-grid {
+      gap: 18px;
+    }
+
+    .activity-card {
+      grid-template-columns: minmax(220px, 0.72fr) minmax(300px, 1.28fr);
+    }
+
+    .activity-card img {
+      min-height: 388px;
+      max-height: none;
+    }
+
+    .faq-heading {
+      position: static;
+    }
+
+    .footer-layout {
+      grid-template-columns: 1fr;
+      gap: 36px;
     }
 
     footer nav {
@@ -1856,89 +1597,242 @@ const jsonLd = {
     }
   }
 
-  @media (max-width: 600px) {
-    .site-header {
-      grid-template-columns: auto auto;
-      justify-content: space-between;
-    }
-
-    .brand small {
-      display: none;
-    }
-
-    .brand {
-      max-width: 180px;
+  @media (max-width: 700px) {
+    .section-block {
+      padding-block: 72px;
     }
 
     .header-cta {
       display: none;
     }
 
+    .site-header {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .brand {
+      font-size: 1.18rem;
+    }
+
     .hero {
-      min-height: 680px;
-      padding-top: 94px;
+      min-height: 720px;
     }
 
-    .hero-content {
-      width: 100%;
-      max-width: 100%;
+    .hero-image {
+      object-position: 70% center;
     }
 
-    .hero-kicker {
-      padding: 9px 12px;
-      font-size: 0.82rem;
+    .hero-layout {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding-block: 40px;
+      flex-direction: column;
     }
 
-    h1 {
-      max-width: 7.5ch;
-      font-size: 3rem;
+    .hero h1 {
+      position: absolute;
+      top: 96px;
+      left: 0;
+      max-height: none;
+      padding: 13px 16px;
+      font-size: 3.2rem;
+      letter-spacing: 0.03em;
+      writing-mode: horizontal-tb;
+    }
+
+    .hero-message {
+      width: min(100%, 430px);
     }
 
     .hero-lead {
-      width: 100%;
-      max-width: min(320px, calc(100vw - 40px));
-      font-size: 1.08rem;
-      overflow-wrap: anywhere;
-      word-break: break-all;
+      font-size: 1.35rem;
     }
 
-    .hero-copy {
-      max-width: min(320px, calc(100vw - 40px));
-      font-size: 0.97rem;
-      word-break: break-all;
+    .hero-body {
+      font-size: 0.9rem;
     }
 
-    .button,
-    .hero-actions {
+    .hero-actions,
+    .hero-actions .button {
       width: 100%;
     }
 
-    .flow-grid,
-    .course-grid {
+    .purpose-grid,
+    .area-grid,
+    .outcome-grid,
+    .consultation-steps {
       grid-template-columns: 1fr;
     }
 
-    .course-card {
-      display: grid;
-      grid-template-columns: minmax(112px, 0.42fr) minmax(0, 1fr);
+    .purpose-card {
+      min-height: 92px;
     }
 
-    .course-card > img {
+    .heading-row {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .outcomes h2 {
+      white-space: pre-line;
+    }
+
+    .area-card {
+      display: grid;
+      grid-template-columns: minmax(135px, 0.58fr) minmax(0, 1fr);
+    }
+
+    .area-card figure {
       height: 100%;
-      min-height: 250px;
       aspect-ratio: auto;
     }
 
-    .course-card-body {
-      padding: 18px;
+    .area-body {
+      padding: 20px;
     }
 
-    .course-card p {
+    .area-purpose {
+      margin-top: 12px;
+      font-size: 1.12rem;
+    }
+
+    .area-body > p:not(.area-purpose) {
       display: none;
     }
 
-    .price {
-      font-size: 1.55rem;
+    .area-body > a {
+      padding-top: 14px;
+    }
+
+    .consultation-steps li {
+      border-right: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+    }
+
+    .consultation-steps li:last-child {
+      border-bottom: 0;
+    }
+
+    .activity-card {
+      grid-template-columns: 1fr;
+    }
+
+    .activity-card img {
+      min-height: 250px;
+      max-height: 300px;
+    }
+
+    .delivery-card ul {
+      grid-template-columns: 1fr;
+    }
+
+    .delivery-card li {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 14px;
+      min-height: 72px;
+      justify-items: start;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .delivery-card li:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .page-shell {
+      width: min(100% - 28px, 460px);
+    }
+
+    .hero h1 {
+      max-width: 100%;
+      font-size: clamp(2.35rem, 12vw, 3.2rem);
+    }
+
+    .hero {
+      min-height: 690px;
+    }
+
+    .hero-layout {
+      padding-bottom: 26px;
+    }
+
+    .hero-message {
+      padding: 20px;
+    }
+
+    .hero-actions {
+      margin-top: 20px;
+    }
+
+    .button {
+      width: 100%;
+    }
+
+    .purpose-selector {
+      padding-block: 22px 30px;
+    }
+
+    .purpose-card {
+      grid-template-columns: 36px minmax(0, 1fr) auto;
+      padding: 16px;
+    }
+
+    .support-media {
+      min-height: 280px;
+    }
+
+    .process-grid,
+    .system-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .process-step,
+    .system-grid article,
+    .process-step:nth-child(2),
+    .system-grid article:nth-child(2) {
+      min-height: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .process-step:last-child,
+    .system-grid article:last-child {
+      border-bottom: 0;
+    }
+
+    .process-step > .ph {
+      margin-top: 20px;
+    }
+
+    .area-card {
+      grid-template-columns: 1fr;
+    }
+
+    .area-card figure {
+      aspect-ratio: 1.5;
+    }
+
+    .area-body > p:not(.area-purpose) {
+      display: block;
+    }
+
+    .outcome-card {
+      display: grid;
+      grid-template-columns: minmax(120px, 0.55fr) minmax(0, 1fr);
+    }
+
+    .outcome-card img {
+      height: 100%;
+      aspect-ratio: auto;
+    }
+
+    .fact-copy {
+      padding: 26px 22px;
     }
   }
 </style>
