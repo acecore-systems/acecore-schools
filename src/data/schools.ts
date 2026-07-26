@@ -47,6 +47,11 @@ export const schoolsContent = {
     title: "一人ひとりに、\n必要な支えを。",
     body: "目標も、得意なことも、使える時間も人それぞれ。決まったコースへ当てはめるのではなく、話しながら学び方を組み直します。",
     imageAlt: "自宅からビデオ通話で相談しながらノートを取る受講者",
+    audience: {
+      label: "対象",
+      title: "学生から社会人、シニアまで。",
+      body: "年齢や肩書きで一律に区切らず、いまの目的と現在地から必要な学びを考えます。",
+    },
     points: [
       {
         icon: "ph-target",
@@ -78,6 +83,12 @@ export const schoolsContent = {
       title: "高卒認定・その先の選択",
       purpose: "進むために。",
       body: "必要科目と現在地を整理し、試験までの学習計画をつくります。認定取得を終点にせず、進学や仕事など、その先の選択も見据えます。",
+      examples: [
+        "必要科目と現在地の確認",
+        "過去問・模試を使った試験対策",
+        "受験時期から逆算した学習計画",
+        "進学・仕事など次の選択",
+      ],
       image: "/images/schools/purpose-city/area-ged.webp",
       imageAlt: "高卒認定に向けて教材とノートで学習する若者",
     },
@@ -88,6 +99,12 @@ export const schoolsContent = {
       title: "IT学習・プログラミング",
       purpose: "つくるために。",
       body: "Webサイトや小さなツールを実際に形にしながら、仕組みと基礎を学びます。知識だけでなく、自分で試して改善する力を育てます。",
+      examples: [
+        "HTML・CSS・JavaScript",
+        "Python・Node.js",
+        "データベース・API・クラウド",
+        "Git・公開までの流れ",
+      ],
       image: "/images/schools/purpose-city/area-programming.webp",
       imageAlt: "自宅のノートパソコンでWeb制作に取り組む若者",
     },
@@ -98,6 +115,12 @@ export const schoolsContent = {
       title: "PC・スマホ活用",
       purpose: "使うために。",
       body: "資料づくり、調べもの、各種設定、オンラインでの連絡など、暮らしや仕事の実際の用事を題材に、使えるところまで支援します。",
+      examples: [
+        "PC・スマホの基本操作と設定",
+        "Word・Excel・PowerPoint",
+        "メール・SNS・オンライン会議",
+        "セキュリティ・トラブル対応",
+      ],
       image: "/images/schools/purpose-city/area-digital.webp",
       imageAlt: "パソコンとスマートフォンを使って資料を整理する受講者",
     },
@@ -108,6 +131,12 @@ export const schoolsContent = {
       title: "ロボット／メイキング",
       purpose: "確かめるために。",
       body: "部品を組み、回路をつなぎ、実際の動きを確かめる分野です。プログラミングとは分けて機構・電子・制御を扱い、実施方法や時期は内容に応じて相談します。",
+      examples: [
+        "機構・部品の組み立て",
+        "電子回路・配線",
+        "制御と動作確認",
+        "実施方法・時期の相談",
+      ],
       image: "/images/schools/purpose-city/area-making.webp",
       imageAlt: "机の上で小型ロボットの機構と配線を調整する若者",
     },
@@ -217,11 +246,34 @@ export const schoolsContent = {
       { icon: "ph-chats-circle", label: "ビデオ通話・画面共有" },
     ],
   },
+  acecore: {
+    eyebrow: "ACECORE NETWORK",
+    title: "現場の技術を、学びへつなぐ。",
+    body: "Acecoreは、Web制作・サーバー運用・デザインなどを横断して支援しています。Schoolsは、その現場で培う視点を学習支援へつなぐAcecoreの教育事業です。",
+    principle: "技術、運用、表現、教育を分断せず、一つの支援線として扱う。",
+    links: [
+      { label: "Acecoreのサービス", href: "/services/" },
+      { label: "Acecoreについて", href: "/about/" },
+      { label: "Acecoreのブログ", href: "/blog/" },
+    ],
+  },
   consultation: {
     eyebrow: "GET STARTED",
     title: "迷ったら、まずは相談してみませんか？",
     body: "学ぶ内容が決まっていなくても大丈夫です。いまの状況と、できるようになりたいことから一緒に整理します。",
     cta: "LINEで無料相談を申し込む",
+    formCta: "問い合わせフォームで相談",
+    beforeStart: {
+      eyebrow: "BEFORE YOU START",
+      title: "受講を決める前に確認できること",
+      body: "無料相談後のご提案で、内容と条件をまとめてご案内します。確認してから、受講するかどうかを決められます。",
+      items: [
+        { icon: "ph-books", label: "扱う内容とゴール" },
+        { icon: "ph-calendar-dots", label: "進め方・頻度" },
+        { icon: "ph-laptop", label: "必要な機器・教材" },
+        { icon: "ph-receipt", label: "受講にかかる費用" },
+      ],
+    },
     steps: [
       {
         number: "01",
@@ -259,6 +311,21 @@ export const schoolsContent = {
           "目的や時期を確認したうえで、必要な学びを組み合わせて順番を考えます。内容は相談時に一緒に整理します。",
       },
       {
+        question: "高卒認定以外の学校学習や試験対策も相談できますか？",
+        answer:
+          "はい。定期テストや受験対策なども、現在地と目的に合わせて相談できます。対応内容や進め方は、無料相談で状況を確認してからご案内します。",
+      },
+      {
+        question: "学生以外でも受講できますか？",
+        answer:
+          "はい。学生、社会人、シニアまで、年齢ではなく目的と現在地を確認して内容を組み立てます。",
+      },
+      {
+        question: "料金はいつ分かりますか？",
+        answer:
+          "学ぶ内容や進め方によって異なるため、無料相談後のご提案で、受講を決める前に費用をご案内します。",
+      },
+      {
         question: "受講に必要な機器はありますか？",
         answer:
           "学ぶ内容とお手持ちの環境を確認し、必要な機器や接続方法を事前にご案内します。",
@@ -271,10 +338,13 @@ export const schoolsContent = {
     ],
   },
   footer: {
-    tagline: "学びのパートナーとして、あなたの「何のために。」を支えます。",
+    tagline:
+      "Acecoreの教育事業として、あなたの「何のために。」から学びを支えます。",
   },
 } as const;
 
 export const schoolsOrigin = "https://schools.acecore.net";
 export const acecoreOrigin = "https://acecore.net";
+export const acecoreContactUrl =
+  "https://acecore.net/contact/?category=service&service=education#contact-form";
 export const lineUrl = "https://lin.ee/DjIrdqj";

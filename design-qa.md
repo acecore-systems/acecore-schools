@@ -1,42 +1,79 @@
 # Acecore Schools purpose-city redesign QA
 
-## Comparison source
+## 今回の監査範囲
 
-- Selected rough: `artifacts/design-qa/selected-reference.webp`
-- Combined comparison: `artifacts/design-qa/reference-vs-implementation.webp`
-- Desktop section contact sheet: `artifacts/design-qa/desktop-contact.webp`
-- Mobile section contact sheet: `artifacts/design-qa/mobile-contact.webp`
-- Browser: Codex in-app browser
-- Viewports: 1440×1000, 820×1000, 390×844, 320×800
+- `origin/main` の旧 Schools 情報と現行トップページを比較
+- 現行 `https://acecore.net/` とローカル `acecore-net` のブランド・導線・問い合わせ仕様を照合
+- Codex in-app browser で 1440×1000 / 390×844 を実測
+- PC・モバイルの余白、情報密度、横はみ出し、メニュー、FAQ を確認
 
-## Final findings
+## Visual evidence
 
-No actionable P0, P1, or P2 findings remain.
+- Before / after: `artifacts/quality-audit-2/comparison-before-after.webp`
+- Final desktop contact sheet: `artifacts/quality-audit-2/final-desktop-contact.webp`
+- Final mobile contact sheet: `artifacts/quality-audit-2/final-mobile-contact.webp`
+- Acecore reference capture: `artifacts/quality-audit-2/09-acecore-net-home.png`
 
-## Comparison notes
+## 旧サイト情報の扱い
 
-- Typography: the implementation keeps the reference's editorial Japanese serif headings and compact sans-serif utility text. The vertical desktop hero headline switches to a horizontal headline below 700px.
-- Layout and spacing: the city hero, four crisp purpose entrances, individual-support spread, four learning fields, process, support system, outcomes, current/past facts, consultation, and FAQ preserve the selected rough's hierarchy without the rejected route-map treatment.
-- Colors and surfaces: off-white, deep navy, cool pale blue, and a restrained green accent are used consistently. Cards rely on straight borders and spacing instead of generic rounded-card decoration.
-- Imagery: all 11 generated WebP assets loaded successfully. The photos distinguish high-school-equivalency study, programming, practical device use, and robotics/making. Robotics is not presented as programming.
-- Copy: the founder story is absent from the homepage. The four fields are described as individually assembled learning areas rather than fixed current courses. The current online format appears once in the factual lower-page section, while the summer in-person robot workshop is explicitly identified as a past activity that is not currently running.
-- Icons: Phosphor Icons supplies a single consistent outline family; no custom inline SVG or CSS-drawn substitute is used.
-- Responsive behavior: desktop, tablet, standard mobile, and 320px layouts have no horizontal document overflow. The mobile hero headline was resized and moved into the open sky so it no longer clips or crosses the subject's eyes, and the outcomes heading uses a balanced intentional break.
+### 現行方針に合わせて復元
 
-## Interaction and accessibility checks
+- 4領域ごとの具体例
+  - 高卒認定: 必要科目、過去問・模試、逆算した計画、その先の選択
+  - IT・プログラミング: HTML/CSS/JavaScript、Python/Node.js、DB/API/クラウド、Git・公開
+  - PC・スマホ: 基本操作、Office、メール/SNS/オンライン会議、セキュリティ・トラブル対応
+  - ロボット／メイキング: 機構、回路、制御、実施方法・時期
+- 学生、社会人、シニアまでを対象に、年齢ではなく目的と現在地から組み立てること
+- 高卒認定以外の学校学習・試験対策を相談できること
+- 受講前に内容、進め方・頻度、機器・教材、費用を確認できること
+- LINEに加え、AcecoreのSchools専用問い合わせフォーム
 
-- Mobile navigation opens, announces `aria-expanded="true"`, changes its accessible name to `メニューを閉じる`, and closes again.
-- FAQ disclosure opens and exposes its answer; the plus icon changes state.
-- Purpose, section-navigation, consultation, About, privacy, and LINE links have valid destinations.
-- All 11 built images have non-empty alternative text.
-- Focus-visible styles and reduced-motion overrides are present.
-- Browser console: no warnings or errors during final desktop/mobile checks.
+### 現行性を確認できないため復元しない
+
+- 旧料金表の具体額
+- 旧曜日・時間帯・固定頻度
+- 無料体験授業、端末貸出
+- 会員ポータル、予約変更、ICSなど未提供の将来機能
+- 子供向けロボットプログラミングを常設コースとして扱う旧表現
+
+## Acecore連携
+
+- ヘッダーを公式ロゴ付きの `Acecore / Schools` 階層へ変更
+- `Acecore Schoolsについて` という誤った親リンク名を `運営元 Acecoreについて` へ修正
+- Acecoreのサービス・About・Blogへ戻れる関連帯を追加
+- 問い合わせフォームを `category=service&service=education` でSchools選択済みの状態へ接続
+- フッターを Schools / Acecore / Network の3群へ再編
+- 存在しない `/privacy-policy/` を正規の `/privacy/` へ修正
+- JSON-LDの `knowsAbout` に4領域と具体例を反映
+
+## 余白・密度
+
+- 本文幅を1360pxから1200pxへ絞り、左右の余白を安定化
+- 全セクション一律96pxをやめ、役割に応じて64〜88pxへ調整
+- ヒーロー最大高を760pxから680pxへ短縮し、1440×1000で目的カードまで表示
+- 成果画像に `height: auto` を追加
+  - 修正前: PCで約310×1024px
+  - 修正後: 約287×185px
+  - 成果セクション高: 約1474pxから約622px
+- 4領域を4列の薄いカードから2列の詳細カードへ変更
+- サポート体制を4列から2列×2行の横組みに変更
+- 相談セクションを見出し・CTAと、開始手順・事前確認事項の2列へ再編
+- モバイルでは主要セクションを56〜64pxへ圧縮し、CTAを手順より前に表示
+
+## Interaction and accessibility
+
+- モバイルメニューは開閉でき、`aria-expanded` と accessible name が更新される
+- 料金FAQを開くと回答が表示される
+- 390×844で横方向のdocument overflowなし
+- Acecoreロゴ3点は読込成功、全14画像にnon-empty altあり
+- LINE、Schools専用問い合わせ、Acecore、Privacyのリンク先を確認
+- ブラウザコンソールに warning / error なし
 
 ## Verification
 
 - `npm run format:check`
 - `npm run build`
-- Image-alt audit: 2 HTML files, 11 images, 0 failures
+- Image-alt audit: 2 HTML files、14 images、0 failures
 - `git diff --check`
 
 final result: passed
