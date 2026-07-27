@@ -1,0 +1,30 @@
+---
+import { schoolsContent } from "../data/schools";
+
+const activity = schoolsContent.activity;
+const workshopImage = "/images/schools/purpose-city/workshop-robot-summer.webp";
+---
+
+<section
+  class="facts section-block"
+  id="activity"
+  aria-labelledby="activity-title"
+>
+  <div class="facts-grid facts-grid-single page-shell">
+    <article class="activity-card">
+      <div class="fact-copy">
+        <p class="section-label">{activity.eyebrow}</p>
+        <h2 id="activity-title">{activity.title}</h2>
+        <p class="fact-lead">{activity.body}</p>
+        <p class="fact-note">{activity.note}</p>
+      </div>
+      <img
+        src={workshopImage}
+        alt={activity.imageAlt}
+        width="1536"
+        height="1024"
+        loading="lazy"
+      />
+    </article>
+  </div>
+</section>

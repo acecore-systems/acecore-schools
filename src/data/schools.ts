@@ -3,12 +3,15 @@ export const schoolsContent = {
   description:
     "Acecore Schoolsは、高卒認定、IT・プログラミング、PC・スマホ活用、ロボット／メイキングを、一人ひとりの目的に合わせて組み立てる学習スクールです。",
   nav: [
-    { label: "学びの特徴", href: "#support" },
-    { label: "学べること", href: "#areas" },
-    { label: "学び方・サポート", href: "#process" },
-    { label: "受講方法", href: "#delivery" },
-    { label: "料金", href: "#pricing" },
-    { label: "よくある質問", href: "#faq" },
+    { key: "learning", label: "学べること", href: "/learning/" },
+    {
+      key: "how-it-works",
+      label: "学び方",
+      href: "/how-it-works/",
+    },
+    { key: "pricing", label: "料金", href: "/pricing/" },
+    { key: "about", label: "Schoolsについて", href: "/about/" },
+    { key: "faq", label: "よくある質問", href: "/faq/" },
   ],
   hero: {
     title: "何のために。",
@@ -22,25 +25,25 @@ export const schoolsContent = {
     {
       icon: "ph-book-open",
       title: "高卒認定を取り、\nその先を考えたい",
-      href: "#ged",
+      href: "/learning/#ged",
       tone: "navy",
     },
     {
       icon: "ph-code",
       title: "IT・プログラミングを\n実践で学びたい",
-      href: "#programming",
+      href: "/learning/#programming",
       tone: "green",
     },
     {
       icon: "ph-devices",
       title: "PC・スマホを\n生活や仕事で使いたい",
-      href: "#digital",
+      href: "/learning/#digital",
       tone: "navy",
     },
     {
       icon: "ph-robot",
       title: "ロボット／メイキングの\n実施方法を相談したい",
-      href: "#making",
+      href: "/learning/#making",
       tone: "green",
     },
   ],
