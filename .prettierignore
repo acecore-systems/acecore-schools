@@ -1,0 +1,8 @@
+.agents/
+.astro/
+.codex/
+.worktrees/
+.wrangler/
+dist/
+node_modules/
+.dev-server.*.log

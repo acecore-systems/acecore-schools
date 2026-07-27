@@ -5,8 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && npm run audit:image-alts",
+    "build": "astro build && npm run audit:image-alts && npm run audit:links",
     "audit:image-alts": "node scripts/audit-built-image-alts.mjs",
+    "audit:links": "node scripts/audit-built-links.mjs",
     "preview": "astro preview",
     "deploy:preview": "npm run build && wrangler pages deploy dist --project-name acecore-schools",
     "format:check": "prettier . --check"

@@ -1,0 +1,66 @@
+---
+import { acecoreContactUrl, lineUrl, schoolsContent } from "../data/schools";
+
+const consultation = schoolsContent.consultation;
+---
+
+<section
+  class="consultation section-block"
+  id="consultation"
+  aria-labelledby="consultation-title"
+>
+  <div class="consultation-layout page-shell">
+    <div class="consultation-intro">
+      <div class="section-heading consultation-heading">
+        <p class="section-label">{consultation.eyebrow}</p>
+        <h2 id="consultation-title">{consultation.title}</h2>
+        <p>{consultation.body}</p>
+      </div>
+      <div class="consultation-actions">
+        <a
+          class="button button-primary consultation-button"
+          href={lineUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {consultation.cta}
+          <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>
+        </a>
+        <a class="button consultation-form-button" href={acecoreContactUrl}>
+          {consultation.formCta}
+          <i class="ph ph-arrow-up-right" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
+    <div class="consultation-details">
+      <ol class="consultation-steps">
+        {
+          consultation.steps.map((step) => (
+            <li>
+              <span>{step.number}</span>
+              <div>
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+      <aside class="before-start">
+        <p class="section-label">{consultation.beforeStart.eyebrow}</p>
+        <h3>{consultation.beforeStart.title}</h3>
+        <p>{consultation.beforeStart.body}</p>
+        <ul>
+          {
+            consultation.beforeStart.items.map((item) => (
+              <li>
+                <i class:list={["ph", item.icon]} aria-hidden="true" />
+                <span>{item.label}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>

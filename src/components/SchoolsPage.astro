@@ -1,5 +1,7 @@
 ---
 import "@phosphor-icons/web/regular";
+import ActivitySection from "./ActivitySection.astro";
+import ConsultationSection from "./ConsultationSection.astro";
 import {
   acecoreContactUrl,
   acecoreOrigin,
@@ -9,77 +11,195 @@ import {
   schoolsOrigin,
 } from "../data/schools";
 
+type PageKey =
+  "home" | "learning" | "how-it-works" | "pricing" | "about" | "faq";
+
+interface Props {
+  page?: PageKey;
+}
+
 const content = schoolsContent;
-const canonicalPath = "/";
+const { page = "home" } = Astro.props;
+
+const pageConfigs = {
+  home: {
+    path: "/",
+    eyebrow: "ACECORE SCHOOLS",
+    title: "目的から学びを組み立てるスクール",
+    description: content.description,
+  },
+  learning: {
+    path: "/learning/",
+    eyebrow: "LEARNING AREAS",
+    title: "学べること",
+    description:
+      "高卒認定、IT・プログラミング、PC・スマホ活用、ロボット／メイキングの4領域と、学びの先で目指すことを紹介します。",
+  },
+  "how-it-works": {
+    path: "/how-it-works/",
+    eyebrow: "HOW IT WORKS",
+    title: "学び方・サポート",
+    description:
+      "目的の整理から計画、実践、見直しまでの進め方と、オンラインでの受講方法を紹介します。",
+  },
+  pricing: {
+    path: "/pricing/",
+    eyebrow: "PRICE GUIDE",
+    title: "料金",
+    description:
+      "Acecore Schoolsの入会金、月謝、教材・管理費の税込目安と、受講前に確認できる内容を紹介します。",
+  },
+  about: {
+    path: "/about/",
+    eyebrow: "ABOUT SCHOOLS",
+    title: "Schoolsについて",
+    description:
+      "Acecore Schoolsの考え方、運営元Acecoreとのつながり、これまでの取り組みを紹介します。",
+  },
+  faq: {
+    path: "/faq/",
+    eyebrow: "FAQ",
+    title: "よくあるご質問",
+    description:
+      "学習内容、対象、料金、必要な機器、対面企画など、Acecore Schoolsによく寄せられる質問に回答します。",
+  },
+} as const satisfies Record<
+  PageKey,
+  {
+    path: string;
+    eyebrow: string;
+    title: string;
+    description: string;
+  }
+>;
+
+const pageConfig = pageConfigs[page];
+const canonicalPath = pageConfig.path;
 const canonicalUrl = new URL(canonicalPath, schoolsOrigin).href;
-const pageTitle = `${content.title} | 目的から学びを組み立てるスクール`;
+const pageTitle =
+  page === "home"
+    ? `${content.title} | ${pageConfig.title}`
+    : `${pageConfig.title} | ${content.title}`;
 const heroImage = "/images/schools/purpose-city/hero-city.webp";
 const heroImageUrl = new URL(heroImage, schoolsOrigin).href;
 const supportImage = "/images/schools/purpose-city/support-call.webp";
-const workshopImage =
-  "/images/schools/purpose-city/workshop-robot-summer.webp";
 const acecoreLogo = `${acecoreOrigin}/favicon.svg`;
 const currentYear = new Date().getFullYear();
 
-const organizationId = `${canonicalUrl}#organization`;
-const websiteId = `${canonicalUrl}#website`;
+const homeUrl = new URL("/", schoolsOrigin).href;
+const organizationId = `${homeUrl}#organization`;
+const websiteId = `${homeUrl}#website`;
 const webpageId = `${canonicalUrl}#webpage`;
+
+const jsonLdGraph = [
+  {
+    "@type": "EducationalOrganization",
+    "@id": organizationId,
+    name: content.title,
+    description: content.description,
+    url: homeUrl,
+    image: heroImageUrl,
+    inLanguage: "ja",
+    knowsAbout: content.areas.flatMap((area) => [area.title, ...area.examples]),
+    parentOrganization: {
+      "@type": "Organization",
+      name: "Acecore",
+      url: acecoreOrigin,
+    },
+  },
+  {
+    "@type": "WebSite",
+    "@id": websiteId,
+    name: content.title,
+    url: homeUrl,
+    description: content.description,
+    inLanguage: "ja",
+    publisher: { "@id": organizationId },
+  },
+  {
+    "@type": "WebPage",
+    "@id": webpageId,
+    url: canonicalUrl,
+    name: pageTitle,
+    description: pageConfig.description,
+    image: heroImageUrl,
+    inLanguage: "ja",
+    isPartOf: { "@id": websiteId },
+    about: { "@id": organizationId },
+  },
+];
+
+if (page === "faq") {
+  jsonLdGraph.push({
+    "@type": "FAQPage",
+    "@id": `${canonicalUrl}#faq-schema`,
+    mainEntity: content.faq.items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  });
+}
+
+if (page !== "home") {
+  jsonLdGraph.push({
+    "@type": "BreadcrumbList",
+    "@id": `${canonicalUrl}#breadcrumb`,
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: content.title,
+        item: homeUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: pageConfig.title,
+        item: canonicalUrl,
+      },
+    ],
+  });
+}
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "EducationalOrganization",
-      "@id": organizationId,
-      name: content.title,
-      description: content.description,
-      url: canonicalUrl,
-      image: heroImageUrl,
-      inLanguage: "ja",
-      knowsAbout: content.areas.flatMap((area) => [
-        area.title,
-        ...area.examples,
-      ]),
-      parentOrganization: {
-        "@type": "Organization",
-        name: "Acecore",
-        url: acecoreOrigin,
-      },
-    },
-    {
-      "@type": "WebSite",
-      "@id": websiteId,
-      name: content.title,
-      url: canonicalUrl,
-      description: content.description,
-      inLanguage: "ja",
-      publisher: { "@id": organizationId },
-    },
-    {
-      "@type": "WebPage",
-      "@id": webpageId,
-      url: canonicalUrl,
-      name: pageTitle,
-      description: content.description,
-      image: heroImageUrl,
-      inLanguage: "ja",
-      isPartOf: { "@id": websiteId },
-      about: { "@id": organizationId },
-    },
-    {
-      "@type": "FAQPage",
-      "@id": `${canonicalUrl}#faq-schema`,
-      mainEntity: content.faq.items.map((item) => ({
-        "@type": "Question",
-        name: item.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: item.answer,
-        },
-      })),
-    },
-  ],
+  "@graph": jsonLdGraph,
 };
+
+const homeOverview = [
+  {
+    icon: "ph-books",
+    label: "LEARNING",
+    title: "学べること",
+    body: "4つの領域を、目的に合わせて組み合わせます。",
+    href: "/learning/",
+  },
+  {
+    icon: "ph-path",
+    label: "HOW IT WORKS",
+    title: "学び方",
+    body: "相談と実践を往復しながら、内容とペースを組み直します。",
+    href: "/how-it-works/",
+  },
+  {
+    icon: "ph-receipt",
+    label: "PRICE GUIDE",
+    title: "料金",
+    body: "入会金、月謝、教材・管理費の税込目安を確認できます。",
+    href: "/pricing/",
+  },
+  {
+    icon: "ph-buildings",
+    label: "ABOUT",
+    title: "Schoolsについて",
+    body: "教育事業としての考え方と、運営元Acecoreとのつながりを紹介します。",
+    href: "/about/",
+  },
+] as const;
 ---
 
 <!doctype html>
@@ -89,11 +209,11 @@ const jsonLd = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="msvalidate.01" content="B670753BF4A50FA5437E5694CB04BAFD" />
     <title>{pageTitle}</title>
-    <meta name="description" content={content.description} />
+    <meta name="description" content={pageConfig.description} />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href={canonicalUrl} />
     <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={content.description} />
+    <meta property="og:description" content={pageConfig.description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content={content.title} />
@@ -101,7 +221,7 @@ const jsonLd = {
     <meta property="og:image:alt" content={content.hero.imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
-    <meta name="twitter:description" content={content.description} />
+    <meta name="twitter:description" content={pageConfig.description} />
     <meta name="twitter:image" content={heroImageUrl} />
     <meta name="twitter:image:alt" content={content.hero.imageAlt} />
     <link rel="icon" type="image/svg+xml" href={acecoreLogo} />
@@ -114,14 +234,19 @@ const jsonLd = {
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">本文へ移動</a>
     <header class="site-header" data-header>
       <div class="brand-lockup" aria-label="Acecore Schools">
-        <a class="brand-parent" href={acecoreOrigin} aria-label="Acecore 公式サイト">
+        <a
+          class="brand-parent"
+          href={acecoreOrigin}
+          aria-label="Acecore 公式サイト"
+        >
           <img src={acecoreLogo} alt="Acecore ロゴ" width="32" height="32" />
           <span>Acecore</span>
         </a>
         <span class="brand-divider" aria-hidden="true">/</span>
-        <a class="brand-school" href={canonicalPath}>Schools</a>
+        <a class="brand-school" href="/">Schools</a>
       </div>
 
       <button
@@ -143,12 +268,14 @@ const jsonLd = {
       >
         {
           content.nav.map((item) => (
-            <a href={item.href}>{item.label}</a>
+            <a
+              href={item.href}
+              aria-current={page === item.key ? "page" : undefined}
+            >
+              {item.label}
+            </a>
           ))
         }
-        <a class="nav-about" href={`${acecoreOrigin}/about/`}>
-          運営元 Acecoreについて
-        </a>
       </nav>
 
       <a
@@ -161,422 +288,456 @@ const jsonLd = {
       </a>
     </header>
 
-    <main>
-      <section class="hero" aria-labelledby="hero-title">
-        <img
-          class="hero-image"
-          src={heroImage}
-          alt={content.hero.imageAlt}
-          width="1800"
-          height="900"
-          loading="eager"
-          fetchpriority="high"
-        />
-        <div class="hero-layout page-shell">
-          <h1 id="hero-title">{content.hero.title}</h1>
-          <div class="hero-message">
-            <p class="hero-lead">{content.hero.lead}</p>
-            <p class="hero-body">{content.hero.body}</p>
-            <div class="hero-actions">
-              <a
-                class="button button-primary"
-                href={lineUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {content.hero.primary}
-                <i class="ph ph-arrow-right" aria-hidden="true"></i>
-              </a>
-              <a class="button button-secondary" href="#areas">
-                {content.hero.secondary}
-              </a>
+    <main id="main-content" tabindex="-1">
+      {
+        page !== "home" && (
+          <section class="subpage-hero" aria-labelledby="page-title">
+            <div class="page-shell">
+              <nav class="breadcrumbs" aria-label="パンくず">
+                <ol>
+                  <li>
+                    <a href="/">トップ</a>
+                  </li>
+                  <li aria-current="page">{pageConfig.title}</li>
+                </ol>
+              </nav>
+              <p class="section-label">{pageConfig.eyebrow}</p>
+              <h1 id="page-title">{pageConfig.title}</h1>
+              <p class="subpage-description">{pageConfig.description}</p>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        )
+      }
 
-      <section class="purpose-selector" aria-labelledby="purpose-title">
-        <div class="page-shell">
-          <p class="section-label" id="purpose-title">今日の目的から選ぶ</p>
-          <div class="purpose-grid">
-            {
-              content.purposes.map((purpose) => (
-                <a
-                  class:list={["purpose-card", `purpose-${purpose.tone}`]}
-                  href={purpose.href}
-                >
-                  <i class:list={["ph", purpose.icon]} aria-hidden="true" />
-                  <strong>{purpose.title}</strong>
-                  <i class="ph ph-arrow-right purpose-arrow" aria-hidden="true" />
-                </a>
-              ))
-            }
-          </div>
-        </div>
-      </section>
-
-      <section class="support section-block" id="support" aria-labelledby="support-title">
-        <div class="support-layout page-shell">
-          <div class="support-copy">
-            <div class="section-heading">
-              <p class="section-label">INDIVIDUAL SUPPORT</p>
-              <h2 id="support-title">{content.support.title}</h2>
-              <p>{content.support.body}</p>
-            </div>
-            <div class="support-list">
-              {
-                content.support.points.map((point) => (
-                  <article class="support-item">
-                    <i class:list={["ph", point.icon]} aria-hidden="true" />
-                    <div>
-                      <h3>{point.title}</h3>
-                      <p>{point.body}</p>
-                    </div>
-                  </article>
-                ))
-              }
-            </div>
-            <div class="support-audience">
-              <span>{content.support.audience.label}</span>
-              <div>
-                <strong>{content.support.audience.title}</strong>
-                <p>{content.support.audience.body}</p>
+      {
+        page === "home" && (
+          <>
+            <section class="hero" aria-labelledby="hero-title">
+              <img
+                class="hero-image"
+                src={heroImage}
+                alt={content.hero.imageAlt}
+                width="1800"
+                height="900"
+                loading="eager"
+                fetchpriority="high"
+              />
+              <div class="hero-layout page-shell">
+                <h1 id="hero-title">{content.hero.title}</h1>
+                <div class="hero-message">
+                  <p class="hero-lead">{content.hero.lead}</p>
+                  <p class="hero-body">{content.hero.body}</p>
+                  <div class="hero-actions">
+                    <a
+                      class="button button-primary"
+                      href={lineUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {content.hero.primary}
+                      <i class="ph ph-arrow-right" aria-hidden="true" />
+                    </a>
+                    <a class="button button-secondary" href="/learning/">
+                      {content.hero.secondary}
+                    </a>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <figure class="support-media">
-            <img
-              src={supportImage}
-              alt={content.support.imageAlt}
-              width="1536"
-              height="1024"
-              loading="lazy"
-            />
-          </figure>
-        </div>
-      </section>
+            </section>
 
-      <section class="learning-areas section-block" id="areas" aria-labelledby="areas-title">
-        <div class="page-shell">
-          <div class="section-heading heading-row">
-            <div>
-              <p class="section-label">LEARNING AREAS</p>
-              <h2 id="areas-title">学べる4つの領域</h2>
+            <section class="purpose-selector" aria-labelledby="purpose-title">
+              <div class="page-shell">
+                <p class="section-label" id="purpose-title">
+                  今日の目的から選ぶ
+                </p>
+                <div class="purpose-grid">
+                  {content.purposes.map((purpose) => (
+                    <a
+                      class:list={["purpose-card", `purpose-${purpose.tone}`]}
+                      href={purpose.href}
+                    >
+                      <i class:list={["ph", purpose.icon]} aria-hidden="true" />
+                      <strong>{purpose.title}</strong>
+                      <i
+                        class="ph ph-arrow-right purpose-arrow"
+                        aria-hidden="true"
+                      />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="home-overview section-block"
+              aria-labelledby="overview-title"
+            >
+              <div class="page-shell">
+                <div class="section-heading heading-row">
+                  <div>
+                    <p class="section-label">EXPLORE SCHOOLS</p>
+                    <h2 id="overview-title">知りたいことから選ぶ</h2>
+                  </div>
+                  <p>
+                    ページごとに内容を整理しました。いま確認したいことから進めます。
+                  </p>
+                </div>
+                <div class="overview-grid">
+                  {homeOverview.map((item) => (
+                    <a class="overview-card" href={item.href}>
+                      <i class:list={["ph", item.icon]} aria-hidden="true" />
+                      <span>{item.label}</span>
+                      <h3>{item.title}</h3>
+                      <p>{item.body}</p>
+                      <strong>
+                        詳しく見る
+                        <i class="ph ph-arrow-right" aria-hidden="true" />
+                      </strong>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        )
+      }
+
+      {
+        page === "how-it-works" && (
+          <section
+            class="support section-block"
+            id="support"
+            aria-labelledby="support-title"
+          >
+            <div class="support-layout page-shell">
+              <div class="support-copy">
+                <div class="section-heading">
+                  <p class="section-label">INDIVIDUAL SUPPORT</p>
+                  <h2 id="support-title">{content.support.title}</h2>
+                  <p>{content.support.body}</p>
+                </div>
+                <div class="support-list">
+                  {content.support.points.map((point) => (
+                    <article class="support-item">
+                      <i class:list={["ph", point.icon]} aria-hidden="true" />
+                      <div>
+                        <h3>{point.title}</h3>
+                        <p>{point.body}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+                <div class="support-audience">
+                  <span>{content.support.audience.label}</span>
+                  <div>
+                    <strong>{content.support.audience.title}</strong>
+                    <p>{content.support.audience.body}</p>
+                  </div>
+                </div>
+              </div>
+              <figure class="support-media">
+                <img
+                  src={supportImage}
+                  alt={content.support.imageAlt}
+                  width="1536"
+                  height="1024"
+                  loading="lazy"
+                />
+              </figure>
             </div>
-            <p>
-              固定講座の一覧ではありません。目的に合わせて、扱う領域と実施方法を相談しながら組み立てます。
-            </p>
-          </div>
-          <div class="area-grid">
-            {
-              content.areas.map((area) => (
-                <article class="area-card" id={area.id}>
-                  <figure>
-                    <img
-                      src={area.image}
-                      alt={area.imageAlt}
-                      width="1536"
-                      height="1024"
-                      loading="lazy"
-                    />
-                  </figure>
-                  <div class="area-body">
-                    <div class="area-meta">
-                      <span>{area.number}</span>
-                      <i class:list={["ph", area.icon]} aria-hidden="true" />
-                    </div>
-                    <p class="area-purpose">{area.purpose}</p>
-                    <h3>{area.title}</h3>
-                    <p>{area.body}</p>
-                    <div class="area-examples">
-                      <span>相談できる内容の例</span>
-                      <ul>
-                        {
-                          area.examples.map((example) => (
+          </section>
+        )
+      }
+
+      {
+        page === "learning" && (
+          <section
+            class="learning-areas section-block"
+            id="areas"
+            aria-labelledby="areas-title"
+          >
+            <div class="page-shell">
+              <div class="section-heading heading-row">
+                <div>
+                  <p class="section-label">LEARNING AREAS</p>
+                  <h2 id="areas-title">学べる4つの領域</h2>
+                </div>
+                <p>
+                  固定講座の一覧ではありません。目的に合わせて、扱う領域と実施方法を相談しながら組み立てます。
+                </p>
+              </div>
+              <div class="area-grid">
+                {content.areas.map((area) => (
+                  <article class="area-card" id={area.id}>
+                    <figure>
+                      <img
+                        src={area.image}
+                        alt={area.imageAlt}
+                        width="1536"
+                        height="1024"
+                        loading="lazy"
+                      />
+                    </figure>
+                    <div class="area-body">
+                      <div class="area-meta">
+                        <span>{area.number}</span>
+                        <i class:list={["ph", area.icon]} aria-hidden="true" />
+                      </div>
+                      <p class="area-purpose">{area.purpose}</p>
+                      <h3>{area.title}</h3>
+                      <p>{area.body}</p>
+                      <div class="area-examples">
+                        <span>相談できる内容の例</span>
+                        <ul>
+                          {area.examples.map((example) => (
                             <li>
                               <i class="ph ph-check" aria-hidden="true" />
                               <span>{example}</span>
                             </li>
-                          ))
-                        }
-                      </ul>
+                          ))}
+                        </ul>
+                      </div>
+                      <a href="#consultation">
+                        内容と実施方法を相談
+                        <i class="ph ph-arrow-right" aria-hidden="true" />
+                      </a>
                     </div>
-                    <a href="#consultation">
-                      内容と実施方法を相談
-                      <i class="ph ph-arrow-right" aria-hidden="true" />
-                    </a>
-                  </div>
-                </article>
-              ))
-            }
-          </div>
-        </div>
-      </section>
-
-      <section class="process section-block" id="process" aria-labelledby="process-title">
-        <div class="page-shell">
-          <div class="section-heading process-heading">
-            <p class="section-label">{content.process.eyebrow}</p>
-            <h2 id="process-title">{content.process.title}</h2>
-            <p>{content.process.body}</p>
-          </div>
-          <div class="process-grid">
-            {
-              content.process.steps.map((step) => (
-                <article class="process-step">
-                  <span class="process-number">{step.number}</span>
-                  <i class:list={["ph", step.icon]} aria-hidden="true" />
-                  <h3>{step.title}</h3>
-                  <p>{step.body}</p>
-                </article>
-              ))
-            }
-          </div>
-        </div>
-      </section>
-
-      <section class="support-system section-block" aria-labelledby="support-system-title">
-        <div class="page-shell">
-          <div class="section-heading heading-row compact-heading">
-            <div>
-              <p class="section-label">SUPPORT</p>
-              <h2 id="support-system-title">{content.supportSystem.title}</h2>
+                  </article>
+                ))}
+              </div>
             </div>
-          </div>
-          <div class="system-grid">
-            {
-              content.supportSystem.items.map((item) => (
-                <article>
-                  <i class:list={["ph", item.icon]} aria-hidden="true" />
-                  <h3>{item.title}</h3>
-                  <p>{item.body}</p>
-                </article>
-              ))
-            }
-          </div>
-        </div>
-      </section>
+          </section>
+        )
+      }
 
-      <section class="outcomes section-block" id="outcomes" aria-labelledby="outcomes-title">
-        <div class="page-shell">
-          <div class="section-heading heading-row">
-            <div>
-              <p class="section-label">{content.outcomes.eyebrow}</p>
-              <h2 id="outcomes-title">{content.outcomes.title}</h2>
-            </div>
-            <p>{content.outcomes.body}</p>
-          </div>
-          <div class="outcome-grid">
-            {
-              content.outcomes.items.map((item) => (
-                <article class="outcome-card">
-                  <img
-                    src={item.image}
-                    alt={item.imageAlt}
-                    width="1536"
-                    height="1024"
-                    loading="lazy"
-                  />
-                  <div>
-                    <span>{item.label}</span>
-                    <h3>{item.title}</h3>
-                  </div>
-                </article>
-              ))
-            }
-          </div>
-        </div>
-      </section>
-
-      <section class="facts section-block" id="activity" aria-label="取り組みと受講方法">
-        <div class="facts-grid page-shell">
-          <article class="activity-card">
-            <div class="fact-copy">
-              <p class="section-label">{content.activity.eyebrow}</p>
-              <h2>{content.activity.title}</h2>
-              <p class="fact-lead">{content.activity.body}</p>
-              <p class="fact-note">{content.activity.note}</p>
-            </div>
-            <img
-              src={workshopImage}
-              alt={content.activity.imageAlt}
-              width="1536"
-              height="1024"
-              loading="lazy"
-            />
-          </article>
-
-          <article class="delivery-card" id="delivery">
-            <div class="fact-copy">
-              <p class="section-label">{content.delivery.eyebrow}</p>
-              <h2>{content.delivery.title}</h2>
-              <p class="fact-lead">{content.delivery.body}</p>
-              <p class="fact-note">{content.delivery.note}</p>
-            </div>
-            <ul>
-              {
-                content.delivery.items.map((item) => (
-                  <li>
-                    <i class:list={["ph", item.icon]} aria-hidden="true" />
-                    <span>{item.label}</span>
-                  </li>
-                ))
-              }
-            </ul>
-          </article>
-        </div>
-      </section>
-
-      <section class="acecore-bridge" aria-labelledby="acecore-bridge-title">
-        <div class="acecore-bridge-layout page-shell">
-          <div class="acecore-bridge-copy">
-            <p class="section-label">{content.acecore.eyebrow}</p>
-            <div class="acecore-bridge-brand">
-              <img
-                src={acecoreLogo}
-                alt="Acecore ロゴ"
-                width="40"
-                height="40"
-                loading="lazy"
-              />
-              <span>Acecore <i aria-hidden="true">/</i> Schools</span>
-            </div>
-            <h2 id="acecore-bridge-title">{content.acecore.title}</h2>
-            <p>{content.acecore.body}</p>
-          </div>
-          <div class="acecore-bridge-links">
-            <blockquote>{content.acecore.principle}</blockquote>
-            <nav aria-label="Acecoreの関連ページ">
-              {
-                content.acecore.links.map((item) => (
-                  <a href={`${acecoreOrigin}${item.href}`}>
-                    <span>{item.label}</span>
-                    <i class="ph ph-arrow-up-right" aria-hidden="true" />
-                  </a>
-                ))
-              }
-            </nav>
-          </div>
-        </div>
-      </section>
-
-      <section class="pricing section-block" id="pricing" aria-labelledby="pricing-title">
-        <div class="pricing-layout page-shell">
-          <div class="section-heading pricing-heading">
-            <p class="section-label">{content.pricing.eyebrow}</p>
-            <h2 id="pricing-title">{content.pricing.title}</h2>
-            <p>{content.pricing.body}</p>
-            <a href={acecorePricingUrl}>
-              <span>{content.pricing.linkLabel}</span>
-              <i class="ph ph-arrow-up-right" aria-hidden="true" />
-            </a>
-          </div>
-          <div class="pricing-panel">
-            <dl>
-              {
-                content.pricing.items.map((item) => (
-                  <div class="pricing-row">
-                    <dt>
-                      <i class:list={["ph", item.icon]} aria-hidden="true" />
-                      <span>
-                        <strong>{item.label}</strong>
-                        <small>{item.note}</small>
-                      </span>
-                    </dt>
-                    <dd>{item.amount}</dd>
-                  </div>
-                ))
-              }
-            </dl>
-            <p class="pricing-note">{content.pricing.note}</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="consultation section-block" id="consultation" aria-labelledby="consultation-title">
-        <div class="consultation-layout page-shell">
-          <div class="consultation-intro">
-            <div class="section-heading consultation-heading">
-              <p class="section-label">{content.consultation.eyebrow}</p>
-              <h2 id="consultation-title">{content.consultation.title}</h2>
-              <p>{content.consultation.body}</p>
-            </div>
-            <div class="consultation-actions">
-              <a
-                class="button button-primary consultation-button"
-                href={lineUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {content.consultation.cta}
-                <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>
-              </a>
-              <a
-                class="button consultation-form-button"
-                href={acecoreContactUrl}
-              >
-                {content.consultation.formCta}
-                <i class="ph ph-arrow-up-right" aria-hidden="true"></i>
-              </a>
-            </div>
-          </div>
-          <div class="consultation-details">
-            <ol class="consultation-steps">
-              {
-                content.consultation.steps.map((step) => (
-                  <li>
-                    <span>{step.number}</span>
-                    <div>
+      {
+        page === "how-it-works" && (
+          <>
+            <section
+              class="process section-block"
+              id="process"
+              aria-labelledby="process-title"
+            >
+              <div class="page-shell">
+                <div class="section-heading process-heading">
+                  <p class="section-label">{content.process.eyebrow}</p>
+                  <h2 id="process-title">{content.process.title}</h2>
+                  <p>{content.process.body}</p>
+                </div>
+                <div class="process-grid">
+                  {content.process.steps.map((step) => (
+                    <article class="process-step">
+                      <span class="process-number">{step.number}</span>
+                      <i class:list={["ph", step.icon]} aria-hidden="true" />
                       <h3>{step.title}</h3>
                       <p>{step.body}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="support-system section-block"
+              aria-labelledby="support-system-title"
+            >
+              <div class="page-shell">
+                <div class="section-heading heading-row compact-heading">
+                  <div>
+                    <p class="section-label">SUPPORT</p>
+                    <h2 id="support-system-title">
+                      {content.supportSystem.title}
+                    </h2>
+                  </div>
+                </div>
+                <div class="system-grid">
+                  {content.supportSystem.items.map((item) => (
+                    <article>
+                      <i class:list={["ph", item.icon]} aria-hidden="true" />
+                      <h3>{item.title}</h3>
+                      <p>{item.body}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        )
+      }
+
+      {
+        page === "learning" && (
+          <section
+            class="outcomes section-block"
+            id="outcomes"
+            aria-labelledby="outcomes-title"
+          >
+            <div class="page-shell">
+              <div class="section-heading heading-row">
+                <div>
+                  <p class="section-label">{content.outcomes.eyebrow}</p>
+                  <h2 id="outcomes-title">{content.outcomes.title}</h2>
+                </div>
+                <p>{content.outcomes.body}</p>
+              </div>
+              <div class="outcome-grid">
+                {content.outcomes.items.map((item) => (
+                  <article class="outcome-card">
+                    <img
+                      src={item.image}
+                      alt={item.imageAlt}
+                      width="1536"
+                      height="1024"
+                      loading="lazy"
+                    />
+                    <div>
+                      <span>{item.label}</span>
+                      <h3>{item.title}</h3>
                     </div>
-                  </li>
-                ))
-              }
-            </ol>
-            <aside class="before-start">
-              <p class="section-label">{content.consultation.beforeStart.eyebrow}</p>
-              <h3>{content.consultation.beforeStart.title}</h3>
-              <p>{content.consultation.beforeStart.body}</p>
-              <ul>
-                {
-                  content.consultation.beforeStart.items.map((item) => (
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+      }
+
+      {
+        page === "how-it-works" && (
+          <section class="facts section-block" aria-labelledby="delivery-title">
+            <div class="facts-grid facts-grid-single page-shell">
+              <article class="delivery-card" id="delivery">
+                <div class="fact-copy">
+                  <p class="section-label">{content.delivery.eyebrow}</p>
+                  <h2 id="delivery-title">{content.delivery.title}</h2>
+                  <p class="fact-lead">{content.delivery.body}</p>
+                  <p class="fact-note">{content.delivery.note}</p>
+                </div>
+                <ul>
+                  {content.delivery.items.map((item) => (
                     <li>
                       <i class:list={["ph", item.icon]} aria-hidden="true" />
                       <span>{item.label}</span>
                     </li>
-                  ))
-                }
-              </ul>
-            </aside>
-          </div>
-        </div>
-      </section>
+                  ))}
+                </ul>
+              </article>
+            </div>
+          </section>
+        )
+      }
 
-      <section class="faq section-block" id="faq" aria-labelledby="faq-title">
-        <div class="faq-layout page-shell">
-          <div class="section-heading faq-heading">
-            <p class="section-label">FAQ</p>
-            <h2 id="faq-title">{content.faq.title}</h2>
-            <p>
-              ここにない内容も、無料相談で気軽に聞いてください。
-            </p>
-          </div>
-          <div class="faq-list">
-            {
-              content.faq.items.map((item) => (
-                <details>
-                  <summary>
-                    <span>{item.question}</span>
-                    <i class="ph ph-plus" aria-hidden="true" />
-                  </summary>
-                  <p>{item.answer}</p>
-                </details>
-              ))
-            }
-          </div>
-        </div>
-      </section>
+      {
+        page === "about" && (
+          <section
+            class="acecore-bridge"
+            aria-labelledby="acecore-bridge-title"
+          >
+            <div class="acecore-bridge-layout page-shell">
+              <div class="acecore-bridge-copy">
+                <p class="section-label">{content.acecore.eyebrow}</p>
+                <div class="acecore-bridge-brand">
+                  <img
+                    src={acecoreLogo}
+                    alt="Acecore ロゴ"
+                    width="40"
+                    height="40"
+                    loading="lazy"
+                  />
+                  <span>
+                    Acecore <i aria-hidden="true">/</i> Schools
+                  </span>
+                </div>
+                <h2 id="acecore-bridge-title">{content.acecore.title}</h2>
+                <p>{content.acecore.body}</p>
+              </div>
+              <div class="acecore-bridge-links">
+                <blockquote>{content.acecore.principle}</blockquote>
+                <nav aria-label="Acecoreの関連ページ">
+                  {content.acecore.links.map((item) => (
+                    <a href={`${acecoreOrigin}${item.href}`}>
+                      <span>{item.label}</span>
+                      <i class="ph ph-arrow-up-right" aria-hidden="true" />
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </div>
+          </section>
+        )
+      }
+
+      {page === "about" && <ActivitySection />}
+
+      {
+        page === "pricing" && (
+          <section
+            class="pricing section-block"
+            id="pricing"
+            aria-labelledby="pricing-title"
+          >
+            <div class="pricing-layout page-shell">
+              <div class="section-heading pricing-heading">
+                <p class="section-label">{content.pricing.eyebrow}</p>
+                <h2 id="pricing-title">{content.pricing.title}</h2>
+                <p>{content.pricing.body}</p>
+                <a href={acecorePricingUrl}>
+                  <span>{content.pricing.linkLabel}</span>
+                  <i class="ph ph-arrow-up-right" aria-hidden="true" />
+                </a>
+              </div>
+              <div class="pricing-panel">
+                <dl>
+                  {content.pricing.items.map((item) => (
+                    <div class="pricing-row">
+                      <dt>
+                        <i class:list={["ph", item.icon]} aria-hidden="true" />
+                        <span>
+                          <strong>{item.label}</strong>
+                          <small>{item.note}</small>
+                        </span>
+                      </dt>
+                      <dd>{item.amount}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p class="pricing-note">{content.pricing.note}</p>
+              </div>
+            </div>
+          </section>
+        )
+      }
+
+      {
+        page === "faq" && (
+          <section
+            class="faq section-block"
+            id="faq"
+            aria-labelledby="faq-title"
+          >
+            <div class="faq-layout page-shell">
+              <div class="section-heading faq-heading">
+                <p class="section-label">FAQ</p>
+                <h2 id="faq-title">{content.faq.title}</h2>
+                <p>ここにない内容も、無料相談で気軽に聞いてください。</p>
+              </div>
+              <div class="faq-list">
+                {content.faq.items.map((item) => (
+                  <details>
+                    <summary>
+                      <span>{item.question}</span>
+                      <i class="ph ph-plus" aria-hidden="true" />
+                    </summary>
+                    <p>{item.answer}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+      }
+
+      <ConsultationSection />
     </main>
 
     <footer>
@@ -594,7 +755,7 @@ const jsonLd = {
               <span>Acecore</span>
             </a>
             <span aria-hidden="true">/</span>
-            <a href={canonicalPath}>Schools</a>
+            <a href="/">Schools</a>
           </div>
           <p>{content.footer.tagline}</p>
           <small>運営：Acecore</small>
@@ -604,7 +765,12 @@ const jsonLd = {
             <strong>Schools</strong>
             {
               content.nav.map((item) => (
-                <a href={item.href}>{item.label}</a>
+                <a
+                  href={item.href}
+                  aria-current={page === item.key ? "page" : undefined}
+                >
+                  {item.label}
+                </a>
               ))
             }
           </nav>
@@ -635,8 +801,36 @@ const jsonLd = {
       const toggle = document.querySelector("[data-menu-toggle]");
       const navigation = document.querySelector("[data-navigation]");
 
-      const closeMenu = () => {
-        if (!(header instanceof HTMLElement) || !(toggle instanceof HTMLElement)) {
+      const legacyHashRoutes: Record<string, string> = {
+        "#support": "/how-it-works/#support",
+        "#areas": "/learning/#areas",
+        "#ged": "/learning/#ged",
+        "#programming": "/learning/#programming",
+        "#digital": "/learning/#digital",
+        "#making": "/learning/#making",
+        "#outcomes": "/learning/#outcomes",
+        "#process": "/how-it-works/#process",
+        "#delivery": "/how-it-works/#delivery",
+        "#activity": "/about/#activity",
+        "#pricing": "/pricing/#pricing",
+        "#faq": "/faq/#faq",
+      };
+
+      const redirectLegacyHash = () => {
+        const legacyDestination = legacyHashRoutes[window.location.hash];
+        if (window.location.pathname === "/" && legacyDestination) {
+          window.location.replace(legacyDestination);
+        }
+      };
+
+      redirectLegacyHash();
+      window.addEventListener("hashchange", redirectLegacyHash);
+
+      const closeMenu = (restoreFocus = false) => {
+        if (
+          !(header instanceof HTMLElement) ||
+          !(toggle instanceof HTMLButtonElement)
+        ) {
           return;
         }
         header.classList.remove("menu-open");
@@ -645,22 +839,43 @@ const jsonLd = {
         if (label) label.textContent = "メニューを開く";
         const icon = toggle.querySelector("i");
         if (icon) icon.className = "ph ph-list";
+        if (restoreFocus) toggle.focus();
       };
 
       toggle?.addEventListener("click", () => {
-        if (!(header instanceof HTMLElement) || !(toggle instanceof HTMLElement)) {
+        if (
+          !(header instanceof HTMLElement) ||
+          !(toggle instanceof HTMLButtonElement)
+        ) {
           return;
         }
         const open = header.classList.toggle("menu-open");
         toggle.setAttribute("aria-expanded", String(open));
         const label = toggle.querySelector(".sr-only");
-        if (label) label.textContent = open ? "メニューを閉じる" : "メニューを開く";
+        if (label)
+          label.textContent = open ? "メニューを閉じる" : "メニューを開く";
         const icon = toggle.querySelector("i");
         if (icon) icon.className = open ? "ph ph-x" : "ph ph-list";
       });
 
       navigation?.querySelectorAll("a").forEach((link) => {
-        link.addEventListener("click", closeMenu);
+        link.addEventListener("click", () => closeMenu());
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && header?.classList.contains("menu-open")) {
+          closeMenu(true);
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        if (
+          header instanceof HTMLElement &&
+          event.target instanceof Node &&
+          !header.contains(event.target)
+        ) {
+          closeMenu();
+        }
       });
 
       window.addEventListener("resize", () => {
@@ -688,8 +903,7 @@ const jsonLd = {
     --sans:
       "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo,
       sans-serif;
-    --serif:
-      "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    --serif: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
   }
 
   *,
@@ -774,6 +988,23 @@ const jsonLd = {
     white-space: nowrap;
   }
 
+  .skip-link {
+    position: fixed;
+    z-index: 100;
+    top: 12px;
+    left: 12px;
+    padding: 10px 16px;
+    background: var(--navy-dark);
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-160%);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
   .page-shell {
     width: min(1200px, calc(100% - 80px));
     margin-inline: auto;
@@ -785,7 +1016,7 @@ const jsonLd = {
 
   .section-label {
     color: var(--green);
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.15em;
   }
@@ -878,7 +1109,7 @@ const jsonLd = {
 
   .primary-nav a {
     color: #344654;
-    font-size: 0.79rem;
+    font-size: 0.82rem;
     font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
@@ -889,9 +1120,12 @@ const jsonLd = {
     color: var(--green);
   }
 
-  .nav-about {
-    color: var(--muted) !important;
-    font-size: 0.72rem !important;
+  .primary-nav a[aria-current="page"] {
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--green);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 7px;
   }
 
   .header-cta,
@@ -950,6 +1184,58 @@ const jsonLd = {
     background: var(--paper);
     cursor: pointer;
     font-size: 1.55rem;
+  }
+
+  .subpage-hero {
+    border-bottom: 1px solid var(--line);
+    padding-block: 64px 70px;
+    background:
+      linear-gradient(135deg, rgba(8, 125, 98, 0.08), transparent 42%),
+      var(--canvas-blue);
+  }
+
+  .breadcrumbs {
+    margin-bottom: 36px;
+  }
+
+  .breadcrumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    align-items: center;
+    list-style: none;
+  }
+
+  .breadcrumbs li {
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  .breadcrumbs li + li::before {
+    margin-right: 9px;
+    color: var(--line-strong);
+    content: "/";
+  }
+
+  .breadcrumbs a:hover,
+  .breadcrumbs a:focus-visible {
+    color: var(--green);
+  }
+
+  .subpage-hero h1 {
+    max-width: 820px;
+    margin-top: 12px;
+    font-family: var(--serif);
+    font-size: clamp(2.7rem, 5.4vw, 5rem);
+    font-weight: 600;
+    letter-spacing: 0.025em;
+  }
+
+  .subpage-description {
+    max-width: 720px;
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.5vw, 1.16rem);
   }
 
   .hero {
@@ -1087,6 +1373,74 @@ const jsonLd = {
     font-size: 1rem;
   }
 
+  .home-overview {
+    border-bottom: 1px solid var(--line);
+    background: var(--canvas);
+  }
+
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .overview-card {
+    display: flex;
+    min-height: 300px;
+    border: 1px solid var(--line);
+    padding: 28px;
+    background: var(--paper);
+    text-decoration: none;
+    transition:
+      border-color 180ms ease,
+      transform 180ms ease,
+      box-shadow 180ms ease;
+    flex-direction: column;
+  }
+
+  .overview-card:hover,
+  .overview-card:focus-visible {
+    border-color: var(--green);
+    box-shadow: var(--shadow);
+    transform: translateY(-4px);
+  }
+
+  .overview-card > .ph {
+    color: var(--green);
+    font-size: 2rem;
+  }
+
+  .overview-card > span {
+    margin-top: 24px;
+    color: var(--green);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .overview-card h3 {
+    margin-top: 7px;
+    color: var(--navy);
+    font-family: var(--serif);
+    font-size: 1.45rem;
+  }
+
+  .overview-card p {
+    margin-top: 13px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .overview-card strong {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 22px;
+    color: var(--navy);
+    font-size: 0.875rem;
+  }
+
   .support {
     padding-block: 88px;
     background: var(--paper);
@@ -1146,7 +1500,7 @@ const jsonLd = {
 
   .support-audience > span {
     color: var(--green);
-    font-size: 0.72rem;
+    font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.08em;
   }
@@ -1266,7 +1620,7 @@ const jsonLd = {
   .area-examples > span {
     display: block;
     color: var(--muted);
-    font-size: 0.7rem;
+    font-size: 0.82rem;
     font-weight: 700;
   }
 
@@ -1283,7 +1637,7 @@ const jsonLd = {
     gap: 7px;
     align-items: start;
     color: #314554;
-    font-size: 0.76rem;
+    font-size: 0.85rem;
   }
 
   .area-examples li .ph {
@@ -1429,7 +1783,7 @@ const jsonLd = {
 
   .outcome-card span {
     color: var(--green);
-    font-size: 0.72rem;
+    font-size: 0.8rem;
     font-weight: 700;
   }
 
@@ -1447,6 +1801,10 @@ const jsonLd = {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
+  }
+
+  .facts-grid-single {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .activity-card,
@@ -1524,7 +1882,7 @@ const jsonLd = {
   }
 
   .delivery-card li span {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 600;
   }
 
@@ -1698,7 +2056,7 @@ const jsonLd = {
   .pricing-row dt small {
     max-width: 520px;
     color: var(--muted);
-    font-size: 0.76rem;
+    font-size: 0.85rem;
     font-weight: 400;
     line-height: 1.65;
   }
@@ -1714,7 +2072,7 @@ const jsonLd = {
   .pricing-note {
     margin-top: 16px;
     color: var(--muted);
-    font-size: 0.72rem;
+    font-size: 0.82rem;
   }
 
   .consultation {
@@ -1806,7 +2164,7 @@ const jsonLd = {
   }
 
   .before-start .section-label {
-    font-size: 0.68rem;
+    font-size: 0.8rem;
   }
 
   .before-start h3 {
@@ -1819,7 +2177,7 @@ const jsonLd = {
     max-width: 650px;
     margin-top: 7px;
     color: rgba(255, 255, 255, 0.68);
-    font-size: 0.78rem;
+    font-size: 0.85rem;
   }
 
   .before-start ul {
@@ -1837,7 +2195,7 @@ const jsonLd = {
     min-height: 42px;
     border: 1px solid rgba(255, 255, 255, 0.22);
     padding: 9px 12px;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 
   .before-start li .ph {
@@ -1954,7 +2312,7 @@ const jsonLd = {
     display: block;
     margin-top: 18px;
     color: rgba(255, 255, 255, 0.58);
-    font-size: 0.7rem;
+    font-size: 0.8rem;
   }
 
   .footer-nav-grid {
@@ -1972,13 +2330,13 @@ const jsonLd = {
   .footer-nav-grid strong {
     margin-bottom: 4px;
     color: white;
-    font-size: 0.75rem;
+    font-size: 0.82rem;
     letter-spacing: 0.08em;
   }
 
   .footer-nav-grid a {
     color: rgba(255, 255, 255, 0.72);
-    font-size: 0.76rem;
+    font-size: 0.85rem;
     text-decoration: none;
   }
 
@@ -1995,7 +2353,7 @@ const jsonLd = {
     border-top: 1px solid rgba(255, 255, 255, 0.16);
     padding-top: 22px;
     color: rgba(255, 255, 255, 0.58);
-    font-size: 0.68rem;
+    font-size: 0.78rem;
   }
 
   :focus-visible {
@@ -2020,10 +2378,6 @@ const jsonLd = {
 
     .primary-nav {
       gap: 15px;
-    }
-
-    .primary-nav .nav-about {
-      display: none;
     }
 
     .support-layout {
@@ -2052,6 +2406,10 @@ const jsonLd = {
   @media (max-width: 980px) {
     .page-shell {
       width: min(100% - 40px, 760px);
+    }
+
+    .overview-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .site-header {
@@ -2087,8 +2445,7 @@ const jsonLd = {
       display: flex;
     }
 
-    .primary-nav a,
-    .primary-nav .nav-about {
+    .primary-nav a {
       display: block;
       padding: 10px 12px;
       font-size: 0.9rem !important;
@@ -2200,12 +2557,27 @@ const jsonLd = {
       grid-template-columns: 1fr;
       gap: 36px;
     }
-
   }
 
   @media (max-width: 700px) {
     .section-block {
       padding-block: 56px;
+    }
+
+    .subpage-hero {
+      padding-block: 42px 50px;
+    }
+
+    .breadcrumbs {
+      margin-bottom: 26px;
+    }
+
+    .overview-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .overview-card {
+      min-height: 250px;
     }
 
     .header-cta {
