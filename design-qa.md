@@ -13,6 +13,7 @@
 - Final desktop contact sheet: `artifacts/quality-audit-2/final-desktop-contact.webp`
 - Final mobile contact sheet: `artifacts/quality-audit-2/final-mobile-contact.webp`
 - Acecore reference capture: `artifacts/quality-audit-2/09-acecore-net-home.png`
+- フッターロゴと料金復元の最終追補は、最新branch previewで別途確認
 
 ## 旧サイト情報の扱い
 
@@ -26,11 +27,11 @@
 - 学生、社会人、シニアまでを対象に、年齢ではなく目的と現在地から組み立てること
 - 高卒認定以外の学校学習・試験対策を相談できること
 - 受講前に内容、進め方・頻度、機器・教材、費用を確認できること
+- Acecore.netの現行料金ページと照合した、入会金・月謝・教材／管理費の税込目安
 - LINEに加え、AcecoreのSchools専用問い合わせフォーム
 
 ### 現行性を確認できないため復元しない
 
-- 旧料金表の具体額
 - 旧曜日・時間帯・固定頻度
 - 無料体験授業、端末貸出
 - 会員ポータル、予約変更、ICSなど未提供の将来機能

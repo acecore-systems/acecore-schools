@@ -3,6 +3,7 @@ import "@phosphor-icons/web/regular";
 import {
   acecoreContactUrl,
   acecoreOrigin,
+  acecorePricingUrl,
   lineUrl,
   schoolsContent,
   schoolsOrigin,
@@ -166,8 +167,8 @@ const jsonLd = {
           class="hero-image"
           src={heroImage}
           alt={content.hero.imageAlt}
-          width="2048"
-          height="1152"
+          width="1800"
+          height="900"
           loading="eager"
           fetchpriority="high"
         />
@@ -455,6 +456,39 @@ const jsonLd = {
                 ))
               }
             </nav>
+          </div>
+        </div>
+      </section>
+
+      <section class="pricing section-block" id="pricing" aria-labelledby="pricing-title">
+        <div class="pricing-layout page-shell">
+          <div class="section-heading pricing-heading">
+            <p class="section-label">{content.pricing.eyebrow}</p>
+            <h2 id="pricing-title">{content.pricing.title}</h2>
+            <p>{content.pricing.body}</p>
+            <a href={acecorePricingUrl}>
+              <span>{content.pricing.linkLabel}</span>
+              <i class="ph ph-arrow-up-right" aria-hidden="true" />
+            </a>
+          </div>
+          <div class="pricing-panel">
+            <dl>
+              {
+                content.pricing.items.map((item) => (
+                  <div class="pricing-row">
+                    <dt>
+                      <i class:list={["ph", item.icon]} aria-hidden="true" />
+                      <span>
+                        <strong>{item.label}</strong>
+                        <small>{item.note}</small>
+                      </span>
+                    </dt>
+                    <dd>{item.amount}</dd>
+                  </div>
+                ))
+              }
+            </dl>
+            <p class="pricing-note">{content.pricing.note}</p>
           </div>
         </div>
       </section>
@@ -949,7 +983,7 @@ const jsonLd = {
     padding: 24px 18px;
     background: rgba(255, 255, 255, 0.82);
     font-family: var(--serif);
-    font-size: clamp(4rem, 6vw, 6.7rem);
+    font-size: clamp(4rem, 6vw, 5.8rem);
     font-weight: 600;
     letter-spacing: 0.08em;
     line-height: 1.12;
@@ -1580,6 +1614,109 @@ const jsonLd = {
     color: #0009e6;
   }
 
+  .pricing {
+    padding-block: 72px;
+    background: var(--canvas-blue);
+  }
+
+  .pricing-layout {
+    display: grid;
+    grid-template-columns: minmax(300px, 0.68fr) minmax(0, 1.32fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  .pricing-heading {
+    position: sticky;
+    top: 110px;
+  }
+
+  .pricing-heading > p:last-of-type {
+    max-width: 500px;
+    color: var(--muted);
+  }
+
+  .pricing-heading > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    border-bottom: 1px solid var(--navy);
+    padding-bottom: 3px;
+    color: var(--navy);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .pricing-heading > a:hover,
+  .pricing-heading > a:focus-visible {
+    color: var(--green);
+    border-color: var(--green);
+  }
+
+  .pricing-panel {
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .pricing-panel dl {
+    margin: 0;
+  }
+
+  .pricing-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 28px;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    padding: 22px 4px;
+  }
+
+  .pricing-row dt {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .pricing-row dt > .ph {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: var(--green);
+    font-size: 1.25rem;
+  }
+
+  .pricing-row dt span {
+    display: grid;
+    gap: 5px;
+  }
+
+  .pricing-row dt strong {
+    color: var(--ink);
+    font-size: 0.92rem;
+  }
+
+  .pricing-row dt small {
+    max-width: 520px;
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 400;
+    line-height: 1.65;
+  }
+
+  .pricing-row dd {
+    margin: 0;
+    color: var(--navy);
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .pricing-note {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
   .consultation {
     padding-block: 72px;
     background: var(--navy-dark);
@@ -1797,10 +1934,9 @@ const jsonLd = {
   }
 
   .footer-brand-lockup img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: white;
+    width: 30px;
+    height: 30px;
+    filter: brightness(0) invert(1);
   }
 
   .footer-brand-lockup > span {
@@ -1817,7 +1953,7 @@ const jsonLd = {
   .footer-brand small {
     display: block;
     margin-top: 18px;
-    color: rgba(255, 255, 255, 0.48);
+    color: rgba(255, 255, 255, 0.58);
     font-size: 0.7rem;
   }
 
@@ -1858,13 +1994,14 @@ const jsonLd = {
     margin-top: 48px;
     border-top: 1px solid rgba(255, 255, 255, 0.16);
     padding-top: 22px;
-    color: rgba(255, 255, 255, 0.46);
+    color: rgba(255, 255, 255, 0.58);
     font-size: 0.68rem;
   }
 
   :focus-visible {
-    outline: 3px solid #31b997;
+    outline: 3px solid white;
     outline-offset: 3px;
+    box-shadow: 0 0 0 6px var(--green);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1934,12 +2071,16 @@ const jsonLd = {
       right: 20px;
       left: 20px;
       display: none;
+      max-height: calc(100vh - 88px);
+      max-height: calc(100svh - 88px);
+      overflow-y: auto;
       align-items: stretch;
       border: 1px solid var(--line);
       padding: 12px;
       background: var(--paper);
       box-shadow: var(--shadow);
       flex-direction: column;
+      overscroll-behavior: contain;
     }
 
     .menu-open .primary-nav {
@@ -1985,6 +2126,7 @@ const jsonLd = {
     .support-layout,
     .facts-grid,
     .acecore-bridge-layout,
+    .pricing-layout,
     .consultation-layout,
     .faq-layout {
       grid-template-columns: 1fr;
@@ -2017,6 +2159,7 @@ const jsonLd = {
     }
 
     .acecore-bridge-layout,
+    .pricing-layout,
     .consultation-layout {
       gap: 42px;
     }
@@ -2042,6 +2185,10 @@ const jsonLd = {
     }
 
     .faq-heading {
+      position: static;
+    }
+
+    .pricing-heading {
       position: static;
     }
 
@@ -2228,6 +2375,7 @@ const jsonLd = {
 
     .facts,
     .faq,
+    .pricing,
     .consultation {
       padding-block: 56px;
     }
@@ -2347,6 +2495,15 @@ const jsonLd = {
 
     .fact-copy {
       padding: 26px 22px;
+    }
+
+    .pricing-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .pricing-row dd {
+      padding-left: 39px;
     }
 
     .consultation-actions,

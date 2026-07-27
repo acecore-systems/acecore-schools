@@ -7,6 +7,7 @@ export const schoolsContent = {
     { label: "学べること", href: "#areas" },
     { label: "学び方・サポート", href: "#process" },
     { label: "受講方法", href: "#delivery" },
+    { label: "料金", href: "#pricing" },
     { label: "よくある質問", href: "#faq" },
   ],
   hero: {
@@ -231,9 +232,9 @@ export const schoolsContent = {
   activity: {
     eyebrow: "PAST ACTIVITY",
     title: "これまでの取り組み",
-    body: "夏季限定の対面ロボット教室を実施しました。",
+    body: "2023年夏季限定で、対面のロボット工作体験を実施しました。",
     note: "現在開催中の講座ではありません。対面企画を実施する際は、サイトでお知らせします。",
-    imageAlt: "夏季の対面ロボット教室で機構を確かめる参加者",
+    imageAlt: "2023年夏季の対面ロボット工作体験で機構を確かめる参加者",
   },
   delivery: {
     eyebrow: "CURRENT FORMAT",
@@ -245,6 +246,33 @@ export const schoolsContent = {
       { icon: "ph-laptop", label: "PCまたは内容に合う端末" },
       { icon: "ph-chats-circle", label: "ビデオ通話・画面共有" },
     ],
+  },
+  pricing: {
+    eyebrow: "PRICE GUIDE",
+    title: "受講料金の目安",
+    body: "目的、内容、回数、利用する教材・環境に合わせて変動します。受講前に正式な金額をご案内します。",
+    items: [
+      {
+        icon: "ph-sign-in",
+        label: "入会金",
+        amount: "1.1万〜2.2万円",
+        note: "初回のみ。支援内容や準備物により変動します。",
+      },
+      {
+        icon: "ph-calendar-dots",
+        label: "月謝",
+        amount: "8千〜3.3万円",
+        note: "回数、時間、支援内容、進め方により変動します。",
+      },
+      {
+        icon: "ph-books",
+        label: "教材・管理費",
+        amount: "5千〜3万円程度",
+        note: "教材、ロボット部材、PC・ライセンス費などは内容により実費が発生します。",
+      },
+    ],
+    note: "すべて税込の目安です。教材、機材、交通費などの外部実費は別途となる場合があります。",
+    linkLabel: "Acecoreの料金ページで詳細を見る",
   },
   acecore: {
     eyebrow: "ACECORE NETWORK",
@@ -323,7 +351,7 @@ export const schoolsContent = {
       {
         question: "料金はいつ分かりますか？",
         answer:
-          "学ぶ内容や進め方によって異なるため、無料相談後のご提案で、受講を決める前に費用をご案内します。",
+          "このページに入会金、月謝、教材・管理費の目安を掲載しています。正式な金額は、目的や進め方を確認したうえで、受講を決める前にご案内します。",
       },
       {
         question: "受講に必要な機器はありますか？",
@@ -333,7 +361,7 @@ export const schoolsContent = {
       {
         question: "対面のロボット教室は開催していますか？",
         answer:
-          "現在開催中の常設講座ではありません。これまでに夏季限定で実施しており、対面企画を行う際はサイトでお知らせします。",
+          "現在開催中の常設講座ではありません。2023年夏季限定で対面のロボット工作体験を実施しました。今後、対面企画を行う際はサイトでお知らせします。",
       },
     ],
   },
@@ -347,4 +375,5 @@ export const schoolsOrigin = "https://schools.acecore.net";
 export const acecoreOrigin = "https://acecore.net";
 export const acecoreContactUrl =
   "https://acecore.net/contact/?category=service&service=education#contact-form";
+export const acecorePricingUrl = "https://acecore.net/pricing/#schools";
 export const lineUrl = "https://lin.ee/DjIrdqj";
