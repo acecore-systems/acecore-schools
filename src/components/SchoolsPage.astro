@@ -12,7 +12,12 @@ import {
 } from "../data/schools";
 
 type PageKey =
-  "home" | "learning" | "how-it-works" | "pricing" | "about" | "faq";
+  | "home"
+  | "learning"
+  | "how-it-works"
+  | "pricing"
+  | "about"
+  | "faq";
 
 interface Props {
   page?: PageKey;
@@ -27,6 +32,13 @@ const pageConfigs = {
     eyebrow: "ACECORE SCHOOLS",
     title: "目的から学びを組み立てるスクール",
     description: content.description,
+    heroImage: {
+      src: "/images/schools/purpose-city/hero-city.webp",
+      alt: content.hero.imageAlt,
+      width: 1800,
+      height: 900,
+      position: "center center",
+    },
   },
   learning: {
     path: "/learning/",
@@ -34,6 +46,13 @@ const pageConfigs = {
     title: "学べること",
     description:
       "高卒認定、IT・プログラミング、PC・スマホ活用、ロボット／メイキングの4領域と、学びの先で目指すことを紹介します。",
+    heroImage: {
+      src: "/images/schools/purpose-city/hero-learning.webp",
+      alt: "教材、ノートパソコン、スマートフォン、小型電子部品を並べて学ぶ内容を整理する受講者",
+      width: 1536,
+      height: 806,
+      position: "68% center",
+    },
   },
   "how-it-works": {
     path: "/how-it-works/",
@@ -41,6 +60,13 @@ const pageConfigs = {
     title: "学び方・サポート",
     description:
       "目的の整理から計画、実践、見直しまでの進め方と、オンラインでの受講方法を紹介します。",
+    heroImage: {
+      src: "/images/schools/purpose-city/hero-how-it-works.webp",
+      alt: "カードとノートを使って学習の順番を相談する受講者と講師",
+      width: 1536,
+      height: 806,
+      position: "68% center",
+    },
   },
   pricing: {
     path: "/pricing/",
@@ -48,6 +74,13 @@ const pageConfigs = {
     title: "料金",
     description:
       "Acecore Schoolsの入会金、月謝、教材・管理費の税込目安と、受講前に確認できる内容を紹介します。",
+    heroImage: {
+      src: "/images/schools/purpose-city/hero-pricing.webp",
+      alt: "受講内容と費用の提案資料を相談相手と確認する受講希望者",
+      width: 1536,
+      height: 806,
+      position: "70% center",
+    },
   },
   about: {
     path: "/about/",
@@ -55,6 +88,13 @@ const pageConfigs = {
     title: "Schoolsについて",
     description:
       "Acecore Schoolsの考え方、運営元Acecoreとのつながり、これまでの取り組みを紹介します。",
+    heroImage: {
+      src: "/images/schools/purpose-city/hero-about.webp",
+      alt: "ノートパソコンと電子機材のあるスタジオで教材を準備する運営者",
+      width: 1536,
+      height: 806,
+      position: "70% center",
+    },
   },
   faq: {
     path: "/faq/",
@@ -62,6 +102,13 @@ const pageConfigs = {
     title: "よくあるご質問",
     description:
       "学習内容、対象、料金、必要な機器、対面企画など、Acecore Schoolsによく寄せられる質問に回答します。",
+    heroImage: {
+      src: "/images/schools/purpose-city/hero-faq.webp",
+      alt: "オンライン相談で受講前の疑問を質問する受講希望者",
+      width: 1536,
+      height: 806,
+      position: "68% center",
+    },
   },
 } as const satisfies Record<
   PageKey,
@@ -70,6 +117,13 @@ const pageConfigs = {
     eyebrow: string;
     title: string;
     description: string;
+    heroImage: {
+      src: string;
+      alt: string;
+      width: number;
+      height: number;
+      position: string;
+    };
   }
 >;
 
@@ -80,8 +134,9 @@ const pageTitle =
   page === "home"
     ? `${content.title} | ${pageConfig.title}`
     : `${pageConfig.title} | ${content.title}`;
-const heroImage = "/images/schools/purpose-city/hero-city.webp";
-const heroImageUrl = new URL(heroImage, schoolsOrigin).href;
+const pageHeroImageUrl = new URL(pageConfig.heroImage.src, schoolsOrigin).href;
+const homeHeroImageUrl = new URL(pageConfigs.home.heroImage.src, schoolsOrigin)
+  .href;
 const supportImage = "/images/schools/purpose-city/support-call.webp";
 const acecoreLogo = `${acecoreOrigin}/favicon.svg`;
 const currentYear = new Date().getFullYear();
@@ -98,7 +153,7 @@ const jsonLdGraph = [
     name: content.title,
     description: content.description,
     url: homeUrl,
-    image: heroImageUrl,
+    image: homeHeroImageUrl,
     inLanguage: "ja",
     knowsAbout: content.areas.flatMap((area) => [area.title, ...area.examples]),
     parentOrganization: {
@@ -122,7 +177,7 @@ const jsonLdGraph = [
     url: canonicalUrl,
     name: pageTitle,
     description: pageConfig.description,
-    image: heroImageUrl,
+    image: pageHeroImageUrl,
     inLanguage: "ja",
     isPartOf: { "@id": websiteId },
     about: { "@id": organizationId },
@@ -217,13 +272,13 @@ const homeOverview = [
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content={content.title} />
-    <meta property="og:image" content={heroImageUrl} />
-    <meta property="og:image:alt" content={content.hero.imageAlt} />
+    <meta property="og:image" content={pageHeroImageUrl} />
+    <meta property="og:image:alt" content={pageConfig.heroImage.alt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={pageConfig.description} />
-    <meta name="twitter:image" content={heroImageUrl} />
-    <meta name="twitter:image:alt" content={content.hero.imageAlt} />
+    <meta name="twitter:image" content={pageHeroImageUrl} />
+    <meta name="twitter:image:alt" content={pageConfig.heroImage.alt} />
     <link rel="icon" type="image/svg+xml" href={acecoreLogo} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -292,6 +347,16 @@ const homeOverview = [
       {
         page !== "home" && (
           <section class="subpage-hero" aria-labelledby="page-title">
+            <img
+              class="subpage-hero-image"
+              src={pageConfig.heroImage.src}
+              alt={pageConfig.heroImage.alt}
+              width={pageConfig.heroImage.width}
+              height={pageConfig.heroImage.height}
+              loading="eager"
+              fetchpriority="high"
+              style={`object-position: ${pageConfig.heroImage.position};`}
+            />
             <div class="page-shell">
               <nav class="breadcrumbs" aria-label="パンくず">
                 <ol>
@@ -315,10 +380,10 @@ const homeOverview = [
             <section class="hero" aria-labelledby="hero-title">
               <img
                 class="hero-image"
-                src={heroImage}
-                alt={content.hero.imageAlt}
-                width="1800"
-                height="900"
+                src={pageConfig.heroImage.src}
+                alt={pageConfig.heroImage.alt}
+                width={pageConfig.heroImage.width}
+                height={pageConfig.heroImage.height}
                 loading="eager"
                 fetchpriority="high"
               />
@@ -1187,11 +1252,43 @@ const homeOverview = [
   }
 
   .subpage-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     border-bottom: 1px solid var(--line);
     padding-block: 64px 70px;
-    background:
-      linear-gradient(135deg, rgba(8, 125, 98, 0.08), transparent 42%),
-      var(--canvas-blue);
+    background: var(--canvas-blue);
+  }
+
+  .subpage-hero::before {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      var(--canvas-blue) 0%,
+      rgba(243, 247, 250, 0.99) 40%,
+      rgba(243, 247, 250, 0.88) 56%,
+      rgba(243, 247, 250, 0.25) 76%,
+      rgba(243, 247, 250, 0.06) 100%
+    );
+    content: "";
+    pointer-events: none;
+  }
+
+  .subpage-hero-image {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    right: 0;
+    width: 56%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .subpage-hero .page-shell {
+    position: relative;
+    z-index: 2;
   }
 
   .breadcrumbs {
@@ -2565,7 +2662,31 @@ const homeOverview = [
     }
 
     .subpage-hero {
-      padding-block: 42px 50px;
+      padding-block: 42px 218px;
+    }
+
+    .subpage-hero::before {
+      inset: auto 0 0;
+      height: 210px;
+      background: linear-gradient(
+        180deg,
+        var(--canvas-blue) 0%,
+        rgba(243, 247, 250, 0.55) 20%,
+        rgba(243, 247, 250, 0.08) 62%,
+        transparent 100%
+      );
+    }
+
+    .subpage-hero-image {
+      top: auto;
+      bottom: 0;
+      width: 100%;
+      height: 200px;
+    }
+
+    .subpage-hero h1 {
+      font-size: clamp(2.15rem, 9.5vw, 2.7rem);
+      text-wrap: balance;
     }
 
     .breadcrumbs {
