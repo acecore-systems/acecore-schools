@@ -15,8 +15,13 @@ const workshopImage = "/images/schools/purpose-city/workshop-robot-summer.webp";
       <div class="fact-copy">
         <p class="section-label">{activity.eyebrow}</p>
         <h2 id="activity-title">{activity.title}</h2>
+        <span class="activity-status">{activity.status}</span>
         <p class="fact-lead">{activity.body}</p>
         <p class="fact-note">{activity.note}</p>
+        <a class="activity-link" href={activity.href}>
+          <span>{activity.linkLabel}</span>
+          <i class="ph ph-arrow-right" aria-hidden="true"></i>
+        </a>
       </div>
       <img
         src={workshopImage}

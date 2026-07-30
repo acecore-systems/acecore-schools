@@ -270,7 +270,78 @@ export const schoolsContent = {
     title: "これまでの取り組み",
     body: "2023年夏季限定で、対面のロボット工作体験を実施しました。",
     note: "現在開催中の講座ではありません。対面企画を実施する際は、サイトでお知らせします。",
-    imageAlt: "2023年夏季の対面ロボット工作体験で機構を確かめる参加者",
+    status: "募集終了",
+    href: "/activities/2023-summer-robot-workshop/",
+    linkLabel: "2023年夏の活動記録を詳しく見る",
+    imageAlt: "ロボットの組み立てと動作確認を表したイメージビジュアル",
+  },
+  activityRecord: {
+    eyebrow: "ACTIVITY RECORD",
+    title: "2023年夏のロボット工作体験",
+    description:
+      "Acecore Schoolsが2023年夏に小中学生を対象として実施した、対面ロボット工作体験の活動記録です。募集は終了しています。",
+    status: "募集終了",
+    lead: "機構を組み立て、改造し、実際の動きを確かめることを通じて、ものづくりを体験する夏季限定イベントを実施しました。",
+    imageAlt: "ロボットの組み立てと動作確認を表したイメージビジュアル",
+    imageCaption: "活動内容を表したイメージビジュアルです。",
+    displayDate: "2023年8月20日・27日",
+    dateTime: "2023-08",
+    locationName: "桜台市民センター 3階 講座室2",
+    publishedAt: "2023-07-19",
+    modifiedAt: "2026-07-30",
+    eventDates: [
+      {
+        label: "2023年8月20日",
+        startDate: "2023-08-20T14:00:00+09:00",
+        endDate: "2023-08-20T15:30:00+09:00",
+      },
+      {
+        label: "2023年8月27日",
+        startDate: "2023-08-27T14:00:00+09:00",
+        endDate: "2023-08-27T15:30:00+09:00",
+      },
+    ],
+    facts: [
+      { label: "対象", value: "小学生〜中学生（幼児は相談）" },
+      {
+        label: "場所",
+        value: "桜台市民センター 3階 講座室2",
+      },
+      { label: "開催日", value: "2023年8月20日・27日" },
+      { label: "時間", value: "各日14:00開始（90分間）" },
+      {
+        label: "内容",
+        value: "45分の工作＋45分の改造・動作体験",
+      },
+      { label: "参加費", value: "1人1回 2,000円（教材費込み）" },
+      {
+        label: "教材",
+        value: "タミヤ 楽しい工作シリーズ（持ち帰り）",
+      },
+      { label: "定員", value: "各回10名（要予約）" },
+    ],
+    sections: [
+      {
+        title: "実施したこと",
+        paragraphs: [
+          "工作、改造、動作確認を一つずつ重ね、仕組みを手で確かめる時間としました。完成後は、動きを見ながら機構を調整しました。",
+          "このイベントはプログラミング教室ではなく、ロボットの機構と動きを扱うメイキング体験として実施したものです。自由研究にも活用できる内容として案内しました。",
+        ],
+      },
+      {
+        title: "当時の特典",
+        paragraphs: [
+          "当時は、LINE登録者を対象に200円の割引を実施しました。現在利用できる特典ではありません。",
+        ],
+      },
+      {
+        title: "現在のご案内",
+        paragraphs: [
+          "このイベントの募集は終了しています。現在、通常の学習サポートはオンラインで提供しています。",
+          "対面のロボット／メイキングは常設ではありません。今後、対面企画を実施する場合は、このサイトでお知らせします。",
+        ],
+      },
+    ],
   },
   delivery: {
     eyebrow: "CURRENT FORMAT",
@@ -308,7 +379,7 @@ export const schoolsContent = {
       },
     ],
     note: "すべて税込の目安です。教材、機材、交通費などの外部実費は別途となる場合があります。",
-    linkLabel: "Acecoreの料金ページで詳細を見る",
+    cta: "料金について無料相談する",
   },
   acecore: {
     eyebrow: "ACECORE NETWORK",
@@ -316,17 +387,17 @@ export const schoolsContent = {
     body: "Acecoreは、Web制作・サーバー運用・デザインなどを横断して支援しています。Schoolsは、その現場で培う視点を学習支援へつなぐAcecoreの教育事業です。",
     principle: "技術、運用、表現、教育を分断せず、一つの支援線として扱う。",
     links: [
-      { label: "Acecoreのサービス", href: "/services/" },
+      { label: "Acecoreの事業", href: "/services/" },
       { label: "Acecoreについて", href: "/about/" },
-      { label: "Acecoreのブログ", href: "/blog/" },
+      { label: "Acecoreのニュース", href: "/blog/" },
     ],
   },
   consultation: {
     eyebrow: "GET STARTED",
     title: "迷ったら、まずは相談してみませんか？",
-    body: "学ぶ内容が決まっていなくても大丈夫です。いまの状況と、できるようになりたいことから一緒に整理します。",
-    cta: "LINEで無料相談を申し込む",
-    formCta: "問い合わせフォームで相談",
+    body: "相談は無料です。学ぶ内容が決まっていなくても、いまの状況と、できるようになりたいことから一緒に整理します。",
+    cta: "LINEで無料相談する",
+    formCta: "フォームで無料相談する",
     beforeStart: {
       eyebrow: "BEFORE YOU START",
       title: "受講を決める前に確認できること",
@@ -387,7 +458,7 @@ export const schoolsContent = {
       {
         question: "料金はいつ分かりますか？",
         answer:
-          "このページに入会金、月謝、教材・管理費の目安を掲載しています。正式な金額は、目的や進め方を確認したうえで、受講を決める前にご案内します。",
+          "料金ページに入会金、月謝、教材・管理費の目安を掲載しています。正式な金額は、目的や進め方を確認したうえで、受講を決める前にご案内します。",
       },
       {
         question: "受講に必要な機器はありますか？",
@@ -411,5 +482,4 @@ export const schoolsOrigin = "https://schools.acecore.net";
 export const acecoreOrigin = "https://acecore.net";
 export const acecoreContactUrl =
   "https://acecore.net/contact/?category=service&service=education#contact-form";
-export const acecorePricingUrl = "https://acecore.net/pricing/#schools";
 export const lineUrl = "https://lin.ee/DjIrdqj";
