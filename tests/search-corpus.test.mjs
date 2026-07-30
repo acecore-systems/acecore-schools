@@ -142,12 +142,52 @@ test("6つの公開routeからja namespaceのcorpusを生成する", async (t) =
   );
 
   for (const chunk of corpus.chunks) {
-    assert.match(chunk.id, /^schools-v1-[0-9a-f]{48}$/u);
+    assert.match(chunk.id, /^schools-v2-[0-9a-f]{48}$/u);
     assert.equal(chunk.namespace, "ja");
     assert.equal(chunk.metadata.locale, "ja");
+    assert.match(chunk.metadata.contentDigest, /^[0-9a-f]{20}$/u);
     assert.ok(SEARCH_REQUIRED_SOURCE_PATHS.includes(chunk.metadata.url));
     assert.ok(chunk.text.length <= SEARCH_MAX_CHUNK_LENGTH);
   }
+});
+
+test("本文変更では安定IDを維持しcorpus versionだけを更新する", async (t) => {
+  const distDir = await createCompleteDist();
+  t.after(() => rm(distDir, { recursive: true, force: true }));
+
+  const first = await buildSearchCorpus({ distDir, write: false });
+  await writeDistPage(
+    distDir,
+    "/faq/",
+    pageHtml({
+      path: "/faq/",
+      title: "よくある質問",
+      body: `
+        <p>相談前に確認できる質問と回答を、最新の案内に合わせて掲載します。</p>
+        <h2>相談方法</h2>
+        <p>目的と現在地を確認し、必要な学び方を一緒に整理します。</p>
+      `,
+    }),
+  );
+  const second = await buildSearchCorpus({ distDir, write: false });
+
+  const firstIds = first.chunks
+    .filter(({ metadata }) => metadata.url === "/faq/")
+    .map(({ id }) => id);
+  const secondIds = second.chunks
+    .filter(({ metadata }) => metadata.url === "/faq/")
+    .map(({ id }) => id);
+
+  assert.deepEqual(secondIds, firstIds);
+  assert.notEqual(second.version, first.version);
+  assert.notDeepEqual(
+    second.chunks
+      .filter(({ metadata }) => metadata.url === "/faq/")
+      .map(({ metadata }) => metadata.contentDigest),
+    first.chunks
+      .filter(({ metadata }) => metadata.url === "/faq/")
+      .map(({ metadata }) => metadata.contentDigest),
+  );
 });
 
 test("必須routeが欠けたcorpus生成を停止する", async (t) => {

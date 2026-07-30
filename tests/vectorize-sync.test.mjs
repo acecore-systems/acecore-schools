@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -8,6 +7,8 @@ import test from "node:test";
 import {
   SEARCH_EMBEDDING_DIMENSIONS,
   SEARCH_REQUIRED_SOURCE_PATHS,
+  calculateSearchChunkDigest,
+  calculateSearchCorpusVersion,
 } from "../scripts/build-search-corpus.mjs";
 import {
   PREVIEW_INDEX_NAME,
@@ -23,6 +24,10 @@ const embedding = Array.from(
 );
 
 function vectorId(index) {
+  return `schools-v2-${index.toString(16).padStart(48, "0")}`;
+}
+
+function v1VectorId(index) {
   return `schools-v1-${index.toString(16).padStart(48, "0")}`;
 }
 
@@ -33,7 +38,7 @@ function createCorpus({ vectorCount = 6 } = {}) {
   }
   const chunks = Array.from({ length: vectorCount }, (_, index) => {
     const url = sourceUrls[index % sourceUrls.length];
-    return {
+    const chunk = {
       id: vectorId(index + 1),
       namespace: "ja",
       text: `Schools検索用の公開本文 ${index + 1}`,
@@ -46,16 +51,10 @@ function createCorpus({ vectorCount = 6 } = {}) {
         locale: "ja",
       },
     };
+    chunk.metadata.contentDigest = calculateSearchChunkDigest(chunk);
+    return chunk;
   });
-  const version = createHash("sha256")
-    .update(
-      chunks
-        .map(({ id }) => id)
-        .sort()
-        .join("\n"),
-    )
-    .digest("hex")
-    .slice(0, 20);
+  const version = calculateSearchCorpusVersion(chunks);
   return {
     schemaVersion: 1,
     version,
@@ -96,8 +95,22 @@ function cloudflareResponse(result, status = 200) {
   );
 }
 
-function createSyncFetch(initialIds, expectedIds, { dimensions = 1024 } = {}) {
+function createSyncFetch(
+  initialIds,
+  expectedIds,
+  { dimensions = 1024, existingChunks = [] } = {},
+) {
   const currentIds = new Set(initialIds);
+  const currentVectors = new Map(
+    existingChunks.map((chunk) => [
+      chunk.id,
+      {
+        id: chunk.id,
+        namespace: chunk.namespace,
+        metadata: structuredClone(chunk.metadata),
+      },
+    ]),
+  );
   const calls = [];
   let lastMutationId = "";
 
@@ -128,6 +141,26 @@ function createSyncFetch(initialIds, expectedIds, { dimensions = 1024 } = {}) {
       });
     }
 
+    if (
+      parsedUrl.pathname.endsWith(
+        `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}/get_by_ids`,
+      )
+    ) {
+      const ids = JSON.parse(init.body).ids;
+      return cloudflareResponse(
+        ids
+          .filter((id) => currentIds.has(id))
+          .map(
+            (id) =>
+              currentVectors.get(id) || {
+                id,
+                namespace: "ja",
+                metadata: {},
+              },
+          ),
+      );
+    }
+
     if (parsedUrl.pathname.endsWith("/ai/run/@cf/baai/bge-m3")) {
       const input = JSON.parse(init.body);
       return cloudflareResponse({
@@ -142,7 +175,9 @@ function createSyncFetch(initialIds, expectedIds, { dimensions = 1024 } = {}) {
     ) {
       const ndjson = await init.body.get("vectors").text();
       for (const line of ndjson.trim().split("\n")) {
-        currentIds.add(JSON.parse(line).id);
+        const vector = JSON.parse(line);
+        currentIds.add(vector.id);
+        currentVectors.set(vector.id, vector);
       }
       lastMutationId = "upsert-mutation";
       return cloudflareResponse({ mutationId: lastMutationId });
@@ -153,7 +188,10 @@ function createSyncFetch(initialIds, expectedIds, { dimensions = 1024 } = {}) {
         `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}/delete_by_ids`,
       )
     ) {
-      for (const id of JSON.parse(init.body).ids) currentIds.delete(id);
+      for (const id of JSON.parse(init.body).ids) {
+        currentIds.delete(id);
+        currentVectors.delete(id);
+      }
       lastMutationId = "delete-mutation";
       return cloudflareResponse({ mutationId: lastMutationId });
     }
@@ -275,21 +313,43 @@ test("存在しないindexを同期処理から暗黙作成しない", async (t)
 });
 
 test("production同期には明示確認が必要", async (t) => {
-  const { corpusFile, directory } = await writeCorpusFile(createCorpus());
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
   t.after(() => rm(directory, { recursive: true, force: true }));
 
+  for (const confirmProductionVersion of [undefined, "0".repeat(20)]) {
+    await assert.rejects(
+      syncVectorize({
+        accountId: "account",
+        apiToken: "token",
+        indexName: PRODUCTION_INDEX_NAME,
+        corpusFile,
+        confirmProductionVersion,
+        fetchImpl: async () => {
+          throw new Error("must not fetch");
+        },
+      }),
+      /Production sync requires/u,
+    );
+  }
+
+  let requests = 0;
   await assert.rejects(
     syncVectorize({
       accountId: "account",
       apiToken: "token",
       indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
+      confirmProductionVersion: corpus.version,
       fetchImpl: async () => {
-        throw new Error("must not fetch");
+        requests += 1;
+        return cloudflareResponse("not found", 404);
       },
+      logger: { log: () => {} },
     }),
-    /Production sync requires/u,
+    /does not exist/u,
   );
+  assert.equal(requests, 1);
 });
 
 test("全corpusを再embedding・upsertし、古いIDを削除して収束確認する", async (t) => {
@@ -321,6 +381,125 @@ test("全corpusを再embedding・upsertし、古いIDを削除して収束確認
   assert.ok(mock.calls.some(({ url }) => url.endsWith("/upsert")));
   assert.ok(mock.calls.some(({ url }) => url.endsWith("/delete_by_ids")));
   assert.ok(mock.calls.some(({ url }) => url.endsWith("/info")));
+});
+
+test("本文digestが一致するcorpusはmutationせず成功receiptを残す", async (t) => {
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
+  const receiptFile = join(directory, "receipt.json");
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const expectedIds = corpus.chunks.map(({ id }) => id);
+  const mock = createSyncFetch(expectedIds, expectedIds, {
+    existingChunks: corpus.chunks,
+  });
+
+  const result = await syncVectorize({
+    accountId: "account",
+    apiToken: "token",
+    indexName: PREVIEW_INDEX_NAME,
+    corpusFile,
+    receiptFile,
+    fetchImpl: mock.fetchImpl,
+    logger: { log: () => {} },
+  });
+
+  assert.equal(result.noop, true);
+  assert.equal(result.upserted, 0);
+  assert.equal(result.mutationId, null);
+  assert.equal(
+    mock.calls.some(({ url }) => url.endsWith("/ai/run/@cf/baai/bge-m3")),
+    false,
+  );
+  assert.equal(
+    mock.calls.some(({ url }) => url.endsWith("/upsert")),
+    false,
+  );
+
+  const receipt = JSON.parse(await readFile(receiptFile, "utf8"));
+  assert.equal(receipt.status, "success");
+  assert.equal(receipt.target.corpusVersion, corpus.version);
+  assert.equal(receipt.result.noop, true);
+  assert.match(receipt.completedAt, /^\d{4}-\d{2}-\d{2}T/u);
+});
+
+test("失敗時もtokenを含まないfailure receiptを残す", async (t) => {
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
+  const receiptFile = join(directory, "receipt.json");
+  t.after(() => rm(directory, { recursive: true, force: true }));
+
+  await assert.rejects(
+    syncVectorize({
+      accountId: "account",
+      apiToken: "secret-token-value",
+      indexName: PRODUCTION_INDEX_NAME,
+      corpusFile,
+      receiptFile,
+      fetchImpl: async () => {
+        throw new Error("must not fetch");
+      },
+    }),
+    /Production sync requires/u,
+  );
+
+  const receiptText = await readFile(receiptFile, "utf8");
+  const receipt = JSON.parse(receiptText);
+  assert.equal(receipt.status, "failure");
+  assert.match(receipt.error.message, /Production sync requires/u);
+  assert.equal(receiptText.includes("secret-token-value"), false);
+});
+
+test("20%超削除はv1からv2への限定migrationだけ許可する", async (t) => {
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const expectedIds = corpus.chunks.map(({ id }) => id);
+  const v1Ids = expectedIds.map((_, index) => v1VectorId(index + 1));
+
+  const blocked = createSyncFetch(v1Ids, expectedIds);
+  await assert.rejects(
+    syncVectorize({
+      accountId: "account",
+      apiToken: "token",
+      indexName: PREVIEW_INDEX_NAME,
+      corpusFile,
+      fetchImpl: blocked.fetchImpl,
+      logger: { log: () => {} },
+    }),
+    /only the reviewed --migrate-v1-to-v2 path/u,
+  );
+
+  const migration = createSyncFetch(v1Ids, expectedIds);
+  const result = await syncVectorize({
+    accountId: "account",
+    apiToken: "token",
+    indexName: PREVIEW_INDEX_NAME,
+    corpusFile,
+    allowV1ToV2Migration: true,
+    fetchImpl: migration.fetchImpl,
+    sleepImpl: async () => {},
+    mutationPollIntervalMs: 0,
+    logger: { log: () => {} },
+  });
+  assert.equal(result.deleted, v1Ids.length);
+  migration.assertConverged();
+
+  const unsafeV2Delete = createSyncFetch(
+    [...expectedIds, vectorId(98), vectorId(99)],
+    expectedIds,
+  );
+  await assert.rejects(
+    syncVectorize({
+      accountId: "account",
+      apiToken: "token",
+      indexName: PREVIEW_INDEX_NAME,
+      corpusFile,
+      allowV1ToV2Migration: true,
+      fetchImpl: unsafeV2Delete.fetchImpl,
+      logger: { log: () => {} },
+    }),
+    /only the reviewed --migrate-v1-to-v2 path/u,
+  );
 });
 
 test("管理外ID、20%超削除、index設定不一致では変更前に停止する", async (t) => {
