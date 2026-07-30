@@ -3,24 +3,87 @@
   "name": "acecore-schools",
   "pages_build_output_dir": "./dist",
   "compatibility_date": "2026-06-07",
+  "ai": {
+    "binding": "AI",
+    "remote": true,
+  },
+  "vectorize": [
+    {
+      "binding": "SEARCH_INDEX",
+      "index_name": "acecore-schools-search-preview",
+      "remote": true,
+    },
+  ],
+  "d1_databases": [
+    {
+      "binding": "SEARCH_RATE_LIMIT_DB",
+      "database_name": "acecore-schools-search-preview",
+      "database_id": "9ec6b1bb-92c1-4706-9977-aeedd7f27111",
+      "migrations_dir": "./migrations/search",
+      "remote": true,
+    },
+  ],
   "vars": {
     "ACECORE_NET_URL": "https://acecore.net",
-    "PUBLIC_APP_URL": "https://schools.acecore.net",
-    "ALLOWED_ORIGINS": "https://schools.acecore.net,https://acecore.net",
+    "PUBLIC_APP_URL": "https://acecore-schools.pages.dev",
+    "ALLOWED_ORIGINS": "https://acecore-schools.pages.dev,https://acecore.net",
+    "SEARCH_ENABLED": "false",
+    "SEARCH_MIN_SCORE": "0.50",
   },
   "env": {
     "preview": {
+      "ai": {
+        "binding": "AI",
+        "remote": true,
+      },
+      "vectorize": [
+        {
+          "binding": "SEARCH_INDEX",
+          "index_name": "acecore-schools-search-preview",
+          "remote": true,
+        },
+      ],
+      "d1_databases": [
+        {
+          "binding": "SEARCH_RATE_LIMIT_DB",
+          "database_name": "acecore-schools-search-preview",
+          "database_id": "9ec6b1bb-92c1-4706-9977-aeedd7f27111",
+          "migrations_dir": "./migrations/search",
+          "remote": true,
+        },
+      ],
       "vars": {
         "ACECORE_NET_URL": "https://acecore.net",
         "PUBLIC_APP_URL": "https://acecore-schools.pages.dev",
         "ALLOWED_ORIGINS": "https://acecore-schools.pages.dev,https://acecore.net",
+        "SEARCH_ENABLED": "true",
+        "SEARCH_MIN_SCORE": "0.50",
       },
     },
     "production": {
+      "ai": {
+        "binding": "AI",
+      },
+      "vectorize": [
+        {
+          "binding": "SEARCH_INDEX",
+          "index_name": "acecore-schools-search-production",
+        },
+      ],
+      "d1_databases": [
+        {
+          "binding": "SEARCH_RATE_LIMIT_DB",
+          "database_name": "acecore-schools-search-production",
+          "database_id": "60908c5d-897e-4d17-9b17-2632ac4fde14",
+          "migrations_dir": "./migrations/search",
+        },
+      ],
       "vars": {
         "ACECORE_NET_URL": "https://acecore.net",
         "PUBLIC_APP_URL": "https://schools.acecore.net",
         "ALLOWED_ORIGINS": "https://schools.acecore.net,https://acecore.net",
+        "SEARCH_ENABLED": "false",
+        "SEARCH_MIN_SCORE": "0.50",
       },
     },
   },
