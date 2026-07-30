@@ -8,5 +8,5 @@
     "types": ["@cloudflare/workers-types"]
   },
   "exclude": [],
-  "include": ["functions/**/*.ts"]
+  "include": ["functions/**/*.ts", "workers/**/*.ts"]
 }

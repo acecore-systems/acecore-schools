@@ -11,12 +11,13 @@
     "preview": "astro preview",
     "deploy:preview": "npm run build && wrangler pages deploy dist --project-name acecore-schools",
     "format:check": "prettier . --check",
-    "test:search": "node --experimental-strip-types --test tests/search-api.test.mjs tests/search-corpus.test.mjs tests/vectorize-sync.test.mjs",
+    "test:search": "node --experimental-strip-types --test tests/health-api.test.mjs tests/search-api.test.mjs tests/search-corpus.test.mjs tests/search-maintenance.test.mjs tests/vectorize-sync.test.mjs",
     "sync:vectorize": "node scripts/sync-vectorize.mjs",
     "sync:vectorize:dry-run": "node scripts/sync-vectorize.mjs --dry-run",
     "types:cloudflare": "wrangler types functions/cloudflare-env.d.ts --env-interface CloudflareEnv --include-runtime false",
     "types:cloudflare:check": "wrangler types functions/cloudflare-env.d.ts --env-interface CloudflareEnv --include-runtime false --check",
     "check:pages-config": "wrangler pages functions build --outdir .wrangler/pages-functions",
+    "check:maintenance-config": "wrangler deploy --config wrangler.maintenance.jsonc --dry-run --outdir .wrangler/search-maintenance",
     "typecheck:functions": "tsc --project tsconfig.functions.json"
   },
   "dependencies": {
@@ -26,11 +27,11 @@
     "sharp": "^0.35.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260727.1",
+    "@cloudflare/workers-types": "5.20260730.1",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^7.0.2",
-    "wrangler": "^4.114.0"
+    "wrangler": "^4.115.0"
   },
   "engines": {
     "node": ">=24.18.0"
