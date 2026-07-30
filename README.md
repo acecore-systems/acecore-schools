@@ -100,6 +100,7 @@ Routes:
 /pricing/
 /about/
 /faq/
+/activities/2023-summer-robot-workshop/
 /api/health
 /api/search
 ```

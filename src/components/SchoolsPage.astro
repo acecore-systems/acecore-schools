@@ -5,7 +5,6 @@ import ConsultationSection from "./ConsultationSection.astro";
 import {
   acecoreContactUrl,
   acecoreOrigin,
-  acecorePricingUrl,
   lineUrl,
   schoolsContent,
   schoolsOrigin,
@@ -17,7 +16,8 @@ type PageKey =
   | "how-it-works"
   | "pricing"
   | "about"
-  | "faq";
+  | "faq"
+  | "activity";
 
 interface Props {
   page?: PageKey;
@@ -110,6 +110,19 @@ const pageConfigs = {
       position: "68% center",
     },
   },
+  activity: {
+    path: "/activities/2023-summer-robot-workshop/",
+    eyebrow: content.activityRecord.eyebrow,
+    title: content.activityRecord.title,
+    description: content.activityRecord.description,
+    heroImage: {
+      src: "/images/schools/purpose-city/workshop-robot-summer.webp",
+      alt: content.activityRecord.imageAlt,
+      width: 1536,
+      height: 1024,
+      position: "center center",
+    },
+  },
 } as const satisfies Record<
   PageKey,
   {
@@ -137,6 +150,7 @@ const pageTitle =
 const pageHeroImageUrl = new URL(pageConfig.heroImage.src, schoolsOrigin).href;
 const homeHeroImageUrl = new URL(pageConfigs.home.heroImage.src, schoolsOrigin)
   .href;
+const workshopImage = pageConfigs.activity.heroImage.src;
 const supportImage = "/images/schools/purpose-city/support-call.webp";
 const acecoreLogo = `${acecoreOrigin}/favicon.svg`;
 const currentYear = new Date().getFullYear();
@@ -144,9 +158,18 @@ const currentYear = new Date().getFullYear();
 const homeUrl = new URL("/", schoolsOrigin).href;
 const organizationId = `${homeUrl}#organization`;
 const websiteId = `${homeUrl}#website`;
+const educationServiceId = `${homeUrl}#education-service`;
 const webpageId = `${canonicalUrl}#webpage`;
+const activityArticleId = `${canonicalUrl}#article`;
+const pageOgType = page === "activity" ? "article" : "website";
+const servicePageKeys = new Set<PageKey>([
+  "learning",
+  "how-it-works",
+  "pricing",
+  "faq",
+]);
 
-const jsonLdGraph = [
+const jsonLdGraph: Record<string, unknown>[] = [
   {
     "@type": "EducationalOrganization",
     "@id": organizationId,
@@ -160,6 +183,24 @@ const jsonLdGraph = [
       "@type": "Organization",
       name: "Acecore",
       url: acecoreOrigin,
+    },
+  },
+  {
+    "@type": "Service",
+    "@id": educationServiceId,
+    name: content.title,
+    description: content.description,
+    url: homeUrl,
+    serviceType: content.areas.map((area) => area.title),
+    provider: { "@id": organizationId },
+    availableChannel: {
+      "@type": "ServiceChannel",
+      serviceUrl: new URL("/how-it-works/", schoolsOrigin).href,
+      availableLanguage: {
+        "@type": "Language",
+        name: "Japanese",
+        alternateName: "ja",
+      },
     },
   },
   {
@@ -181,6 +222,11 @@ const jsonLdGraph = [
     inLanguage: "ja",
     isPartOf: { "@id": websiteId },
     about: { "@id": organizationId },
+    ...(page === "activity"
+      ? { mainEntity: { "@id": activityArticleId } }
+      : servicePageKeys.has(page)
+        ? { mainEntity: { "@id": educationServiceId } }
+        : {}),
   },
 ];
 
@@ -188,6 +234,10 @@ if (page === "faq") {
   jsonLdGraph.push({
     "@type": "FAQPage",
     "@id": `${canonicalUrl}#faq-schema`,
+    url: canonicalUrl,
+    inLanguage: "ja",
+    isPartOf: { "@id": websiteId },
+    about: { "@id": educationServiceId },
     mainEntity: content.faq.items.map((item) => ({
       "@type": "Question",
       name: item.question,
@@ -196,6 +246,49 @@ if (page === "faq") {
         text: item.answer,
       },
     })),
+  });
+}
+
+if (page === "activity") {
+  const eventIds = content.activityRecord.eventDates.map(
+    (_, index) => `${canonicalUrl}#event-${index + 1}`,
+  );
+
+  content.activityRecord.eventDates.forEach((eventDate, index) => {
+    jsonLdGraph.push({
+      "@type": "Event",
+      "@id": eventIds[index],
+      name: `${content.activityRecord.title}（${eventDate.label}）`,
+      description: content.activityRecord.description,
+      image: pageHeroImageUrl,
+      url: eventIds[index],
+      startDate: eventDate.startDate,
+      endDate: eventDate.endDate,
+      eventStatus: "https://schema.org/EventCompleted",
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      location: {
+        "@type": "Place",
+        name: content.activityRecord.locationName,
+      },
+      organizer: { "@id": organizationId },
+    });
+  });
+
+  jsonLdGraph.push({
+    "@type": "Article",
+    "@id": activityArticleId,
+    url: canonicalUrl,
+    headline: content.activityRecord.title,
+    description: content.activityRecord.description,
+    image: pageHeroImageUrl,
+    datePublished: content.activityRecord.publishedAt,
+    dateModified: content.activityRecord.modifiedAt,
+    inLanguage: "ja",
+    isPartOf: { "@id": websiteId },
+    mainEntityOfPage: { "@id": webpageId },
+    author: { "@id": organizationId },
+    publisher: { "@id": organizationId },
+    about: eventIds.map((eventId) => ({ "@id": eventId })),
   });
 }
 
@@ -269,7 +362,7 @@ const homeOverview = [
     <link rel="canonical" href={canonicalUrl} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageConfig.description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={pageOgType} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content={content.title} />
     <meta property="og:image" content={pageHeroImageUrl} />
@@ -279,6 +372,21 @@ const homeOverview = [
     <meta name="twitter:description" content={pageConfig.description} />
     <meta name="twitter:image" content={pageHeroImageUrl} />
     <meta name="twitter:image:alt" content={pageConfig.heroImage.alt} />
+    {
+      page === "activity" && (
+        <>
+          <meta
+            property="article:published_time"
+            content={content.activityRecord.publishedAt}
+          />
+          <meta
+            property="article:modified_time"
+            content={content.activityRecord.modifiedAt}
+          />
+          <meta property="article:section" content="活動記録" />
+        </>
+      )
+    }
     <link rel="icon" type="image/svg+xml" href={acecoreLogo} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -746,9 +854,9 @@ const homeOverview = [
                 <p class="section-label">{content.pricing.eyebrow}</p>
                 <h2 id="pricing-title">{content.pricing.title}</h2>
                 <p>{content.pricing.body}</p>
-                <a href={acecorePricingUrl}>
-                  <span>{content.pricing.linkLabel}</span>
-                  <i class="ph ph-arrow-up-right" aria-hidden="true" />
+                <a href="#consultation">
+                  <span>{content.pricing.cta}</span>
+                  <i class="ph ph-arrow-down" aria-hidden="true" />
                 </a>
               </div>
               <div class="pricing-panel">
@@ -770,6 +878,78 @@ const homeOverview = [
               </div>
             </div>
           </section>
+        )
+      }
+
+      {
+        page === "activity" && (
+          <article class="activity-record section-block">
+            <div class="page-shell activity-record-shell">
+              <section
+                class="activity-record-overview"
+                aria-labelledby="activity-overview-title"
+              >
+                <figure class="activity-record-media">
+                  <img
+                    src={workshopImage}
+                    alt={content.activityRecord.imageAlt}
+                    width="1536"
+                    height="1024"
+                    loading="eager"
+                  />
+                  <figcaption>{content.activityRecord.imageCaption}</figcaption>
+                </figure>
+                <div class="activity-record-summary">
+                  <div class="activity-record-meta">
+                    <span class="activity-status">
+                      {content.activityRecord.status}
+                    </span>
+                    <time datetime={content.activityRecord.dateTime}>
+                      {content.activityRecord.displayDate}
+                    </time>
+                  </div>
+                  <p class="section-label">SUMMARY</p>
+                  <h2 id="activity-overview-title">実施概要</h2>
+                  <p class="activity-record-lead">
+                    {content.activityRecord.lead}
+                  </p>
+                  <dl class="activity-record-facts">
+                    {content.activityRecord.facts.map((fact) => (
+                      <div>
+                        <dt>{fact.label}</dt>
+                        <dd>{fact.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </section>
+
+              <div class="activity-record-story">
+                {content.activityRecord.sections.map((section) => (
+                  <section>
+                    <h2>{section.title}</h2>
+                    {section.paragraphs.map((paragraph) => (
+                      <p>{paragraph}</p>
+                    ))}
+                  </section>
+                ))}
+              </div>
+
+              <nav
+                class="activity-record-links"
+                aria-label="活動記録の関連ページ"
+              >
+                <a href="/learning/#making">
+                  <span>ロボット／メイキングで学べること</span>
+                  <i class="ph ph-arrow-right" aria-hidden="true" />
+                </a>
+                <a href="/how-it-works/#delivery">
+                  <span>現在の受講方法</span>
+                  <i class="ph ph-arrow-right" aria-hidden="true" />
+                </a>
+              </nav>
+            </div>
+          </article>
         )
       }
 
@@ -842,9 +1022,9 @@ const homeOverview = [
           <nav aria-label="Acecore メニュー">
             <strong>Acecore</strong>
             <a href={acecoreOrigin}>公式サイト</a>
-            <a href={`${acecoreOrigin}/services/`}>サービス</a>
+            <a href={`${acecoreOrigin}/services/`}>事業</a>
             <a href={`${acecoreOrigin}/about/`}>Acecoreについて</a>
-            <a href={`${acecoreOrigin}/blog/`}>ブログ</a>
+            <a href={`${acecoreOrigin}/blog/`}>ニュース</a>
             <a href={acecoreContactUrl}>お問い合わせ</a>
           </nav>
           <nav aria-label="Acecore 関連サイト">
@@ -1946,6 +2126,187 @@ const homeOverview = [
     font-size: 0.8rem;
   }
 
+  .activity-status {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: 18px;
+    border: 1px solid var(--line-strong);
+    padding: 5px 10px;
+    background: var(--canvas-blue);
+    color: var(--navy);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .activity-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    border-bottom: 1px solid var(--navy);
+    padding-bottom: 3px;
+    color: var(--navy);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .activity-link:hover,
+  .activity-link:focus-visible {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .activity-record {
+    background: var(--paper);
+  }
+
+  .activity-record-shell {
+    display: grid;
+    gap: 54px;
+  }
+
+  .activity-record-overview {
+    display: grid;
+    grid-template-columns: minmax(300px, 0.88fr) minmax(0, 1.12fr);
+    border: 1px solid var(--line);
+  }
+
+  .activity-record-media {
+    display: grid;
+    grid-template-rows: minmax(360px, 1fr) auto;
+    margin: 0;
+    background: var(--canvas-blue);
+  }
+
+  .activity-record-media img {
+    width: 100%;
+    height: 100%;
+    min-height: 360px;
+    object-fit: cover;
+  }
+
+  .activity-record-media figcaption {
+    border-top: 1px solid var(--line);
+    padding: 10px 14px;
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .activity-record-summary {
+    padding: 36px;
+  }
+
+  .activity-record-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+
+  .activity-record-meta .activity-status {
+    margin-top: 0;
+  }
+
+  .activity-record-meta time {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .activity-record-summary h2 {
+    margin-top: 8px;
+    font-size: clamp(1.65rem, 2.25vw, 2.35rem);
+  }
+
+  .activity-record-lead {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 0.94rem;
+  }
+
+  .activity-record-facts {
+    margin-top: 28px;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .activity-record-facts > div {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 16px;
+    border-bottom: 1px solid var(--line);
+    padding: 12px 2px;
+  }
+
+  .activity-record-facts dt {
+    color: var(--green);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .activity-record-facts dd {
+    margin: 0;
+    color: var(--ink);
+    font-size: 0.84rem;
+  }
+
+  .activity-record-story {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-block: 1px solid var(--line-strong);
+  }
+
+  .activity-record-story section {
+    padding: 30px;
+    border-right: 1px solid var(--line);
+  }
+
+  .activity-record-story section:last-child {
+    border-right: 0;
+  }
+
+  .activity-record-story h2 {
+    font-size: 1.08rem;
+  }
+
+  .activity-record-story p {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 0.86rem;
+  }
+
+  .activity-record-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .activity-record-links a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 18px 4px;
+    color: var(--navy);
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .activity-record-links a:last-child {
+    border-right: 0;
+  }
+
+  .activity-record-links a:hover,
+  .activity-record-links a:focus-visible {
+    color: var(--green);
+  }
+
   .delivery-card {
     display: grid;
     grid-template-rows: 1fr auto;
@@ -2638,6 +2999,31 @@ const homeOverview = [
       max-height: none;
     }
 
+    .activity-record-overview {
+      grid-template-columns: 1fr;
+    }
+
+    .activity-record-media {
+      grid-template-rows: minmax(320px, 420px) auto;
+    }
+
+    .activity-record-media img {
+      min-height: 320px;
+    }
+
+    .activity-record-story {
+      grid-template-columns: 1fr;
+    }
+
+    .activity-record-story section {
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .activity-record-story section:last-child {
+      border-bottom: 0;
+    }
+
     .faq-heading {
       position: static;
     }
@@ -2831,6 +3217,30 @@ const homeOverview = [
       max-height: 300px;
     }
 
+    .activity-record-shell {
+      gap: 38px;
+    }
+
+    .activity-record-summary {
+      padding: 28px 22px;
+    }
+
+    .activity-record-media {
+      grid-template-rows: minmax(250px, 300px) auto;
+    }
+
+    .activity-record-media img {
+      min-height: 250px;
+    }
+
+    .activity-record-links {
+      grid-template-columns: 1fr;
+    }
+
+    .activity-record-links a {
+      border-right: 0;
+    }
+
     .delivery-card ul {
       grid-template-columns: 1fr;
     }
@@ -2997,6 +3407,11 @@ const homeOverview = [
 
     .pricing-row dd {
       padding-left: 39px;
+    }
+
+    .activity-record-facts > div {
+      grid-template-columns: 78px minmax(0, 1fr);
+      gap: 12px;
     }
 
     .consultation-actions,
