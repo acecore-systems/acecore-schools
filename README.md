@@ -30,12 +30,16 @@ Outlook などの外部カレンダー連携は read-only ICS feed に限定す�
 
 `deploy:preview` は開発時の確認用です。Direct Upload を本番完了条件にせず、GitHub の push deploy と custom domain の状態を確認します。
 
-意味検索は Workers AI、Vectorize、検索回数制御専用の D1 を使用します。Preview と Production の
-リソースを分離し、Production は `SEARCH_ENABLED=false` のまま段階導入します。構成、同期手順、
-有効化条件は [`docs/vectorize-search.md`](docs/vectorize-search.md) を参照してください。
+意味検索は Workers AI、Vectorize、検索回数制御と匿名の時間集計専用の D1 を使用します。
+Preview と Production のリソースを分離し、検索UIはhealthのkill switchが有効な環境だけで
+表示します。Productionは`SEARCH_ENABLED=false`のまま実装PRを導入し、別PRで有効化します。
+client keyはCloudflare Pagesの暗号化secretでHMAC化し、期限切れD1行は検索処理と毎時の
+maintenance Workerで削除します。
+構成、同期手順、監視、費用の上限試算、rollbackは
+[`docs/vectorize-search.md`](docs/vectorize-search.md)を参照してください。
 
-予約用の `SCHOOLS_DB` はまだ作成していません。検索回数制御用の `SEARCH_RATE_LIMIT_DB` と、
-将来の予約データベースは責務を分離します。
+予約用の`SCHOOLS_DB`はまだ作成していません。検索専用の`SEARCH_RATE_LIMIT_DB`と、将来の
+予約データベースは責務を分離します。
 
 ## Planned Runtime
 
@@ -66,6 +70,7 @@ Cloudflare Pages の preview / production に分けて設定します。
 - `STRIPE_WEBHOOK_SECRET`
 - `RESEND_API_KEY`
 - `SCHOOLS_ICS_TOKEN_PEPPER`
+- `SEARCH_RATE_LIMIT_SECRET`（意味検索で使用中）
 
 ### Vars
 

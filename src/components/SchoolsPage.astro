@@ -2,6 +2,7 @@
 import "@phosphor-icons/web/regular";
 import ActivitySection from "./ActivitySection.astro";
 import ConsultationSection from "./ConsultationSection.astro";
+import SearchPanel from "./SearchPanel.astro";
 import {
   acecoreContactUrl,
   acecoreOrigin,
@@ -154,6 +155,7 @@ const workshopImage = pageConfigs.activity.heroImage.src;
 const supportImage = "/images/schools/purpose-city/support-call.webp";
 const acecoreLogo = `${acecoreOrigin}/favicon.svg`;
 const currentYear = new Date().getFullYear();
+const searchHref = page === "home" ? "#site-search" : "/#site-search";
 
 const homeUrl = new URL("/", schoolsOrigin).href;
 const organizationId = `${homeUrl}#organization`;
@@ -438,6 +440,9 @@ const homeOverview = [
             </a>
           ))
         }
+        <a href={searchHref} data-search-entry hidden>
+          {content.search.navLabel}
+        </a>
       </nav>
 
       <a
@@ -554,6 +559,7 @@ const homeOverview = [
                     ページごとに内容を整理しました。いま確認したいことから進めます。
                   </p>
                 </div>
+                <SearchPanel />
                 <div class="overview-grid">
                   {homeOverview.map((item) => (
                     <a class="overview-card" href={item.href}>
@@ -1017,6 +1023,9 @@ const homeOverview = [
                 </a>
               ))
             }
+            <a href={searchHref} data-search-entry hidden>
+              {content.search.navLabel}
+            </a>
           </nav>
           <nav aria-label="Acecore メニュー">
             <strong>Acecore</strong>
@@ -1044,6 +1053,7 @@ const homeOverview = [
       const header = document.querySelector("[data-header]");
       const toggle = document.querySelector("[data-menu-toggle]");
       const navigation = document.querySelector("[data-navigation]");
+      const searchEntries = document.querySelectorAll("[data-search-entry]");
 
       const legacyHashRoutes: Record<string, string> = {
         "#support": "/how-it-works/#support",
@@ -1069,6 +1079,42 @@ const homeOverview = [
 
       redirectLegacyHash();
       window.addEventListener("hashchange", redirectLegacyHash);
+
+      const revealSearchWhenEnabled = async () => {
+        try {
+          const response = await fetch("/api/health", {
+            credentials: "same-origin",
+            headers: { Accept: "application/json" },
+          });
+          if (!response.ok) return;
+
+          const payload: unknown = await response.json();
+          if (
+            !payload ||
+            typeof payload !== "object" ||
+            !("searchEnabled" in payload) ||
+            payload.searchEnabled !== true
+          ) {
+            return;
+          }
+
+          searchEntries.forEach((entry) => {
+            if (entry instanceof HTMLElement) entry.hidden = false;
+          });
+
+          if (window.location.hash === "#site-search") {
+            requestAnimationFrame(() => {
+              document
+                .getElementById("site-search")
+                ?.scrollIntoView({ block: "start" });
+            });
+          }
+        } catch {
+          // 検索が有効だと確認できない場合は、導線を表示しない。
+        }
+      };
+
+      void revealSearchWhenEnabled();
 
       const closeMenu = (restoreFocus = false) => {
         if (

@@ -13,6 +13,39 @@ export const schoolsContent = {
     { key: "about", label: "Schoolsについて", href: "/about/" },
     { key: "faq", label: "よくある質問", href: "/faq/" },
   ],
+  search: {
+    navLabel: "サイト内検索",
+    eyebrow: "SITE SEARCH",
+    title: "知りたいことを検索",
+    body: "学びたい内容や料金、受講方法について、Acecore Schoolsの公開ページから探せます。",
+    formLabel: "検索キーワード",
+    placeholder: "例：高卒認定とIT学習を組み合わせたい",
+    hint: "2〜160文字で入力してください。",
+    submit: "検索する",
+    loading: "検索しています…",
+    resultsTitle: "検索結果",
+    resultCountSuffix: "件見つかりました。",
+    noResults:
+      "該当する内容が見つかりませんでした。言葉を変えて、もう一度お試しください。",
+    validation: "検索キーワードを2〜160文字で入力してください。",
+    viewResult: "ページを見る",
+    fallbackTitle: "Acecore Schoolsのページ",
+    fallbackExcerpt: "ページで詳しい内容をご確認ください。",
+    errors: {
+      rateLimited:
+        "検索が混み合っています。1分ほど時間をおいて、もう一度お試しください。",
+      provider:
+        "検索サービスとの通信に失敗しました。少し時間をおいて、もう一度お試しください。",
+      unavailable:
+        "現在、サイト内検索を利用できません。各ページはメニューから確認できます。",
+      network:
+        "通信できませんでした。接続状況を確認して、もう一度お試しください。",
+      generic:
+        "検索中に問題が発生しました。少し時間をおいて、もう一度お試しください。",
+    },
+    noscript:
+      "サイト内検索にはJavaScriptが必要です。各ページはメニューから確認できます。",
+  },
   hero: {
     title: "何のために。",
     lead: "目的から、必要な学びを組み立てる。",
