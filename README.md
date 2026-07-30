@@ -32,7 +32,7 @@ Outlook などの外部カレンダー連携は read-only ICS feed に限定す�
 
 意味検索は Workers AI、Vectorize、検索回数制御と匿名の時間集計専用の D1 を使用します。
 Preview と Production のリソースを分離し、検索UIはhealthのkill switchが有効な環境だけで
-表示します。Productionは`SEARCH_ENABLED=false`のまま実装PRを導入し、別PRで有効化します。
+表示します。Productionは`SEARCH_ENABLED=true`で公開し、healthに連動して検索UIを表示します。
 client keyはCloudflare Pagesの暗号化secretでHMAC化し、期限切れD1行は検索処理と毎時の
 maintenance Workerで削除します。
 構成、同期手順、監視、費用の上限試算、rollbackは
