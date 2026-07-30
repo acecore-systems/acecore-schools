@@ -9,13 +9,13 @@ Acecore Schools の公開ページを、日本語の自然文から探すため�
 | Environment | Vectorize index                     | Search D1                           | Vectors | Search |
 | ----------- | ----------------------------------- | ----------------------------------- | ------: | ------ |
 | Preview     | `acecore-schools-search-preview`    | `acecore-schools-search-preview`    |       6 | ON     |
-| Production  | `acecore-schools-search-production` | `acecore-schools-search-production` |       6 | OFF    |
+| Production  | `acecore-schools-search-production` | `acecore-schools-search-production` |       6 | ON     |
 
 2026-07-30に両D1へmigration `0001`〜`0003`を適用し、同じ6件のcorpusを両indexへ収束させました。
 同日、公開routeを持たない`acecore-schools-search-maintenance`をdeployし、
 cron `17 * * * *`をCloudflare APIで確認しました。
-Production は `SEARCH_ENABLED=false` のため、health確認に連動した検索UIも表示されません。
-実装PRのPreview QAとマージ後、別の有効化PRで`true`へ変更します。
+Production は `SEARCH_ENABLED=true` で、health確認に連動した検索UIとAPIを提供します。
+障害時は直前の検索OFF deploymentへ即時rollbackし、続けてGitのkill switchも`false`へ戻します。
 
 ## Data flow
 
