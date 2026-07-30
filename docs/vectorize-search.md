@@ -155,8 +155,9 @@ npm run sync:vectorize -- --confirm-production
 同時に開いている場合はmerge順を固定し、後からmergeする側でreview済みcorpusをbuildして
 Preview、Productionの順に全件upsertします。同期完了をPagesの公開内容と独立して確認します。
 
-同期後も検索は無効です。有効化は`wrangler.jsonc`のProduction `SEARCH_ENABLED`を`true`にする
-別PRで行います。完了判定は次をすべて満たした状態です。
+Production同期後も実装PRでは検索を無効のまま維持し、2026-07-30の本番有効化PRで
+`wrangler.jsonc`のProduction `SEARCH_ENABLED`を`true`に変更しました。
+リリース完了判定は次をすべて満たした状態です。
 
 1. PagesのGit ProviderがYes、source repositoryが`acecore-systems/acecore-schools`、
    production branchが`main`である。
