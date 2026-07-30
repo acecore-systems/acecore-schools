@@ -17,10 +17,12 @@ import {
   calculateSearchCorpusVersion,
 } from "./build-search-corpus.mjs";
 
-export const PREVIEW_INDEX_NAME = "acecore-schools-search-preview";
-export const PRODUCTION_INDEX_NAME = "acecore-schools-search-production";
+export const PREVIEW_INDEX_NAME = "acecore-schools-search-openai-1536-preview";
+export const PRODUCTION_INDEX_NAME =
+  "acecore-schools-search-openai-1536-production";
 
-const API_BASE_URL = "https://api.cloudflare.com/client/v4";
+const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
+const OPENAI_API_BASE_URL = "https://api.openai.com/v1";
 const DEFAULT_CORPUS_FILE = resolve(".vectorize/corpus.json");
 const EMBEDDING_BATCH_SIZE = 32;
 const UPSERT_BATCH_SIZE = 200;
@@ -31,6 +33,7 @@ const MUTATION_POLL_INTERVAL_MS = 5_000;
 const CONVERGENCE_WAIT_TIMEOUT_MS = 300_000;
 const CONVERGENCE_POLL_INTERVAL_MS = 5_000;
 const REQUEST_TIMEOUT_MS = 30_000;
+const MAX_API_RESPONSE_BYTES = 8 * 1024 * 1024;
 const MAX_REQUEST_RETRIES = 5;
 const RETRY_BASE_DELAY_MS = 500;
 const MAX_LIST_CURSOR_RESTARTS = 3;
@@ -49,6 +52,14 @@ class CloudflareApiError extends Error {
   constructor(message, status) {
     super(message);
     this.name = "CloudflareApiError";
+    this.status = status;
+  }
+}
+
+class OpenAiApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = "OpenAiApiError";
     this.status = status;
   }
 }
@@ -97,6 +108,7 @@ export async function syncVectorize(options = {}) {
 async function performVectorizeSync({
   accountId = process.env.CLOUDFLARE_ACCOUNT_ID,
   apiToken = process.env.CLOUDFLARE_API_TOKEN,
+  openAiApiKey = process.env.OPENAI_API_KEY,
   indexName = process.env.VECTORIZE_INDEX_NAME,
   corpusFile = DEFAULT_CORPUS_FILE,
   dryRun = false,
@@ -116,9 +128,9 @@ async function performVectorizeSync({
 } = {}) {
   const corpus = JSON.parse(await readFile(corpusFile, "utf8"));
   validateCorpus(corpus);
-  if (!dryRun && (!accountId || !apiToken || !indexName)) {
+  if (!dryRun && (!accountId || !apiToken || !openAiApiKey || !indexName)) {
     throw new Error(
-      "CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, and VECTORIZE_INDEX_NAME are required.",
+      "CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, OPENAI_API_KEY, and VECTORIZE_INDEX_NAME are required.",
     );
   }
   validateIndexName(indexName, { required: !dryRun });
@@ -141,7 +153,7 @@ async function performVectorizeSync({
     return result;
   }
 
-  const client = createCloudflareClient({
+  const cloudflareClient = createCloudflareClient({
     accountId,
     apiToken,
     fetchImpl,
@@ -150,10 +162,18 @@ async function performVectorizeSync({
     sleepImpl,
     randomImpl,
   });
-  const index = await getIndex(client, indexName);
+  const openAiClient = createOpenAiClient({
+    apiKey: openAiApiKey,
+    fetchImpl,
+    requestTimeoutMs,
+    retryBaseDelayMs,
+    sleepImpl,
+    randomImpl,
+  });
+  const index = await getIndex(cloudflareClient, indexName);
   validateIndexConfiguration(index, indexName);
 
-  const currentIds = await listVectorIds(client, indexName, {
+  const currentIds = await listVectorIds(cloudflareClient, indexName, {
     logger,
     sleepImpl,
     retryBaseDelayMs,
@@ -172,7 +192,7 @@ async function performVectorizeSync({
   const contentMatches =
     idsToDelete.length === 0 &&
     currentIds.size === expectedIds.size &&
-    (await vectorsMatchCorpus(client, indexName, corpus.chunks));
+    (await vectorsMatchCorpus(cloudflareClient, indexName, corpus.chunks));
 
   logger.log(
     JSON.stringify({
@@ -204,7 +224,7 @@ async function performVectorizeSync({
 
   const upsertMutationIds = [];
   for (const chunkBatch of batches(chunksToUpsert, EMBEDDING_BATCH_SIZE)) {
-    const embeddings = await createEmbeddings(client, chunkBatch);
+    const embeddings = await createEmbeddings(openAiClient, chunkBatch);
 
     for (const vectorBatch of batches(
       chunkBatch.map((chunk, index) => ({
@@ -215,14 +235,18 @@ async function performVectorizeSync({
       })),
       UPSERT_BATCH_SIZE,
     )) {
-      const mutationId = await upsertVectors(client, indexName, vectorBatch);
+      const mutationId = await upsertVectors(
+        cloudflareClient,
+        indexName,
+        vectorBatch,
+      );
       upsertMutationIds.push(mutationId);
     }
   }
 
   const lastUpsertMutationId = upsertMutationIds.at(-1);
   if (waitForMutations && lastUpsertMutationId) {
-    await waitForMutation(client, indexName, lastUpsertMutationId, {
+    await waitForMutation(cloudflareClient, indexName, lastUpsertMutationId, {
       sleepImpl,
       mutationPollIntervalMs,
       mutationWaitTimeoutMs,
@@ -231,13 +255,17 @@ async function performVectorizeSync({
 
   const deleteMutationIds = [];
   for (const idBatch of batches(idsToDelete, DELETE_BATCH_SIZE)) {
-    const mutationId = await deleteVectors(client, indexName, idBatch);
+    const mutationId = await deleteVectors(
+      cloudflareClient,
+      indexName,
+      idBatch,
+    );
     deleteMutationIds.push(mutationId);
   }
 
   const lastDeleteMutationId = deleteMutationIds.at(-1);
   if (waitForMutations && lastDeleteMutationId) {
-    await waitForMutation(client, indexName, lastDeleteMutationId, {
+    await waitForMutation(cloudflareClient, indexName, lastDeleteMutationId, {
       sleepImpl,
       mutationPollIntervalMs,
       mutationWaitTimeoutMs,
@@ -246,13 +274,19 @@ async function performVectorizeSync({
 
   const lastMutationId = lastDeleteMutationId || lastUpsertMutationId;
   if (waitForMutations && lastMutationId) {
-    await waitForConvergence(client, indexName, expectedIds, corpus.chunks, {
-      logger,
-      sleepImpl,
-      retryBaseDelayMs,
-      convergencePollIntervalMs,
-      convergenceWaitTimeoutMs,
-    });
+    await waitForConvergence(
+      cloudflareClient,
+      indexName,
+      expectedIds,
+      corpus.chunks,
+      {
+        logger,
+        sleepImpl,
+        retryBaseDelayMs,
+        convergencePollIntervalMs,
+        convergenceWaitTimeoutMs,
+      },
+    );
   }
 
   const result = {
@@ -520,28 +554,35 @@ function throwConvergenceError(
 }
 
 export function extractEmbeddingData(payload, expectedCount) {
-  const result = payload?.result ?? payload;
-  const data = result?.data;
+  const data = payload?.data;
 
   if (!Array.isArray(data) || data.length !== expectedCount) {
     throw new Error(
-      `Workers AI returned ${Array.isArray(data) ? data.length : 0} embeddings; expected ${expectedCount}.`,
+      `OpenAI returned ${Array.isArray(data) ? data.length : 0} embeddings; expected ${expectedCount}.`,
     );
   }
 
-  for (const values of data) {
+  const embeddings = new Array(expectedCount);
+  for (const item of data) {
+    const index = item?.index;
+    const values = item?.embedding;
     if (
+      !Number.isInteger(index) ||
+      index < 0 ||
+      index >= expectedCount ||
+      embeddings[index] !== undefined ||
       !Array.isArray(values) ||
       values.length !== SEARCH_EMBEDDING_DIMENSIONS ||
       values.some((value) => !Number.isFinite(value))
     ) {
       throw new Error(
-        `Workers AI embedding must contain ${SEARCH_EMBEDDING_DIMENSIONS} finite values.`,
+        `OpenAI embedding must contain a unique valid index and ${SEARCH_EMBEDDING_DIMENSIONS} finite values.`,
       );
     }
+    embeddings[index] = values;
   }
 
-  return data;
+  return embeddings;
 }
 
 function createCloudflareClient({
@@ -553,7 +594,7 @@ function createCloudflareClient({
   sleepImpl,
   randomImpl,
 }) {
-  const accountBase = `${API_BASE_URL}/accounts/${encodeURIComponent(accountId)}`;
+  const accountBase = `${CLOUDFLARE_API_BASE_URL}/accounts/${encodeURIComponent(accountId)}`;
 
   return {
     async request(path, init = {}) {
@@ -627,6 +668,83 @@ function createCloudflareClient({
   };
 }
 
+function createOpenAiClient({
+  apiKey,
+  fetchImpl,
+  requestTimeoutMs,
+  retryBaseDelayMs,
+  sleepImpl,
+  randomImpl,
+}) {
+  return {
+    async request(path, init = {}) {
+      const headers = new Headers(init.headers);
+      headers.set("Authorization", `Bearer ${apiKey}`);
+      headers.set("Accept", "application/json");
+
+      for (let attempt = 0; attempt <= MAX_REQUEST_RETRIES; attempt += 1) {
+        const timeoutController = new AbortController();
+        const timeout = setTimeout(
+          () => timeoutController.abort(new Error("Request timed out.")),
+          requestTimeoutMs,
+        );
+        try {
+          const response = await fetchImpl(`${OPENAI_API_BASE_URL}${path}`, {
+            ...init,
+            headers,
+            signal: timeoutController.signal,
+          });
+
+          if (
+            isRetryableStatus(response.status) &&
+            attempt < MAX_REQUEST_RETRIES
+          ) {
+            await response.body?.cancel().catch(() => {});
+            clearTimeout(timeout);
+            await sleepImpl(
+              getRetryDelay({
+                attempt,
+                retryAfter: response.headers.get("Retry-After"),
+                retryBaseDelayMs,
+                randomImpl,
+              }),
+            );
+            continue;
+          }
+
+          const payload = await readJsonResponse(response);
+          if (!response.ok) {
+            throw new OpenAiApiError(
+              `OpenAI API request failed with ${response.status}.`,
+              response.status,
+            );
+          }
+          return payload;
+        } catch (error) {
+          if (
+            attempt >= MAX_REQUEST_RETRIES ||
+            !isRetryableNetworkError(error, timeoutController.signal.aborted)
+          ) {
+            throw error;
+          }
+          clearTimeout(timeout);
+          await sleepImpl(
+            getRetryDelay({
+              attempt,
+              retryBaseDelayMs,
+              randomImpl,
+            }),
+          );
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+
+      throw new Error("OpenAI API request exhausted all retries.");
+    },
+  };
+}
+
 function isRetryableStatus(status) {
   return status === 429 || status >= 500;
 }
@@ -675,7 +793,7 @@ async function getIndex(client, indexName) {
   } catch (error) {
     if (error instanceof CloudflareApiError && error.status === 404) {
       throw new Error(
-        `Vectorize index ${indexName} does not exist. Create the reviewed 1024-dimension cosine index before syncing.`,
+        `Vectorize index ${indexName} does not exist. Create the reviewed ${SEARCH_EMBEDDING_DIMENSIONS}-dimension cosine index before syncing.`,
       );
     }
     throw error;
@@ -877,14 +995,19 @@ function metadataEquals(actual, expected) {
 }
 
 async function createEmbeddings(client, chunks) {
-  const payload = await client.request(`/ai/run/${SEARCH_EMBEDDING_MODEL}`, {
+  const payload = await client.request("/embeddings", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      text: chunks.map(({ text }) => text),
-      truncate_inputs: true,
+      model: SEARCH_EMBEDDING_MODEL,
+      input: chunks.map(({ text }) => text),
+      dimensions: SEARCH_EMBEDDING_DIMENSIONS,
+      encoding_format: "float",
     }),
   });
+  if (payload?.model !== SEARCH_EMBEDDING_MODEL) {
+    throw new Error(`OpenAI response model must be ${SEARCH_EMBEDDING_MODEL}.`);
+  }
   return extractEmbeddingData(payload, chunks.length);
 }
 
@@ -950,7 +1073,41 @@ async function waitForMutation(
 }
 
 async function readJsonResponse(response) {
-  const text = await response.text();
+  const declaredLength = Number(response.headers.get("Content-Length"));
+  if (
+    Number.isFinite(declaredLength) &&
+    declaredLength > MAX_API_RESPONSE_BYTES
+  ) {
+    await response.body?.cancel().catch(() => {});
+    throw new Error(`API response exceeded ${MAX_API_RESPONSE_BYTES} bytes.`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error("API returned an unreadable response body.");
+  }
+
+  const decoder = new TextDecoder();
+  let bytesRead = 0;
+  let text = "";
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytesRead += value.byteLength;
+      if (bytesRead > MAX_API_RESPONSE_BYTES) {
+        await reader.cancel().catch(() => {});
+        throw new Error(
+          `API response exceeded ${MAX_API_RESPONSE_BYTES} bytes.`,
+        );
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    text += decoder.decode();
+  } finally {
+    reader.releaseLock();
+  }
+
   if (!text) return null;
 
   try {

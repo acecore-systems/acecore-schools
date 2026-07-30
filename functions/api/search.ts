@@ -1,5 +1,8 @@
-const EMBEDDING_MODEL = "@cf/baai/bge-m3";
-const EMBEDDING_DIMENSIONS = 1024;
+const EMBEDDING_MODEL = "text-embedding-3-large";
+const EMBEDDING_DIMENSIONS = 1536;
+const OPENAI_EMBEDDINGS_ENDPOINT = "https://api.openai.com/v1/embeddings";
+const OPENAI_TIMEOUT_MS = 8_000;
+const MAX_OPENAI_RESPONSE_BYTES = 256 * 1024;
 const SEARCH_LOCALE = "ja";
 const DEFAULT_MIN_SCORE = 0.5;
 const MAX_REQUEST_BYTES = 2048;
@@ -65,6 +68,16 @@ type SearchCompletion = {
   resultCount: number;
 };
 
+class EmbeddingProviderError extends Error {
+  readonly code: string;
+
+  constructor(code: string) {
+    super(code);
+    this.name = "EmbeddingProviderError";
+    this.code = code;
+  }
+}
+
 export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
   const { request, env } = context;
   const startedAt = performance.now();
@@ -110,13 +123,20 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
       return errorResponse("unsupported_media_type", 415, requestId, startedAt);
     }
 
-    const ai = env.AI;
+    const openAiApiKey = env.OPENAI_API_KEY;
     const searchIndex = env.SEARCH_INDEX;
     const rateLimitDatabase = env.SEARCH_RATE_LIMIT_DB;
     const rateLimitSecret = env.SEARCH_RATE_LIMIT_SECRET;
+    const embeddingModel = env.OPENAI_EMBEDDING_MODEL || EMBEDDING_MODEL;
+    const embeddingDimensions = Number(
+      env.OPENAI_EMBEDDING_DIMENSIONS || EMBEDDING_DIMENSIONS,
+    );
     if (
       env.SEARCH_ENABLED !== "true" ||
-      !ai ||
+      typeof openAiApiKey !== "string" ||
+      !openAiApiKey.trim() ||
+      embeddingModel !== EMBEDDING_MODEL ||
+      embeddingDimensions !== EMBEDDING_DIMENSIONS ||
       !searchIndex ||
       !rateLimitDatabase ||
       typeof rateLimitSecret !== "string" ||
@@ -229,11 +249,13 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
       return errorResponse("invalid_request", 400, requestId, startedAt);
     }
 
-    let embeddingResult: unknown;
+    let embedding: number[];
     try {
-      embeddingResult = await ai.run(EMBEDDING_MODEL, {
-        text: [query],
-        truncate_inputs: true,
+      embedding = await createOpenAiEmbedding({
+        apiKey: openAiApiKey,
+        query,
+        model: embeddingModel,
+        dimensions: embeddingDimensions,
       });
     } catch (error) {
       logSearchError(
@@ -241,18 +263,6 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
         "embedding",
         getErrorCode(error, "provider_error"),
       );
-      completion = {
-        outcome: "provider_error",
-        stage: "embedding",
-        status: 502,
-        resultCount: 0,
-      };
-      return errorResponse("provider_error", 502, requestId, startedAt);
-    }
-
-    const embedding = extractEmbedding(embeddingResult);
-    if (!embedding) {
-      logSearchError(requestId, "embedding", "invalid_embedding");
       completion = {
         outcome: "provider_error",
         stage: "embedding",
@@ -610,20 +620,127 @@ function normalizeMinScore(value: string | undefined): number {
     : DEFAULT_MIN_SCORE;
 }
 
-function extractEmbedding(result: unknown): number[] | null {
-  if (!result || typeof result !== "object") return null;
-  const data = (result as { data?: unknown }).data;
-  if (!Array.isArray(data) || !Array.isArray(data[0])) return null;
+async function createOpenAiEmbedding({
+  apiKey,
+  query,
+  model,
+  dimensions,
+}: {
+  apiKey: string;
+  query: string;
+  model: string;
+  dimensions: number;
+}): Promise<number[]> {
+  const timeoutController = new AbortController();
+  const timeout = setTimeout(
+    () => timeoutController.abort(),
+    OPENAI_TIMEOUT_MS,
+  );
 
-  const values = data[0];
+  try {
+    let response: Response;
+    try {
+      response = await fetch(OPENAI_EMBEDDINGS_ENDPOINT, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          input: [query],
+          dimensions,
+          encoding_format: "float",
+        }),
+        signal: timeoutController.signal,
+      });
+    } catch (error) {
+      throw new EmbeddingProviderError(
+        timeoutController.signal.aborted ||
+          (error instanceof Error && error.name === "AbortError")
+          ? "timeout"
+          : "network_error",
+      );
+    }
+
+    if (!response.ok) {
+      await response.body?.cancel().catch(() => undefined);
+      throw new EmbeddingProviderError(`http_${response.status}`);
+    }
+
+    const payload = await readBoundedOpenAiJson(response);
+    const embedding = extractOpenAiEmbedding(payload, dimensions);
+    if (!embedding) {
+      throw new EmbeddingProviderError("invalid_embedding");
+    }
+    return embedding;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function readBoundedOpenAiJson(response: Response): Promise<unknown> {
+  const declaredLength = Number(response.headers.get("Content-Length"));
   if (
-    values.length !== EMBEDDING_DIMENSIONS ||
+    Number.isFinite(declaredLength) &&
+    declaredLength > MAX_OPENAI_RESPONSE_BYTES
+  ) {
+    await response.body?.cancel().catch(() => undefined);
+    throw new EmbeddingProviderError("response_too_large");
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new EmbeddingProviderError("invalid_json");
+  }
+
+  const decoder = new TextDecoder();
+  let bytesRead = 0;
+  let text = "";
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytesRead += value.byteLength;
+      if (bytesRead > MAX_OPENAI_RESPONSE_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        throw new EmbeddingProviderError("response_too_large");
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    text += decoder.decode();
+  } finally {
+    reader.releaseLock();
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new EmbeddingProviderError("invalid_json");
+  }
+}
+
+function extractOpenAiEmbedding(
+  result: unknown,
+  dimensions: number,
+): number[] | null {
+  if (!isJsonObject(result) || result.model !== EMBEDDING_MODEL) return null;
+  const data = result.data;
+  if (!Array.isArray(data) || data.length !== 1 || !isJsonObject(data[0])) {
+    return null;
+  }
+  if (data[0].index !== 0 || !Array.isArray(data[0].embedding)) return null;
+
+  const values = data[0].embedding;
+  if (
+    values.length !== dimensions ||
     values.some((value) => typeof value !== "number" || !Number.isFinite(value))
   ) {
     return null;
   }
 
-  return values;
+  return values as number[];
 }
 
 function normalizeMatches(
@@ -692,6 +809,7 @@ function normalizeMetadata(
 }
 
 function getErrorCode(error: unknown, fallback: string): string {
+  if (error instanceof EmbeddingProviderError) return error.code;
   return error instanceof Error && error.name ? error.name : fallback;
 }
 

@@ -92,6 +92,10 @@ test("Preview同期もmoving mainではなくdispatch時のSHAへ固定する", 
   );
   assert.match(previewJob, /Preview sync only accepts current main\./u);
   assert.match(previewJob, /CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN/u);
+  assert.match(
+    previewJob,
+    /OPENAI_API_KEY: \$\{\{ secrets\.OPENAI_API_KEY \}\}/u,
+  );
   assert.match(previewJob, /node verifier\/scripts\/sync-vectorize\.mjs/u);
   assert.doesNotMatch(workflow, /allow_large_delete/u);
   assert.match(
@@ -117,8 +121,8 @@ test("Pages binding・sync allowlist・workflowのindex名を一致させる", a
   ]);
 
   for (const indexName of [
-    "acecore-schools-search-preview",
-    "acecore-schools-search-production",
+    "acecore-schools-search-openai-1536-preview",
+    "acecore-schools-search-openai-1536-production",
   ]) {
     assert.match(workflow, new RegExp(indexName, "u"));
     assert.match(wrangler, new RegExp(indexName, "u"));

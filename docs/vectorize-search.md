@@ -6,10 +6,13 @@ Acecore Schools の公開ページを、日本語の自然文から探すため�
 
 ## Current rollout state
 
-| Environment | Vectorize index                     | Search D1                           | Search |
-| ----------- | ----------------------------------- | ----------------------------------- | ------ |
-| Preview     | `acecore-schools-search-preview`    | `acecore-schools-search-preview`    | ON     |
-| Production  | `acecore-schools-search-production` | `acecore-schools-search-production` | ON     |
+| Environment | Vectorize index                                 | Search D1                           | Search |
+| ----------- | ----------------------------------------------- | ----------------------------------- | ------ |
+| Preview     | `acecore-schools-search-openai-1536-preview`    | `acecore-schools-search-preview`    | ON     |
+| Production  | `acecore-schools-search-openai-1536-production` | `acecore-schools-search-production` | ON     |
+
+旧BGE-M3用1024次元indexはrollback用に残し、新しい1536次元indexの同期とPreview QAが完了するまで
+削除しません。
 
 2026-07-30に両D1へmigration `0001`〜`0003`を適用し、同じ6件のcorpusを両indexへ収束させました。
 同日、公開routeを持たない`acecore-schools-search-maintenance`をdeployし、
@@ -29,8 +32,8 @@ GitHub Actions artifactとして保存します。
    `.vectorize/corpus.json` を生成します。
 3. `scripts/write-build-meta.mjs`がGitHub連携Pagesから渡されるcommitとcorpus identityを
    `/.well-known/acecore-schools-build.json`へ出力します。
-4. `scripts/sync-vectorize.mjs` が Workers AI の `@cf/baai/bge-m3` で 1024 次元の
-   embedding を生成し、`ja` namespace へ upsert します。
+4. `scripts/sync-vectorize.mjs` が OpenAI Embeddings API の `text-embedding-3-large`へ
+   `dimensions: 1536`を指定してembeddingを生成し、`ja` namespaceへupsertします。
 5. `/api/search` が同じモデルで質問を embedding し、Vectorize の cosine 類似検索結果を
    最大5ページへ正規化します。
 6. D1 がクライアント10回/分、全体20回/分を1 SQL statementで同時判定し、片方が上限なら
@@ -62,7 +65,7 @@ const payload = await response.json();
 ```
 
 成功時は`results`にroot-relative URL、title、section、excerpt、contentType、rankを返します。
-質問本文はlogへ残しません。キルスイッチ、binding、D1、Workers AI、Vectorizeのいずれかが
+質問本文はlogへ残しません。キルスイッチ、OpenAI API key、D1、OpenAI、Vectorizeのいずれかが
 利用できなければfail closedし、検索結果を推測で返しません。
 
 検索UIは`GET /api/health`の`searchEnabled`が`true`のときだけ導線とフォームを表示します。
@@ -70,22 +73,24 @@ const payload = await response.json();
 
 ## Bindings
 
-`wrangler.jsonc` は公開可能な Cloudflare Pages 設定の source of truth です。Workers AI、
-Vectorize、D1、vars は environment 間で暗黙継承されないため、Preview と Production に
-それぞれ明示しています。`SEARCH_RATE_LIMIT_SECRET`だけはrepositoryへ値を置かず、Pagesの
-Preview／Productionへ別々の暗号化secret bindingとして設定します。
+`wrangler.jsonc` は公開可能な Cloudflare Pages 設定の source of truth です。Vectorize、D1、
+vars は environment 間で暗黙継承されないため、Preview と Production にそれぞれ明示しています。
+`OPENAI_API_KEY`と`SEARCH_RATE_LIMIT_SECRET`はrepositoryへ値を置かず、Pagesの暗号化secret
+bindingとして設定します。
 
-| Binding                    | Purpose                                        |
-| -------------------------- | ---------------------------------------------- |
-| `AI`                       | BGE-M3 query/corpus embedding                  |
-| `SEARCH_INDEX`             | Environment-specific Vectorize index           |
-| `SEARCH_RATE_LIMIT_DB`     | Rate limits and hourly search metrics          |
-| `SEARCH_RATE_LIMIT_SECRET` | Encrypted HMAC key for pseudonymous client key |
-| `SEARCH_ENABLED`           | Fail-closed runtime kill switch                |
-| `SEARCH_MIN_SCORE`         | Minimum cosine similarity score                |
+| Binding                       | Purpose                                        |
+| ----------------------------- | ---------------------------------------------- |
+| `OPENAI_API_KEY`              | OpenAI project service-account key             |
+| `OPENAI_EMBEDDING_MODEL`      | Fixed embedding model identity                 |
+| `OPENAI_EMBEDDING_DIMENSIONS` | Fixed Vectorize-compatible dimensions          |
+| `SEARCH_INDEX`                | Environment-specific Vectorize index           |
+| `SEARCH_RATE_LIMIT_DB`        | Rate limits and hourly search metrics          |
+| `SEARCH_RATE_LIMIT_SECRET`    | Encrypted HMAC key for pseudonymous client key |
+| `SEARCH_ENABLED`              | Fail-closed runtime kill switch                |
+| `SEARCH_MIN_SCORE`            | Minimum cosine similarity score                |
 
 ローカルの top-level 設定は Preview リソースを指しますが、`SEARCH_ENABLED=false` です。
-`remote: true` の binding は実 Cloudflare リソースへ接続し、Workers AI の利用と書き込みが
+`remote: true` の binding は実 Cloudflare リソースへ接続し、Vectorizeの読み書きが
 発生し得ます。ローカル確認のためにキルスイッチを変更する場合も Production を指定しないで
 ください。
 
@@ -134,22 +139,24 @@ environmentを確認してから承認してください。
 
 ## Environment sync
 
-同期には、対象アカウントの Workers AI Read と Vectorize Write に限定した API token を使います。
-token をログ、引数、repositoryへ残さないでください。
+同期には、対象CloudflareアカウントのVectorize Read／Writeだけに限定したAPI tokenと、
+Schools専用OpenAI projectのservice-account keyを別々に使います。どちらもログ、引数、
+repositoryへ残さないでください。
 
 ```powershell
 $env:CLOUDFLARE_ACCOUNT_ID = "<account-id>"
 $env:CLOUDFLARE_API_TOKEN = "<scoped-token>"
-$env:VECTORIZE_INDEX_NAME = "acecore-schools-search-preview"
+$env:OPENAI_API_KEY = "<schools-project-key>"
+$env:VECTORIZE_INDEX_NAME = "acecore-schools-search-openai-1536-preview"
 npm run sync:vectorize
 ```
 
 GitHub Actionsでは次のEnvironmentをmain限定で作成し、同名のsecretへ環境別tokenを保存します。
 
-| GitHub Environment                     | Secret                                           |
-| -------------------------------------- | ------------------------------------------------ |
-| `cloudflare-schools-search-preview`    | `CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN`    |
-| `cloudflare-schools-search-production` | `CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN` |
+| GitHub Environment                     | Secrets                                                            |
+| -------------------------------------- | ------------------------------------------------------------------ |
+| `cloudflare-schools-search-preview`    | `CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN`, `OPENAI_API_KEY`    |
+| `cloudflare-schools-search-production` | `CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN`, `OPENAI_API_KEY` |
 
 Productionのpush／schedule自動同期はrepository variable
 `SCHOOLS_VECTORIZE_SYNC_ENABLED=true`の場合だけ起動します。Environment、secret、Preview QA、
@@ -170,7 +177,7 @@ checkoutし、artifactのSHA-256とcorpus versionを再検証してから、そ�
 または削除が既存vectorの20%を超える場合は変更前に停止します。upsert/delete 後は
 `processedUpToMutation` を待ち、最終ID集合の一致を検証します。既存vectorのID、namespace、
 metadata内の本文・metadata・embedding／chunk設定digestがcorpusとすべて一致する場合はno-opとし、
-Workers AIとmutationを呼びません。一致しない場合はcorpus全件をupsertして、本文・metadata・
+OpenAIとmutationを呼びません。一致しない場合はcorpus全件をupsertして、本文・metadata・
 namespace・embeddingをreview済み入力へ戻します。List Vectors APIへ送るquery parameterは
 公式仕様の`count`と`cursor`だけです。namespaceは各vectorの書き込みとqueryで`ja`を指定します。
 
@@ -190,7 +197,7 @@ GitHubのrun情報、対象index、corpus version、no-op、mutation ID、件数
 ## Production gate
 
 Production 同期は通常の同期コマンドでは実行できません。Production indexが
-1024 dimensions / cosineであること、Production D1 migration、corpus件数、Preview検索結果を
+1536 dimensions / cosineであること、Production D1 migration、corpus件数、Preview検索結果を
 再確認し、GitHub Actionsのmanual dispatchまたは有効化済みのpush／scheduleから実行します。
 同期scriptも公開markerと一致したcorpus versionそのものを確認値として要求します。
 2026-07-30の同期は6件upsert、0件deleteで収束しました。
@@ -272,19 +279,21 @@ ORDER BY hour_start DESC, outcome, stage;
 ```
 
 Pages dashboardではrequest、invocation status、CPU time、durationを最大3か月確認できます。リリース時は
-HTTP 5xx、`provider_error`／`internal_error`、0件率、平均・最大latency、Workers AI neurons、
+HTTP 5xx、`provider_error`／`internal_error`、0件率、平均・最大latency、OpenAI input tokens、
 Vectorize queried dimensions、D1 rows writtenを一緒に確認します。
 
 ## Cost guardrails
 
-2026-07-30時点の公式価格では、BGE-M3は100万input tokenあたり$0.012
-（1,075 neurons）、Workers AIの無料枠は1日10,000 neuronsです。VectorizeはFreeで月3,000万
+`text-embedding-3-large`は100万input tokenあたり$0.13です。`dimensions: 1536`はOpenAI側で
+短縮して受け取り、Vectorizeの1536次元上限に合わせます。VectorizeはFreeで月3,000万
 queried dimensions／500万stored dimensions、Paidで最初の5,000万／1,000万が含まれます。
-現在の保存量は`6 vectors × 1,024 dimensions = 6,144 stored dimensions`です。
+保存量7件なら`7 vectors × 1,536 dimensions = 10,752 stored dimensions`です。
 
-全体上限20検索/分が30日間続く仮定では、最大864,000 query、約884.7 million queried dimensions
-です。Paidのincluded分を超えるVectorize query費用は現行単価で約$8.35/月となる計算です。
-これは上限からの試算であり実績ではありません。
+全体上限20検索/分が30日間続く仮定では、最大864,000 query、約1,327.1 million queried
+dimensionsです。Paidのincluded分を超えるVectorize query費用は現行単価で約$12.77/月です。
+OpenAI embedding費用は`月間input token ÷ 1,000,000 × $0.13`で、平均40 token/queryなら
+約$4.49/月、平均100 token/queryなら約$11.23/月です。いずれも上限からの試算であり実績では
+ありません。
 
 client/global判定は1 statementで、許可時だけ2行をinsert/updateします。global上限後に新しいIPを
 送ってもclient行を追加しないため、D1 rows writtenは検索上限とcleanup対象行で抑えられます。
@@ -297,11 +306,11 @@ Functions requests、D1 rows read、WAFイベントも監視します。急増�
 - [Vectorize introduction](https://developers.cloudflare.com/vectorize/get-started/intro/)
 - [Vectorize limits](https://developers.cloudflare.com/vectorize/platform/limits/)
 - [Vectorize client API](https://developers.cloudflare.com/vectorize/reference/client-api/)
-- [BGE-M3 model](https://developers.cloudflare.com/workers-ai/models/bge-m3/)
+- [OpenAI text-embedding-3-large](https://developers.openai.com/api/docs/models/text-embedding-3-large)
 - [Pages Functions bindings](https://developers.cloudflare.com/pages/functions/bindings/)
 - [Pages Wrangler configuration](https://developers.cloudflare.com/pages/functions/wrangler-configuration/)
 - [Pages Functions metrics](https://developers.cloudflare.com/pages/functions/metrics/)
 - [Pages Functions logging](https://developers.cloudflare.com/pages/functions/debugging-and-logging/)
-- [Workers AI pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/)
+- [OpenAI API pricing](https://openai.com/api/pricing/)
 - [Vectorize pricing](https://developers.cloudflare.com/vectorize/platform/pricing/)
 - [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/)
