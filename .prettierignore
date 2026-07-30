@@ -3,6 +3,7 @@
 .codex/
 .worktrees/
 .wrangler/
+.vectorize/
 dist/
 node_modules/
 .dev-server.*.log

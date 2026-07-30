@@ -8,11 +8,11 @@ Acecore Schools の公開案内を担当する Astro アプリケーションで
 
 ## Service Boundary
 
-| Area              | Current responsibility                                                    |
-| ----------------- | ------------------------------------------------------------------------- |
-| `acecore.net`     | Schools への外部導線、旧 `/schools/` リダイレクト、問い合わせ導線         |
-| `acecore-schools` | Schools 紹介ページ、ページ別 SEO、無料相談 CTA、Pages Functions の health |
-| Acecore Accounts  | 将来の共通ログイン基盤。現行サイトでは未使用                              |
+| Area              | Current responsibility                                                                        |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| `acecore.net`     | Schools への外部導線、旧 `/schools/` リダイレクト、問い合わせ導線                             |
+| `acecore-schools` | Schools 紹介ページ、ページ別 SEO、無料相談 CTA、公開情報の検索 API、Pages Functions の health |
+| Acecore Accounts  | 将来の共通ログイン基盤。現行サイトでは未使用                                                  |
 
 `acecore.net` は予約 DB、Schools の Stripe webhook、会員 session、ICS token を持ちません。
 将来、予約機能を実装する場合は、予約作成・変更・キャンセルをこの app の portal/API に集約します。
@@ -30,8 +30,12 @@ Outlook などの外部カレンダー連携は read-only ICS feed に限定す�
 
 `deploy:preview` は開発時の確認用です。Direct Upload を本番完了条件にせず、GitHub の push deploy と custom domain の状態を確認します。
 
-初期状態では deploy を壊さないため、D1 binding は `wrangler.jsonc` にまだ固定していません。
-最初の予約 DB migration を追加する Issue で、preview / production の D1 database id を作成してから binding を追加します。
+意味検索は Workers AI、Vectorize、検索回数制御専用の D1 を使用します。Preview と Production の
+リソースを分離し、Production は `SEARCH_ENABLED=false` のまま段階導入します。構成、同期手順、
+有効化条件は [`docs/vectorize-search.md`](docs/vectorize-search.md) を参照してください。
+
+予約用の `SCHOOLS_DB` はまだ作成していません。検索回数制御用の `SEARCH_RATE_LIMIT_DB` と、
+将来の予約データベースは責務を分離します。
 
 ## Planned Runtime
 
@@ -70,6 +74,8 @@ Cloudflare Pages の preview / production に分けて設定します。
 - `ACECORE_NET_URL`
 - `PUBLIC_APP_URL`
 - `ALLOWED_ORIGINS`
+- `SEARCH_ENABLED`
+- `SEARCH_MIN_SCORE`
 
 ## Development
 
@@ -95,6 +101,7 @@ Routes:
 /about/
 /faq/
 /api/health
+/api/search
 ```
 
 ## References

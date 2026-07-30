@@ -1,10 +1,4 @@
-interface Env {
-  ACECORE_NET_URL?: string;
-  PUBLIC_APP_URL?: string;
-  ALLOWED_ORIGINS?: string;
-}
-
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesFunction<CloudflareEnv> = async ({ env }) => {
   return Response.json({
     ok: true,
     service: "acecore-schools",
