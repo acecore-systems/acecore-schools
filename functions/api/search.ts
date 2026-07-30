@@ -9,6 +9,7 @@ const QUERY_TOP_K = 15;
 const RESULT_LIMIT = 5;
 const RATE_LIMIT_WINDOW_SECONDS = 60;
 const RATE_LIMIT_RETENTION_SECONDS = 600;
+const SEARCH_METRIC_RETENTION_SECONDS = 90 * 24 * 60 * 60;
 const CLIENT_RATE_LIMIT = 10;
 const GLOBAL_RATE_LIMIT = 20;
 const CLIENT_ID_PATTERN =
@@ -38,86 +39,158 @@ type SearchResult = {
   rank: number;
 };
 
+type SearchOutcome =
+  | "success"
+  | "client_error"
+  | "rate_limited"
+  | "unavailable"
+  | "provider_error"
+  | "internal_error";
+
+type SearchStage =
+  | "request"
+  | "origin"
+  | "content_type"
+  | "availability"
+  | "rate_limit"
+  | "payload"
+  | "embedding"
+  | "vectorize"
+  | "complete";
+
+type SearchCompletion = {
+  outcome: SearchOutcome;
+  stage: SearchStage;
+  status: number;
+  resultCount: number;
+};
+
 export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
   const { request, env } = context;
   const startedAt = performance.now();
   const requestId = crypto.randomUUID();
+  let metricDatabase: D1Database | undefined;
+  let completion: SearchCompletion = {
+    outcome: "internal_error",
+    stage: "request",
+    status: 500,
+    resultCount: 0,
+  };
 
   try {
     if (request.method !== "POST") {
+      completion = {
+        outcome: "client_error",
+        stage: "request",
+        status: 405,
+        resultCount: 0,
+      };
       return errorResponse("method_not_allowed", 405, requestId, startedAt, {
         Allow: "POST",
       });
     }
 
     if (!isSameOriginRequest(request)) {
+      completion = {
+        outcome: "client_error",
+        stage: "origin",
+        status: 403,
+        resultCount: 0,
+      };
       return errorResponse("forbidden", 403, requestId, startedAt);
     }
 
     if (!isJsonContentType(request.headers.get("Content-Type"))) {
+      completion = {
+        outcome: "client_error",
+        stage: "content_type",
+        status: 415,
+        resultCount: 0,
+      };
       return errorResponse("unsupported_media_type", 415, requestId, startedAt);
     }
 
     const ai = env.AI;
     const searchIndex = env.SEARCH_INDEX;
     const rateLimitDatabase = env.SEARCH_RATE_LIMIT_DB;
+    const rateLimitSecret = env.SEARCH_RATE_LIMIT_SECRET;
     if (
       env.SEARCH_ENABLED !== "true" ||
       !ai ||
       !searchIndex ||
-      !rateLimitDatabase
+      !rateLimitDatabase ||
+      typeof rateLimitSecret !== "string" ||
+      rateLimitSecret.length < 32
     ) {
+      completion = {
+        outcome: "unavailable",
+        stage: "availability",
+        status: 503,
+        resultCount: 0,
+      };
       return errorResponse("unavailable", 503, requestId, startedAt);
     }
 
-    let clientAllowed = false;
-    let globalAllowed = false;
+    let rateLimitAllowed = false;
     try {
-      const clientKey = await createClientRateLimitKey(request);
-      clientAllowed = await consumeRateLimit(
+      const clientKey = await createClientRateLimitKey(
+        request,
+        rateLimitSecret,
+      );
+      rateLimitAllowed = await consumeRateLimits(
         rateLimitDatabase,
         `client:${clientKey}`,
-        CLIENT_RATE_LIMIT,
       );
-      if (clientAllowed) {
-        globalAllowed = await consumeRateLimit(
-          rateLimitDatabase,
-          "global",
-          GLOBAL_RATE_LIMIT,
-        );
-      }
     } catch (error) {
       logSearchError(
         requestId,
         "rate_limit",
         getErrorCode(error, "storage_error"),
       );
+      completion = {
+        outcome: "unavailable",
+        stage: "rate_limit",
+        status: 503,
+        resultCount: 0,
+      };
       return errorResponse("unavailable", 503, requestId, startedAt);
     }
 
-    if (!clientAllowed || !globalAllowed) {
+    if (!rateLimitAllowed) {
+      completion = {
+        outcome: "rate_limited",
+        stage: "rate_limit",
+        status: 429,
+        resultCount: 0,
+      };
       return errorResponse("rate_limited", 429, requestId, startedAt, {
         "Retry-After": String(RATE_LIMIT_WINDOW_SECONDS),
       });
     }
 
-    if (requestId.endsWith("00")) {
-      context.waitUntil(
-        deleteExpiredRateLimits(rateLimitDatabase).catch((error) => {
-          logSearchError(
-            requestId,
-            "rate_limit_cleanup",
-            getErrorCode(error, "storage_error"),
-          );
-        }),
-      );
-    }
+    metricDatabase = rateLimitDatabase;
+
+    context.waitUntil(
+      deleteExpiredRateLimits(rateLimitDatabase).catch((error) => {
+        logSearchError(
+          requestId,
+          "rate_limit_cleanup",
+          getErrorCode(error, "storage_error"),
+        );
+      }),
+    );
 
     const requestText = await readBoundedRequestText(
       request,
       MAX_REQUEST_BYTES,
     );
     if (requestText === null) {
+      completion = {
+        outcome: "client_error",
+        stage: "payload",
+        status: 413,
+        resultCount: 0,
+      };
       return errorResponse("request_too_large", 413, requestId, startedAt);
     }
 
@@ -125,9 +198,21 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
     try {
       parsedPayload = JSON.parse(requestText);
     } catch {
+      completion = {
+        outcome: "client_error",
+        stage: "payload",
+        status: 400,
+        resultCount: 0,
+      };
       return errorResponse("invalid_json", 400, requestId, startedAt);
     }
     if (!isJsonObject(parsedPayload)) {
+      completion = {
+        outcome: "client_error",
+        stage: "payload",
+        status: 400,
+        resultCount: 0,
+      };
       return errorResponse("invalid_request", 400, requestId, startedAt);
     }
 
@@ -135,6 +220,12 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
     const query = normalizeQuery(payload.query);
     const locale = normalizeLocale(payload.locale);
     if (!query || !locale) {
+      completion = {
+        outcome: "client_error",
+        stage: "payload",
+        status: 400,
+        resultCount: 0,
+      };
       return errorResponse("invalid_request", 400, requestId, startedAt);
     }
 
@@ -150,12 +241,24 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
         "embedding",
         getErrorCode(error, "provider_error"),
       );
+      completion = {
+        outcome: "provider_error",
+        stage: "embedding",
+        status: 502,
+        resultCount: 0,
+      };
       return errorResponse("provider_error", 502, requestId, startedAt);
     }
 
     const embedding = extractEmbedding(embeddingResult);
     if (!embedding) {
       logSearchError(requestId, "embedding", "invalid_embedding");
+      completion = {
+        outcome: "provider_error",
+        stage: "embedding",
+        status: 502,
+        resultCount: 0,
+      };
       return errorResponse("provider_error", 502, requestId, startedAt);
     }
 
@@ -173,6 +276,12 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
         "vectorize",
         getErrorCode(error, "provider_error"),
       );
+      completion = {
+        outcome: "provider_error",
+        stage: "vectorize",
+        status: 502,
+        resultCount: 0,
+      };
       return errorResponse("provider_error", 502, requestId, startedAt);
     }
 
@@ -184,6 +293,12 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
       SEARCH_LOCALE,
     );
 
+    completion = {
+      outcome: "success",
+      stage: "complete",
+      status: 200,
+      resultCount: results.length,
+    };
     return jsonResponse(
       {
         ok: true,
@@ -200,7 +315,21 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
       "request",
       error instanceof Error ? error.name : "unknown_error",
     );
+    completion = {
+      outcome: "internal_error",
+      stage: "request",
+      status: 500,
+      resultCount: 0,
+    };
     return errorResponse("internal_error", 500, requestId, startedAt);
+  } finally {
+    recordSearchCompletion(
+      context,
+      metricDatabase,
+      requestId,
+      startedAt,
+      completion,
+    );
   }
 };
 
@@ -273,7 +402,10 @@ function isJsonObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-async function createClientRateLimitKey(request: Request): Promise<string> {
+async function createClientRateLimitKey(
+  request: Request,
+  secret: string,
+): Promise<string> {
   const connectingIp = String(
     request.headers.get("CF-Connecting-IP") || "",
   ).trim();
@@ -283,8 +415,16 @@ async function createClientRateLimitKey(request: Request): Promise<string> {
       : `session:${normalizeClientId(
           request.headers.get("X-Acecore-Search-Client"),
         )}`;
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
+  const hmacKey = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const digest = await crypto.subtle.sign(
+    "HMAC",
+    hmacKey,
     new TextEncoder().encode(source),
   );
   return Array.from(new Uint8Array(digest), (value) =>
@@ -292,32 +432,72 @@ async function createClientRateLimitKey(request: Request): Promise<string> {
   ).join("");
 }
 
-async function consumeRateLimit(
+async function consumeRateLimits(
   database: D1Database,
-  limiterKey: string,
-  limit: number,
+  clientLimiterKey: string,
 ): Promise<boolean> {
   const now = Math.floor(Date.now() / 1000);
   const windowStart =
     Math.floor(now / RATE_LIMIT_WINDOW_SECONDS) * RATE_LIMIT_WINDOW_SECONDS;
   const result = await database
     .prepare(
-      `INSERT INTO semantic_search_rate_limits
+      `WITH current_counts AS (
+         SELECT
+           COALESCE(
+             MAX(CASE WHEN limiter_key = ?1 THEN request_count END),
+             0
+           ) AS client_count,
+           COALESCE(
+             MAX(CASE WHEN limiter_key = 'global' THEN request_count END),
+             0
+           ) AS global_count
+         FROM semantic_search_rate_limits
+         WHERE window_start = ?2
+           AND limiter_key IN (?1, 'global')
+       ),
+       eligible AS (
+         SELECT 1 AS allowed
+         FROM current_counts
+         WHERE client_count < ?4
+           AND global_count < ?5
+       )
+       INSERT INTO semantic_search_rate_limits
         (limiter_key, window_start, request_count, expires_at)
-       VALUES (?1, ?2, 1, ?3)
+       SELECT ?1, ?2, 1, ?3
+       FROM eligible
+       WHERE allowed = 1
+       UNION ALL
+       SELECT 'global', ?2, 1, ?3
+       FROM eligible
+       WHERE allowed = 1
        ON CONFLICT (limiter_key, window_start) DO UPDATE SET
-         request_count = semantic_search_rate_limits.request_count + 1,
-         expires_at = excluded.expires_at
-       WHERE semantic_search_rate_limits.request_count < ?4
-       RETURNING request_count`,
+         request_count = semantic_search_rate_limits.request_count + 1
+       RETURNING limiter_key, request_count`,
     )
-    .bind(limiterKey, windowStart, now + RATE_LIMIT_RETENTION_SECONDS, limit)
-    .first<{ request_count: number }>();
+    .bind(
+      clientLimiterKey,
+      windowStart,
+      now + RATE_LIMIT_RETENTION_SECONDS,
+      CLIENT_RATE_LIMIT,
+      GLOBAL_RATE_LIMIT,
+    )
+    .all<{ limiter_key: string; request_count: number }>();
 
-  return Boolean(
-    result &&
-    Number.isInteger(result.request_count) &&
-    result.request_count <= limit,
+  const counts = new Map(
+    result.results.map(({ limiter_key, request_count }) => [
+      limiter_key,
+      request_count,
+    ]),
+  );
+  const clientCount = counts.get(clientLimiterKey);
+  const globalCount = counts.get("global");
+
+  return (
+    result.results.length === 2 &&
+    Number.isInteger(clientCount) &&
+    Number(clientCount) <= CLIENT_RATE_LIMIT &&
+    Number.isInteger(globalCount) &&
+    Number(globalCount) <= GLOBAL_RATE_LIMIT
   );
 }
 
@@ -325,6 +505,100 @@ async function deleteExpiredRateLimits(database: D1Database): Promise<void> {
   const now = Math.floor(Date.now() / 1000);
   await database
     .prepare("DELETE FROM semantic_search_rate_limits WHERE expires_at < ?1")
+    .bind(now)
+    .run();
+}
+
+function recordSearchCompletion(
+  context: EventContext<CloudflareEnv, string, unknown>,
+  database: D1Database | undefined,
+  requestId: string,
+  startedAt: number,
+  completion: SearchCompletion,
+): void {
+  const durationMs = Math.max(0, Math.round(performance.now() - startedAt));
+  const zeroResults =
+    completion.outcome === "success" && completion.resultCount === 0;
+
+  console.log(
+    JSON.stringify({
+      event: "semantic_search_completed",
+      requestId,
+      locale: SEARCH_LOCALE,
+      outcome: completion.outcome,
+      stage: completion.stage,
+      status: completion.status,
+      resultCount: completion.resultCount,
+      zeroResults,
+      durationMs,
+    }),
+  );
+
+  if (!database) return;
+
+  try {
+    context.waitUntil(
+      persistSearchMetric(database, completion, durationMs).catch((error) => {
+        logSearchError(
+          requestId,
+          "metrics",
+          getErrorCode(error, "storage_error"),
+        );
+      }),
+    );
+  } catch (error) {
+    logSearchError(requestId, "metrics", getErrorCode(error, "storage_error"));
+  }
+}
+
+async function persistSearchMetric(
+  database: D1Database,
+  completion: SearchCompletion,
+  durationMs: number,
+): Promise<void> {
+  const now = Math.floor(Date.now() / 1000);
+  const hourStart = Math.floor(now / 3600) * 3600;
+  const zeroResultCount =
+    completion.outcome === "success" && completion.resultCount === 0 ? 1 : 0;
+
+  await database
+    .prepare(
+      `INSERT INTO semantic_search_metrics
+        (hour_start, outcome, stage, status, request_count, zero_result_count,
+         result_count_total, latency_ms_total, latency_ms_max, expires_at)
+       VALUES (?1, ?2, ?3, ?4, 1, ?5, ?6, ?7, ?7, ?8)
+       ON CONFLICT (hour_start, outcome, stage, status) DO UPDATE SET
+         request_count = semantic_search_metrics.request_count + 1,
+         zero_result_count =
+           semantic_search_metrics.zero_result_count + excluded.zero_result_count,
+         result_count_total =
+           semantic_search_metrics.result_count_total + excluded.result_count_total,
+         latency_ms_total =
+           semantic_search_metrics.latency_ms_total + excluded.latency_ms_total,
+         latency_ms_max =
+           MAX(semantic_search_metrics.latency_ms_max, excluded.latency_ms_max)`,
+    )
+    .bind(
+      hourStart,
+      completion.outcome,
+      completion.stage,
+      completion.status,
+      zeroResultCount,
+      completion.resultCount,
+      durationMs,
+      now + SEARCH_METRIC_RETENTION_SECONDS,
+    )
+    .run();
+
+  await deleteExpiredSearchMetrics(database, now);
+}
+
+async function deleteExpiredSearchMetrics(
+  database: D1Database,
+  now: number,
+): Promise<void> {
+  await database
+    .prepare("DELETE FROM semantic_search_metrics WHERE expires_at < ?1")
     .bind(now)
     .run();
 }

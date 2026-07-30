@@ -111,7 +111,7 @@ export async function syncVectorize({
   });
   validateExistingVectorIds(currentIds, indexName);
   const expectedIds = new Set(corpus.chunks.map(({ id }) => id));
-  const chunksToUpsert = corpus.chunks.filter(({ id }) => !currentIds.has(id));
+  const chunksToUpsert = corpus.chunks;
   const idsToDelete = [...currentIds].filter((id) => !expectedIds.has(id));
   validateDeletePlan({
     currentCount: currentIds.size,
@@ -622,7 +622,6 @@ async function listVectorIdsOnce(client, indexName) {
   do {
     const query = new URLSearchParams({
       count: String(LIST_BATCH_SIZE),
-      namespace: SEARCH_NAMESPACE,
     });
     if (cursor) query.set("cursor", cursor);
     const payload = await client.request(

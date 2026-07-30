@@ -121,7 +121,7 @@ function createSyncFetch(initialIds, expectedIds, { dimensions = 1024 } = {}) {
         `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}/list`,
       )
     ) {
-      assert.equal(parsedUrl.searchParams.get("namespace"), "ja");
+      assert.equal(parsedUrl.searchParams.has("namespace"), false);
       return cloudflareResponse({
         vectors: [...currentIds].map((id) => ({ id })),
         isTruncated: false,
@@ -292,7 +292,7 @@ test("production同期には明示確認が必要", async (t) => {
   );
 });
 
-test("差分だけをembedding・upsertし、古いIDを削除して収束確認する", async (t) => {
+test("全corpusを再embedding・upsertし、古いIDを削除して収束確認する", async (t) => {
   const corpus = createCorpus();
   const { corpusFile, directory } = await writeCorpusFile(corpus);
   t.after(() => rm(directory, { recursive: true, force: true }));
@@ -314,7 +314,7 @@ test("差分だけをembedding・upsertし、古いIDを削除して収束確認
     logger: { log: () => {} },
   });
 
-  assert.equal(result.upserted, 1);
+  assert.equal(result.upserted, 6);
   assert.equal(result.deleted, 1);
   assert.equal(result.mutationId, "delete-mutation");
   mock.assertConverged();

@@ -27,6 +27,8 @@ jobs:
         run: npm run types:cloudflare:check
       - name: Build Pages Functions
         run: npm run check:pages-config
+      - name: Build semantic search maintenance Worker
+        run: npm run check:maintenance-config
       - name: Type-check Pages Functions
         run: npm run typecheck:functions
       - name: Build
