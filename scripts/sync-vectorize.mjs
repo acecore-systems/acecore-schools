@@ -1,6 +1,5 @@
-import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -14,6 +13,8 @@ import {
   SEARCH_NAMESPACE,
   SEARCH_REQUIRED_SOURCE_PATHS,
   SEARCH_VECTOR_LIMIT,
+  calculateSearchChunkDigest,
+  calculateSearchCorpusVersion,
 } from "./build-search-corpus.mjs";
 
 export const PREVIEW_INDEX_NAME = "acecore-schools-search-preview";
@@ -32,7 +33,10 @@ const MAX_REQUEST_RETRIES = 5;
 const RETRY_BASE_DELAY_MS = 500;
 const MAX_LIST_CURSOR_RESTARTS = 3;
 const MAX_DELETE_RATIO = 0.2;
-const MANAGED_VECTOR_ID_PATTERN = /^schools-v1-[0-9a-f]{48}$/u;
+const GET_BY_IDS_BATCH_SIZE = 100;
+const MANAGED_VECTOR_ID_PATTERN = /^schools-v(?:1|2)-[0-9a-f]{48}$/u;
+const V1_VECTOR_ID_PATTERN = /^schools-v1-[0-9a-f]{48}$/u;
+const V2_VECTOR_ID_PATTERN = /^schools-v2-[0-9a-f]{48}$/u;
 const CORPUS_VERSION_PATTERN = /^[0-9a-f]{20}$/u;
 const ALLOWED_INDEX_NAMES = new Set([
   PREVIEW_INDEX_NAME,
@@ -47,16 +51,56 @@ class CloudflareApiError extends Error {
   }
 }
 
-export async function syncVectorize({
+export async function syncVectorize(options = {}) {
+  const receiptFile = options.receiptFile
+    ? resolve(options.receiptFile)
+    : undefined;
+  const startedAt = new Date().toISOString();
+  const receiptBase = await createReceiptBase(options, startedAt);
+
+  if (receiptFile) {
+    await writeSyncReceipt(receiptFile, {
+      ...receiptBase,
+      status: "attempt",
+    });
+  }
+
+  try {
+    const result = await performVectorizeSync(options);
+    if (receiptFile) {
+      await writeSyncReceipt(receiptFile, {
+        ...receiptBase,
+        status: "success",
+        completedAt: new Date().toISOString(),
+        result,
+      });
+    }
+    return result;
+  } catch (error) {
+    if (receiptFile) {
+      await writeSyncReceipt(receiptFile, {
+        ...receiptBase,
+        status: "failure",
+        completedAt: new Date().toISOString(),
+        error: {
+          name: error?.name || "Error",
+          message: error?.message || String(error),
+        },
+      });
+    }
+    throw error;
+  }
+}
+
+async function performVectorizeSync({
   accountId = process.env.CLOUDFLARE_ACCOUNT_ID,
   apiToken = process.env.CLOUDFLARE_API_TOKEN,
   indexName = process.env.VECTORIZE_INDEX_NAME,
   corpusFile = DEFAULT_CORPUS_FILE,
   dryRun = false,
   waitForMutations = true,
-  allowLargeDelete = false,
-  confirmProduction = process.env.VECTORIZE_CONFIRM_PRODUCTION ===
-    PRODUCTION_INDEX_NAME,
+  allowV1ToV2Migration = false,
+  confirmProductionVersion = process.env.VECTORIZE_CONFIRM_PRODUCTION_VERSION,
   fetchImpl = globalThis.fetch,
   requestTimeoutMs = REQUEST_TIMEOUT_MS,
   retryBaseDelayMs = RETRY_BASE_DELAY_MS,
@@ -76,7 +120,8 @@ export async function syncVectorize({
   validateIndexName(indexName, { required: !dryRun });
   validateProductionConfirmation(indexName, {
     dryRun,
-    confirmProduction,
+    corpusVersion: corpus.version,
+    confirmProductionVersion,
   });
 
   if (dryRun) {
@@ -114,10 +159,16 @@ export async function syncVectorize({
   const chunksToUpsert = corpus.chunks;
   const idsToDelete = [...currentIds].filter((id) => !expectedIds.has(id));
   validateDeletePlan({
-    currentCount: currentIds.size,
-    deleteCount: idsToDelete.length,
-    allowLargeDelete,
+    currentIds,
+    expectedIds,
+    idsToDelete,
+    allowV1ToV2Migration,
   });
+
+  const contentMatches =
+    idsToDelete.length === 0 &&
+    currentIds.size === expectedIds.size &&
+    (await vectorsMatchCorpus(client, indexName, corpus.chunks));
 
   logger.log(
     JSON.stringify({
@@ -126,10 +177,26 @@ export async function syncVectorize({
       corpusVersion: corpus.version,
       current: currentIds.size,
       expected: expectedIds.size,
-      upsert: chunksToUpsert.length,
+      upsert: contentMatches ? 0 : chunksToUpsert.length,
       delete: idsToDelete.length,
+      noop: contentMatches,
     }),
   );
+
+  if (contentMatches) {
+    const result = {
+      dryRun: false,
+      noop: true,
+      indexName,
+      corpusVersion: corpus.version,
+      existing: currentIds.size,
+      upserted: 0,
+      deleted: 0,
+      mutationId: null,
+    };
+    logger.log(JSON.stringify({ event: "vectorize_sync_complete", ...result }));
+    return result;
+  }
 
   const mutationIds = [];
   for (const chunkBatch of batches(chunksToUpsert, EMBEDDING_BATCH_SIZE)) {
@@ -172,6 +239,7 @@ export async function syncVectorize({
 
   const result = {
     dryRun: false,
+    noop: false,
     indexName,
     corpusVersion: corpus.version,
     existing: currentIds.size,
@@ -249,7 +317,8 @@ export function validateCorpus(corpus) {
       typeof chunk?.text !== "string" ||
       !chunk.text.trim() ||
       chunk.text.length > SEARCH_MAX_CHUNK_LENGTH ||
-      !isValidMetadata(chunk.metadata, sourceUrls)
+      !isValidMetadata(chunk.metadata, sourceUrls) ||
+      chunk.metadata.contentDigest !== calculateSearchChunkDigest(chunk)
     ) {
       throw new Error("Corpus contains an invalid chunk.");
     }
@@ -265,10 +334,7 @@ export function validateCorpus(corpus) {
     throw new Error("Every corpus source URL must have at least one chunk.");
   }
 
-  const expectedVersion = createHash("sha256")
-    .update([...ids].sort().join("\n"))
-    .digest("hex")
-    .slice(0, 20);
+  const expectedVersion = calculateSearchCorpusVersion(corpus.chunks);
   if (
     typeof corpus.version !== "string" ||
     !CORPUS_VERSION_PATTERN.test(corpus.version) ||
@@ -313,7 +379,9 @@ function isValidMetadata(metadata, sourceUrls) {
     isBoundedString(metadata.section, 240, true) &&
     isBoundedString(metadata.excerpt, 500, false) &&
     isBoundedString(metadata.contentType, 40, true) &&
-    metadata.locale === SEARCH_NAMESPACE
+    metadata.locale === SEARCH_NAMESPACE &&
+    typeof metadata.contentDigest === "string" &&
+    CORPUS_VERSION_PATTERN.test(metadata.contentDigest)
   );
 }
 
@@ -358,17 +426,17 @@ function validateIndexName(indexName, { required }) {
 
 function validateProductionConfirmation(
   indexName,
-  { dryRun, confirmProduction },
+  { dryRun, corpusVersion, confirmProductionVersion },
 ) {
   if (
     dryRun ||
     indexName !== PRODUCTION_INDEX_NAME ||
-    confirmProduction === true
+    confirmProductionVersion === corpusVersion
   ) {
     return;
   }
   throw new Error(
-    `Production sync requires --confirm-production or VECTORIZE_CONFIRM_PRODUCTION=${PRODUCTION_INDEX_NAME}.`,
+    `Production sync requires --confirm-production ${corpusVersion} or VECTORIZE_CONFIRM_PRODUCTION_VERSION=${corpusVersion}.`,
   );
 }
 
@@ -383,19 +451,34 @@ function validateExistingVectorIds(ids, indexName) {
   );
 }
 
-function validateDeletePlan({ currentCount, deleteCount, allowLargeDelete }) {
+function validateDeletePlan({
+  currentIds,
+  expectedIds,
+  idsToDelete,
+  allowV1ToV2Migration,
+}) {
+  const currentCount = currentIds.size;
+  const deleteCount = idsToDelete.length;
   if (
     deleteCount === 0 ||
     currentCount === 0 ||
-    deleteCount / currentCount <= MAX_DELETE_RATIO ||
-    allowLargeDelete
+    deleteCount / currentCount <= MAX_DELETE_RATIO
   ) {
     return;
   }
 
+  const isRecoverableV1ToV2Migration =
+    allowV1ToV2Migration &&
+    [...expectedIds].every((id) => V2_VECTOR_ID_PATTERN.test(id)) &&
+    idsToDelete.every((id) => V1_VECTOR_ID_PATTERN.test(id)) &&
+    [...currentIds].every(
+      (id) => V1_VECTOR_ID_PATTERN.test(id) || expectedIds.has(id),
+    );
+  if (isRecoverableV1ToV2Migration) return;
+
   const percentage = ((deleteCount / currentCount) * 100).toFixed(1);
   throw new Error(
-    `Refusing to delete ${deleteCount}/${currentCount} vectors (${percentage}%); pass --allow-large-delete to override the ${MAX_DELETE_RATIO * 100}% safety limit.`,
+    `Refusing to delete ${deleteCount}/${currentCount} vectors (${percentage}%); only the reviewed --migrate-v1-to-v2 path may exceed the ${MAX_DELETE_RATIO * 100}% safety limit.`,
   );
 }
 
@@ -647,6 +730,60 @@ async function listVectorIdsOnce(client, indexName) {
   return ids;
 }
 
+async function vectorsMatchCorpus(client, indexName, chunks) {
+  const expectedById = new Map(chunks.map((chunk) => [chunk.id, chunk]));
+  const actualById = new Map();
+
+  for (const chunkBatch of batches(chunks, GET_BY_IDS_BATCH_SIZE)) {
+    const payload = await client.request(
+      `/vectorize/v2/indexes/${encodeURIComponent(indexName)}/get_by_ids`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: chunkBatch.map(({ id }) => id) }),
+      },
+    );
+    if (!Array.isArray(payload?.result)) {
+      throw new Error(
+        `Vectorize index ${indexName} returned an invalid get_by_ids response; refusing to mutate it.`,
+      );
+    }
+    for (const vector of payload.result) {
+      if (
+        typeof vector?.id !== "string" ||
+        actualById.has(vector.id) ||
+        !expectedById.has(vector.id)
+      ) {
+        throw new Error(
+          `Vectorize index ${indexName} returned an unexpected vector from get_by_ids; refusing to mutate it.`,
+        );
+      }
+      actualById.set(vector.id, vector);
+    }
+  }
+
+  if (actualById.size !== expectedById.size) return false;
+  return [...expectedById].every(([id, expected]) => {
+    const actual = actualById.get(id);
+    return (
+      actual?.namespace === expected.namespace &&
+      metadataEquals(actual?.metadata, expected.metadata)
+    );
+  });
+}
+
+function metadataEquals(actual, expected) {
+  if (
+    !actual ||
+    typeof actual !== "object" ||
+    Array.isArray(actual) ||
+    Object.keys(actual).length !== Object.keys(expected).length
+  ) {
+    return false;
+  }
+  return Object.keys(expected).every((key) => actual[key] === expected[key]);
+}
+
 async function createEmbeddings(client, chunks) {
   const payload = await client.request(`/ai/run/${SEARCH_EMBEDDING_MODEL}`, {
     method: "POST",
@@ -741,39 +878,90 @@ function batches(items, size) {
   return result;
 }
 
+async function createReceiptBase(options, startedAt) {
+  const corpusFile = resolve(options.corpusFile || DEFAULT_CORPUS_FILE);
+  let corpusVersion = null;
+  try {
+    const corpus = JSON.parse(await readFile(corpusFile, "utf8"));
+    corpusVersion = typeof corpus?.version === "string" ? corpus.version : null;
+  } catch {
+    // The failure receipt records any subsequent corpus read/parse error.
+  }
+
+  return {
+    schemaVersion: 1,
+    startedAt,
+    run: {
+      repository: process.env.GITHUB_REPOSITORY || null,
+      workflow: process.env.GITHUB_WORKFLOW || null,
+      runId: process.env.GITHUB_RUN_ID || null,
+      runAttempt: process.env.GITHUB_RUN_ATTEMPT || null,
+      eventName: process.env.GITHUB_EVENT_NAME || null,
+      eventCommit: process.env.GITHUB_SHA || null,
+    },
+    target: {
+      indexName: options.indexName || process.env.VECTORIZE_INDEX_NAME || null,
+      corpusVersion,
+      migration: options.allowV1ToV2Migration === true,
+    },
+  };
+}
+
+async function writeSyncReceipt(receiptFile, receipt) {
+  await mkdir(dirname(receiptFile), { recursive: true });
+  await writeFile(receiptFile, `${JSON.stringify(receipt, null, 2)}\n`, "utf8");
+}
+
 function parseArguments(argv) {
   const options = {
     dryRun: false,
     waitForMutations: true,
-    allowLargeDelete: false,
-    confirmProduction: false,
+    allowV1ToV2Migration: false,
+    confirmProductionVersion: process.env.VECTORIZE_CONFIRM_PRODUCTION_VERSION,
     accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
     indexName: process.env.VECTORIZE_INDEX_NAME,
     corpusFile: DEFAULT_CORPUS_FILE,
+    receiptFile: undefined,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--dry-run") options.dryRun = true;
     else if (argument === "--no-wait") options.waitForMutations = false;
-    else if (argument === "--allow-large-delete") {
-      options.allowLargeDelete = true;
+    else if (argument === "--migrate-v1-to-v2") {
+      options.allowV1ToV2Migration = true;
     } else if (argument === "--confirm-production") {
-      options.confirmProduction = true;
+      options.confirmProductionVersion = requireArgumentValue(
+        argv,
+        ++index,
+        argument,
+      );
     } else if (argument === "--account-id") {
-      options.accountId = argv[++index];
-    } else if (argument === "--index") options.indexName = argv[++index];
-    else if (argument === "--corpus") {
-      options.corpusFile = resolve(argv[++index]);
+      options.accountId = requireArgumentValue(argv, ++index, argument);
+    } else if (argument === "--index") {
+      options.indexName = requireArgumentValue(argv, ++index, argument);
+    } else if (argument === "--corpus") {
+      options.corpusFile = resolve(
+        requireArgumentValue(argv, ++index, argument),
+      );
+    } else if (argument === "--receipt") {
+      options.receiptFile = resolve(
+        requireArgumentValue(argv, ++index, argument),
+      );
     } else {
       throw new Error(`Unknown argument: ${argument}`);
     }
   }
 
-  if (process.env.VECTORIZE_CONFIRM_PRODUCTION === PRODUCTION_INDEX_NAME) {
-    options.confirmProduction = true;
-  }
   return options;
+}
+
+function requireArgumentValue(argv, index, option) {
+  const value = argv[index];
+  if (!value || value.startsWith("--")) {
+    throw new Error(`${option} requires a value.`);
+  }
+  return value;
 }
 
 function isDirectExecution() {

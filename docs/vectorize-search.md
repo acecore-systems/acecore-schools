@@ -6,10 +6,10 @@ Acecore Schools の公開ページを、日本語の自然文から探すため�
 
 ## Current rollout state
 
-| Environment | Vectorize index                     | Search D1                           | Vectors | Search |
-| ----------- | ----------------------------------- | ----------------------------------- | ------: | ------ |
-| Preview     | `acecore-schools-search-preview`    | `acecore-schools-search-preview`    |       6 | ON     |
-| Production  | `acecore-schools-search-production` | `acecore-schools-search-production` |       6 | ON     |
+| Environment | Vectorize index                     | Search D1                           | Search |
+| ----------- | ----------------------------------- | ----------------------------------- | ------ |
+| Preview     | `acecore-schools-search-preview`    | `acecore-schools-search-preview`    | ON     |
+| Production  | `acecore-schools-search-production` | `acecore-schools-search-production` | ON     |
 
 2026-07-30に両D1へmigration `0001`〜`0003`を適用し、同じ6件のcorpusを両indexへ収束させました。
 同日、公開routeを持たない`acecore-schools-search-maintenance`をdeployし、
@@ -17,23 +17,30 @@ cron `17 * * * *`をCloudflare APIで確認しました。
 Production は `SEARCH_ENABLED=true` で、health確認に連動した検索UIとAPIを提供します。
 障害時は直前の検索OFF deploymentへ即時rollbackし、続けてGitのkill switchも`false`へ戻します。
 
+その後の本文追加でmain corpusが7件になったため、`.github/workflows/sync-vectorize.yml`は
+Productionをmain push直後と6時間ごとに公開buildへ再収束させます。Previewはmainからの手動同期、
+Productionは手動再実行にも対応します。各成功runは同期対象corpusと構造化sync logを
+GitHub Actions artifactとして保存します。
+
 ## Data flow
 
 1. `npm run build` が Astro の公開 HTML を `dist/` に生成します。
 2. `scripts/build-search-corpus.mjs` が `<main>` の公開本文だけを抽出し、
    `.vectorize/corpus.json` を生成します。
-3. `scripts/sync-vectorize.mjs` が Workers AI の `@cf/baai/bge-m3` で 1024 次元の
+3. `scripts/write-build-meta.mjs`がGitHub連携Pagesから渡されるcommitとcorpus identityを
+   `/.well-known/acecore-schools-build.json`へ出力します。
+4. `scripts/sync-vectorize.mjs` が Workers AI の `@cf/baai/bge-m3` で 1024 次元の
    embedding を生成し、`ja` namespace へ upsert します。
-4. `/api/search` が同じモデルで質問を embedding し、Vectorize の cosine 類似検索結果を
+5. `/api/search` が同じモデルで質問を embedding し、Vectorize の cosine 類似検索結果を
    最大5ページへ正規化します。
-5. D1 がクライアント10回/分、全体20回/分を1 SQL statementで同時判定し、片方が上限なら
+6. D1 がクライアント10回/分、全体20回/分を1 SQL statementで同時判定し、片方が上限なら
    client・globalのどちらも増やしません。
-6. レート制限を通過した検索だけをD1へUTC時別に集計し、成功数、エラー、0件、結果数、
+7. レート制限を通過した検索だけをD1へUTC時別に集計し、成功数、エラー、0件、結果数、
    latencyを約90日保持します。
 
 Corpus 生成は404、`noindex`、ナビゲーション、フォーム、フッター、装飾文を除外します。
 必須6 route、最低6 source、最低6 vector、`ja` のみという検証を通らない場合は build と同期を
-停止します。IDは本文を含むハッシュなので、内容変更は新しいvectorとして扱われます。
+停止します。IDはlocale、URL、chunk slotから安定生成し、本文変更はcorpus versionで検出します。
 同期時は既存IDも含むreview済みcorpus全件を再embedding・upsertするため、metadataやvaluesの
 意図しないdriftも上書きします。
 
@@ -98,6 +105,11 @@ npm run build
 npm run sync:vectorize:dry-run
 ```
 
+`npm run build`は`.vectorize/corpus.json`に加えて
+`dist/.well-known/acecore-schools-build.json`を生成します。Cloudflare Pagesでは
+`CF_PAGES_COMMIT_SHA`、GitHub Actionsでは明示した`COMMIT_SHA`を使い、ローカルでは現在の
+Git HEADを使います。
+
 `wrangler.jsonc` の binding を変更した場合は、生成型も更新して commit します。
 
 ```bash
@@ -132,23 +144,56 @@ $env:VECTORIZE_INDEX_NAME = "acecore-schools-search-preview"
 npm run sync:vectorize
 ```
 
+GitHub Actionsでは次のEnvironmentをmain限定で作成し、同名のsecretへ環境別tokenを保存します。
+
+| GitHub Environment                     | Secret                                           |
+| -------------------------------------- | ------------------------------------------------ |
+| `cloudflare-schools-search-preview`    | `CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN`    |
+| `cloudflare-schools-search-production` | `CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN` |
+
+Productionのpush／schedule自動同期はrepository variable
+`SCHOOLS_VECTORIZE_SYNC_ENABLED=true`の場合だけ起動します。Environment、secret、Preview QA、
+初回Production同期を揃えるまではvariableを作成しません。手動Production dispatchは段階導入と
+障害修復のため、このvariableが未設定でも実行できます。
+
+Production jobは公開markerが指すcommitを再buildし、commit、corpus version、source count、
+vector countが公開中の値と一致した場合だけ同期します。mutation後も同じ公開identityを再確認します。
+push runは対象commitが公開されるまで最大10分待ち、schedule／manual runは現在公開中のcommitを
+mainの祖先と確認して再収束します。
+
+公開commitの依存関係install、テスト、buildはsecretを持たないjobで実行し、検証済みcorpusを
+短期artifactへ固定します。Production tokenを使うjobはイベント時のmain verifierを改めて
+checkoutし、artifactのSHA-256とcorpus versionを再検証してから、そのverifierの同期scriptだけを
+実行します。公開中の古いcommitへProduction tokenを渡しません。
+
 同期処理は対象 index 名を2件に限定し、index を暗黙作成しません。既存の管理外IDを検出した場合、
 または削除が既存vectorの20%を超える場合は変更前に停止します。upsert/delete 後は
-`processedUpToMutation` を待ち、最終ID集合の一致を検証します。IDが既に存在していてもcorpus
-全件をupsertするため、本文・metadata・namespace・embeddingをreview済み入力へ戻せます。
-List Vectors APIへ送るquery parameterは公式仕様の`count`と`cursor`だけです。namespaceは
-各vectorの書き込みとqueryで`ja`を指定します。
+`processedUpToMutation` を待ち、最終ID集合の一致を検証します。既存vectorのID、namespace、
+metadata内の本文・metadata・embedding／chunk設定digestがcorpusとすべて一致する場合はno-opとし、
+Workers AIとmutationを呼びません。一致しない場合はcorpus全件をupsertして、本文・metadata・
+namespace・embeddingをreview済み入力へ戻します。List Vectors APIへ送るquery parameterは
+公式仕様の`count`と`cursor`だけです。namespaceは各vectorの書き込みとqueryで`ja`を指定します。
+
+自動同期で通常の本文変更が20%削除gateへ掛からないよう、vector IDは`schools-v2`として
+locale、URL、chunk slotから安定生成します。corpus versionは本文、metadata、embedding設定、
+chunk設定を含む全内容hashなので、本文変更時はIDを維持しつつ公開identityが更新されます。
+既存`schools-v1`からの初回移行だけは全ID置換になります。Preview QAと明示承認後、
+GitHub Actionsのmanual dispatchで`migration=v1-to-v2`を選び、Preview、Productionの順に
+実行します。この限定モードは削除対象がv1、期待IDがv2である場合にしか20%超削除を許可せず、
+通常の大規模削除overrideには使えません。Production migrationも公開marker、GitHub Environment、
+corpus SHA-256、corpus versionの検証を迂回しません。
+
+各実行はtokenを含まない`receipt.json`を作成し、attemptからsuccessまたはfailureへ状態を更新します。
+GitHubのrun情報、対象index、corpus version、no-op、mutation ID、件数をsync logと一緒にartifactへ
+保存します。失敗時も`if: always()`で取得できる範囲の証跡をアップロードします。
 
 ## Production gate
 
 Production 同期は通常の同期コマンドでは実行できません。Production indexが
 1024 dimensions / cosineであること、Production D1 migration、corpus件数、Preview検索結果を
-再確認してから明示フラグを付けます。2026-07-30の同期は6件upsert、0件deleteで収束しました。
-
-```powershell
-$env:VECTORIZE_INDEX_NAME = "acecore-schools-search-production"
-npm run sync:vectorize -- --confirm-production
-```
+再確認し、GitHub Actionsのmanual dispatchまたは有効化済みのpush／scheduleから実行します。
+同期scriptも公開markerと一致したcorpus versionそのものを確認値として要求します。
+2026-07-30の同期は6件upsert、0件deleteで収束しました。
 
 検索対象のHTML・`src/data/`・corpus生成処理を変更するPRは、merge前にcorpus buildとPreview
 同期を行い、merge後のProduction有効化前にProduction同期を再実行します。別の本文変更PRが
@@ -171,6 +216,8 @@ Production同期後も実装PRでは検索を無効のまま維持し、2026-07-
 6. `/api/health`の`searchEnabled`が`true`で、desktop/mobileの公開UI、既知query、結果リンクを
    実ブラウザで確認する。
 7. Production D1の時間集計が1件増え、リアルタイムlogに5xxやprovider errorがない。
+8. `Sync Schools Vectorize index`のProduction runが成功し、artifact内のcorpusとsync log、
+   公開build marker、Vectorizeのvector countが一致する。
 
 障害時はまずCloudflare Pagesで直前の`SEARCH_ENABLED=false`の成功済みProduction deploymentへ
 rollbackし、`/api/health`、UI非表示、`POST /api/search`の503を確認します。続けて

@@ -27,7 +27,7 @@ const DEFAULT_OUTPUT_FILE = resolve(".vectorize/corpus.json");
 const TARGET_CHUNK_LENGTH = 850;
 const OVERLAP_LENGTH = 120;
 const MIN_BLOCK_LENGTH = 12;
-const MANAGED_VECTOR_ID_PREFIX = "schools-v1-";
+const MANAGED_VECTOR_ID_PREFIX = "schools-v2-";
 
 const CONTENT_TAGS = new Set([
   "h1",
@@ -101,12 +101,7 @@ export async function buildSearchCorpus({
   }
 
   const sourceUrls = documents.map(({ url }) => url);
-  const version = digest(
-    chunks
-      .map(({ id }) => id)
-      .sort()
-      .join("\n"),
-  ).slice(0, 20);
+  const version = calculateSearchCorpusVersion(chunks);
   const corpus = {
     schemaVersion: SEARCH_CORPUS_SCHEMA_VERSION,
     version,
@@ -171,6 +166,40 @@ export function extractSearchDocument(html, htmlFile, distDir) {
   };
 }
 
+export function calculateSearchCorpusVersion(chunks) {
+  return digest(
+    [
+      `schema:${SEARCH_CORPUS_SCHEMA_VERSION}`,
+      `embedding:${SEARCH_EMBEDDING_MODEL}:${SEARCH_EMBEDDING_DIMENSIONS}:${SEARCH_DISTANCE_METRIC}`,
+      `chunking:${TARGET_CHUNK_LENGTH}:${SEARCH_MAX_CHUNK_LENGTH}:${OVERLAP_LENGTH}`,
+      ...chunks.map(({ id, namespace, text, metadata }) =>
+        JSON.stringify({ id, namespace, text, metadata }),
+      ),
+    ].join("\n"),
+  ).slice(0, 20);
+}
+
+export function calculateSearchChunkDigest({ text, metadata }) {
+  const { contentDigest: _contentDigest, ...contentMetadata } = metadata;
+  return digest(
+    JSON.stringify({
+      schemaVersion: SEARCH_CORPUS_SCHEMA_VERSION,
+      embedding: {
+        model: SEARCH_EMBEDDING_MODEL,
+        dimensions: SEARCH_EMBEDDING_DIMENSIONS,
+        metric: SEARCH_DISTANCE_METRIC,
+      },
+      chunking: {
+        targetCharacters: TARGET_CHUNK_LENGTH,
+        maximumCharacters: SEARCH_MAX_CHUNK_LENGTH,
+        overlapCharacters: OVERLAP_LENGTH,
+      },
+      text,
+      metadata: contentMetadata,
+    }),
+  ).slice(0, 20);
+}
+
 export function chunkSearchDocument(document) {
   const groups = [];
   let current = [];
@@ -229,21 +258,24 @@ export function chunkSearchDocument(document) {
       );
     }
     const id = `${MANAGED_VECTOR_ID_PREFIX}${digest(
-      [document.locale, document.url, String(index), text].join("\n"),
+      [document.locale, document.url, String(index)].join("\n"),
     ).slice(0, 48)}`;
+
+    const metadata = {
+      url: document.url,
+      title: document.title,
+      section,
+      excerpt: createExcerpt(body || document.description),
+      contentType: document.contentType,
+      locale: SEARCH_NAMESPACE,
+    };
+    metadata.contentDigest = calculateSearchChunkDigest({ text, metadata });
 
     return {
       id,
       namespace: SEARCH_NAMESPACE,
       text,
-      metadata: {
-        url: document.url,
-        title: document.title,
-        section,
-        excerpt: createExcerpt(body || document.description),
-        contentType: document.contentType,
-        locale: SEARCH_NAMESPACE,
-      },
+      metadata,
     };
   });
 }
