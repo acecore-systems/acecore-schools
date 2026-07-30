@@ -28,6 +28,8 @@ const DELETE_BATCH_SIZE = 100;
 const LIST_BATCH_SIZE = 1000;
 const MUTATION_WAIT_TIMEOUT_MS = 180_000;
 const MUTATION_POLL_INTERVAL_MS = 5_000;
+const CONVERGENCE_WAIT_TIMEOUT_MS = 300_000;
+const CONVERGENCE_POLL_INTERVAL_MS = 5_000;
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_REQUEST_RETRIES = 5;
 const RETRY_BASE_DELAY_MS = 500;
@@ -106,6 +108,8 @@ async function performVectorizeSync({
   retryBaseDelayMs = RETRY_BASE_DELAY_MS,
   mutationPollIntervalMs = MUTATION_POLL_INTERVAL_MS,
   mutationWaitTimeoutMs = MUTATION_WAIT_TIMEOUT_MS,
+  convergencePollIntervalMs = CONVERGENCE_POLL_INTERVAL_MS,
+  convergenceWaitTimeoutMs = CONVERGENCE_WAIT_TIMEOUT_MS,
   sleepImpl = sleep,
   randomImpl = Math.random,
   logger = console,
@@ -198,7 +202,7 @@ async function performVectorizeSync({
     return result;
   }
 
-  const mutationIds = [];
+  const upsertMutationIds = [];
   for (const chunkBatch of batches(chunksToUpsert, EMBEDDING_BATCH_SIZE)) {
     const embeddings = await createEmbeddings(client, chunkBatch);
 
@@ -212,29 +216,43 @@ async function performVectorizeSync({
       UPSERT_BATCH_SIZE,
     )) {
       const mutationId = await upsertVectors(client, indexName, vectorBatch);
-      mutationIds.push(mutationId);
+      upsertMutationIds.push(mutationId);
     }
   }
 
-  for (const idBatch of batches(idsToDelete, DELETE_BATCH_SIZE)) {
-    const mutationId = await deleteVectors(client, indexName, idBatch);
-    mutationIds.push(mutationId);
-  }
-
-  const lastMutationId = mutationIds.at(-1);
-  if (waitForMutations && lastMutationId) {
-    await waitForMutation(client, indexName, lastMutationId, {
+  const lastUpsertMutationId = upsertMutationIds.at(-1);
+  if (waitForMutations && lastUpsertMutationId) {
+    await waitForMutation(client, indexName, lastUpsertMutationId, {
       sleepImpl,
       mutationPollIntervalMs,
       mutationWaitTimeoutMs,
     });
-    const convergedIds = await listVectorIds(client, indexName, {
+  }
+
+  const deleteMutationIds = [];
+  for (const idBatch of batches(idsToDelete, DELETE_BATCH_SIZE)) {
+    const mutationId = await deleteVectors(client, indexName, idBatch);
+    deleteMutationIds.push(mutationId);
+  }
+
+  const lastDeleteMutationId = deleteMutationIds.at(-1);
+  if (waitForMutations && lastDeleteMutationId) {
+    await waitForMutation(client, indexName, lastDeleteMutationId, {
+      sleepImpl,
+      mutationPollIntervalMs,
+      mutationWaitTimeoutMs,
+    });
+  }
+
+  const lastMutationId = lastDeleteMutationId || lastUpsertMutationId;
+  if (waitForMutations && lastMutationId) {
+    await waitForConvergence(client, indexName, expectedIds, corpus.chunks, {
       logger,
       sleepImpl,
       retryBaseDelayMs,
+      convergencePollIntervalMs,
+      convergenceWaitTimeoutMs,
     });
-    validateExistingVectorIds(convergedIds, indexName);
-    validateConvergence(convergedIds, expectedIds, indexName);
   }
 
   const result = {
@@ -482,12 +500,22 @@ function validateDeletePlan({
   );
 }
 
-function validateConvergence(actualIds, expectedIds, indexName) {
+function getConvergenceDifference(actualIds, expectedIds) {
   const missing = [...expectedIds].filter((id) => !actualIds.has(id));
   const unexpected = [...actualIds].filter((id) => !expectedIds.has(id));
-  if (missing.length === 0 && unexpected.length === 0) return;
+  return { missing, unexpected };
+}
+
+function throwConvergenceError(
+  indexName,
+  { missing, unexpected, contentMatches },
+) {
+  const contentMessage =
+    missing.length === 0 && unexpected.length === 0 && !contentMatches
+      ? " Corpus metadata did not match."
+      : "";
   throw new Error(
-    `Vectorize index ${indexName} did not converge: ${missing.length} missing and ${unexpected.length} unexpected vector(s).`,
+    `Vectorize index ${indexName} did not converge: ${missing.length} missing and ${unexpected.length} unexpected vector(s).${contentMessage}`,
   );
 }
 
@@ -728,6 +756,70 @@ async function listVectorIdsOnce(client, indexName) {
   } while (cursor);
 
   return ids;
+}
+
+async function waitForConvergence(
+  client,
+  indexName,
+  expectedIds,
+  chunks,
+  {
+    logger,
+    sleepImpl,
+    retryBaseDelayMs,
+    convergencePollIntervalMs,
+    convergenceWaitTimeoutMs,
+  },
+) {
+  const deadline = Date.now() + convergenceWaitTimeoutMs;
+  let attempt = 0;
+
+  while (true) {
+    attempt += 1;
+    const actualIds = await listVectorIds(client, indexName, {
+      logger,
+      sleepImpl,
+      retryBaseDelayMs,
+    });
+    validateExistingVectorIds(actualIds, indexName);
+
+    const difference = getConvergenceDifference(actualIds, expectedIds);
+    const idsMatch =
+      difference.missing.length === 0 && difference.unexpected.length === 0;
+    const contentMatches =
+      idsMatch && (await vectorsMatchCorpus(client, indexName, chunks));
+
+    if (idsMatch && contentMatches) {
+      logger.log(
+        JSON.stringify({
+          event: "vectorize_convergence_confirmed",
+          indexName,
+          attempt,
+          vectors: actualIds.size,
+        }),
+      );
+      return;
+    }
+
+    logger.log(
+      JSON.stringify({
+        event: "vectorize_convergence_wait",
+        indexName,
+        attempt,
+        missing: difference.missing.length,
+        unexpected: difference.unexpected.length,
+        contentMismatch: idsMatch && !contentMatches,
+      }),
+    );
+
+    if (Date.now() >= deadline) {
+      throwConvergenceError(indexName, {
+        ...difference,
+        contentMatches,
+      });
+    }
+    await sleepImpl(convergencePollIntervalMs);
+  }
 }
 
 async function vectorsMatchCorpus(client, indexName, chunks) {

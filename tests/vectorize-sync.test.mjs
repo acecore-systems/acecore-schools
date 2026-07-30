@@ -98,7 +98,13 @@ function cloudflareResponse(result, status = 200) {
 function createSyncFetch(
   initialIds,
   expectedIds,
-  { dimensions = 1024, existingChunks = [] } = {},
+  {
+    dimensions = 1024,
+    existingChunks = [],
+    deleteVisibilityDelayLists = 0,
+    upsertVisibilityDelayReads = 0,
+    convergenceUnmanagedId = null,
+  } = {},
 ) {
   const currentIds = new Set(initialIds);
   const currentVectors = new Map(
@@ -113,6 +119,10 @@ function createSyncFetch(
   );
   const calls = [];
   let lastMutationId = "";
+  let staleDeleteIds = null;
+  let remainingStaleDeleteLists = 0;
+  let staleUpsertVectors = null;
+  let remainingStaleUpsertReads = 0;
 
   const fetchImpl = async (url, init = {}) => {
     calls.push({ url, init });
@@ -135,8 +145,15 @@ function createSyncFetch(
       )
     ) {
       assert.equal(parsedUrl.searchParams.has("namespace"), false);
+      let visibleIds = currentIds;
+      if (lastMutationId && convergenceUnmanagedId) {
+        visibleIds = new Set([...currentIds, convergenceUnmanagedId]);
+      } else if (remainingStaleDeleteLists > 0 && staleDeleteIds) {
+        visibleIds = staleDeleteIds;
+        remainingStaleDeleteLists -= 1;
+      }
       return cloudflareResponse({
-        vectors: [...currentIds].map((id) => ({ id })),
+        vectors: [...visibleIds].map((id) => ({ id })),
         isTruncated: false,
       });
     }
@@ -147,12 +164,17 @@ function createSyncFetch(
       )
     ) {
       const ids = JSON.parse(init.body).ids;
+      let visibleVectors = currentVectors;
+      if (remainingStaleUpsertReads > 0 && staleUpsertVectors) {
+        visibleVectors = staleUpsertVectors;
+        remainingStaleUpsertReads -= 1;
+      }
       return cloudflareResponse(
         ids
           .filter((id) => currentIds.has(id))
           .map(
             (id) =>
-              currentVectors.get(id) || {
+              visibleVectors.get(id) || {
                 id,
                 namespace: "ja",
                 metadata: {},
@@ -173,6 +195,8 @@ function createSyncFetch(
         `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}/upsert`,
       )
     ) {
+      staleUpsertVectors = new Map(currentVectors);
+      remainingStaleUpsertReads = upsertVisibilityDelayReads;
       const ndjson = await init.body.get("vectors").text();
       for (const line of ndjson.trim().split("\n")) {
         const vector = JSON.parse(line);
@@ -188,6 +212,8 @@ function createSyncFetch(
         `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}/delete_by_ids`,
       )
     ) {
+      staleDeleteIds = new Set(currentIds);
+      remainingStaleDeleteLists = deleteVisibilityDelayLists;
       for (const id of JSON.parse(init.body).ids) {
         currentIds.delete(id);
         currentVectors.delete(id);
@@ -499,6 +525,240 @@ test("20%超削除はv1からv2への限定migrationだけ許可する", async (
       logger: { log: () => {} },
     }),
     /only the reviewed --migrate-v1-to-v2 path/u,
+  );
+});
+
+test("delete反映が遅れてもfresh listを再取得して収束する", async (t) => {
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const expectedIds = corpus.chunks.map(({ id }) => id);
+  const v1Ids = expectedIds.map((_, index) => v1VectorId(index + 1));
+  const mock = createSyncFetch(v1Ids, expectedIds, {
+    deleteVisibilityDelayLists: 2,
+  });
+  const logs = [];
+
+  const result = await syncVectorize({
+    accountId: "account",
+    apiToken: "token",
+    indexName: PREVIEW_INDEX_NAME,
+    corpusFile,
+    allowV1ToV2Migration: true,
+    fetchImpl: mock.fetchImpl,
+    sleepImpl: async () => {},
+    mutationPollIntervalMs: 0,
+    convergencePollIntervalMs: 0,
+    logger: { log: (value) => logs.push(JSON.parse(value)) },
+  });
+
+  assert.equal(result.deleted, v1Ids.length);
+  mock.assertConverged();
+  assert.equal(
+    logs.filter(({ event }) => event === "vectorize_convergence_wait").length,
+    2,
+  );
+  assert.equal(
+    logs.find(({ event }) => event === "vectorize_convergence_confirmed")
+      ?.attempt,
+    3,
+  );
+  assert.equal(
+    mock.calls.filter(({ url }) => url.endsWith("/delete_by_ids")).length,
+    1,
+  );
+  const upsertCall = mock.calls.findIndex(({ url }) => url.endsWith("/upsert"));
+  const deleteCall = mock.calls.findIndex(({ url }) =>
+    url.endsWith("/delete_by_ids"),
+  );
+  const firstInfoCall = mock.calls.findIndex(({ url }) =>
+    url.endsWith("/info"),
+  );
+  assert.ok(upsertCall < firstInfoCall && firstInfoCall < deleteCall);
+});
+
+test("v1とv2が混在する再dispatchをmigration時だけ収束させる", async (t) => {
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
+  const receiptFile = join(directory, "receipt.json");
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const expectedIds = corpus.chunks.map(({ id }) => id);
+  const v1Ids = expectedIds.map((_, index) => v1VectorId(index + 1));
+  const mixedIds = [...v1Ids, ...expectedIds.slice(0, 3)];
+
+  const blocked = createSyncFetch(mixedIds, expectedIds, {
+    existingChunks: corpus.chunks.slice(0, 3),
+  });
+  await assert.rejects(
+    syncVectorize({
+      accountId: "account",
+      apiToken: "token",
+      indexName: PREVIEW_INDEX_NAME,
+      corpusFile,
+      fetchImpl: blocked.fetchImpl,
+      logger: { log: () => {} },
+    }),
+    /only the reviewed --migrate-v1-to-v2 path/u,
+  );
+  assert.equal(
+    blocked.calls.filter(
+      ({ url }) => url.endsWith("/upsert") || url.endsWith("/delete_by_ids"),
+    ).length,
+    0,
+  );
+
+  const migration = createSyncFetch(mixedIds, expectedIds, {
+    existingChunks: corpus.chunks.slice(0, 3),
+  });
+  const result = await syncVectorize({
+    accountId: "account",
+    apiToken: "token",
+    indexName: PREVIEW_INDEX_NAME,
+    corpusFile,
+    receiptFile,
+    allowV1ToV2Migration: true,
+    fetchImpl: migration.fetchImpl,
+    sleepImpl: async () => {},
+    mutationPollIntervalMs: 0,
+    convergencePollIntervalMs: 0,
+    logger: { log: () => {} },
+  });
+
+  assert.equal(result.deleted, v1Ids.length);
+  assert.equal(
+    migration.calls.filter(({ url }) => url.endsWith("/upsert")).length,
+    1,
+  );
+  assert.equal(
+    migration.calls.filter(({ url }) => url.endsWith("/delete_by_ids")).length,
+    1,
+  );
+  migration.assertConverged();
+  const receipt = JSON.parse(await readFile(receiptFile, "utf8"));
+  assert.equal(receipt.status, "success");
+  assert.equal(receipt.result.deleted, v1Ids.length);
+});
+
+test("ID一致後もmetadata反映をfresh readで確認する", async (t) => {
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const expectedIds = corpus.chunks.map(({ id }) => id);
+  const staleChunks = corpus.chunks.map((chunk) => ({
+    ...chunk,
+    metadata: {
+      ...chunk.metadata,
+      contentDigest: "0".repeat(64),
+    },
+  }));
+  const mock = createSyncFetch(expectedIds, expectedIds, {
+    existingChunks: staleChunks,
+    upsertVisibilityDelayReads: 2,
+  });
+  const logs = [];
+
+  const result = await syncVectorize({
+    accountId: "account",
+    apiToken: "token",
+    indexName: PREVIEW_INDEX_NAME,
+    corpusFile,
+    fetchImpl: mock.fetchImpl,
+    sleepImpl: async () => {},
+    mutationPollIntervalMs: 0,
+    convergencePollIntervalMs: 0,
+    logger: { log: (value) => logs.push(JSON.parse(value)) },
+  });
+
+  assert.equal(result.deleted, 0);
+  assert.equal(result.upserted, expectedIds.length);
+  assert.deepEqual(
+    logs
+      .filter(({ event }) => event === "vectorize_convergence_wait")
+      .map(({ contentMismatch }) => contentMismatch),
+    [true, true],
+  );
+  assert.equal(
+    logs.find(({ event }) => event === "vectorize_convergence_confirmed")
+      ?.attempt,
+    3,
+  );
+});
+
+test("収束timeout時はmutationを再送せずfailure receiptを残す", async (t) => {
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
+  const receiptFile = join(directory, "receipt.json");
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const expectedIds = corpus.chunks.map(({ id }) => id);
+  const v1Ids = expectedIds.map((_, index) => v1VectorId(index + 1));
+  const mock = createSyncFetch(v1Ids, expectedIds, {
+    deleteVisibilityDelayLists: Number.POSITIVE_INFINITY,
+  });
+
+  await assert.rejects(
+    syncVectorize({
+      accountId: "account",
+      apiToken: "token",
+      indexName: PREVIEW_INDEX_NAME,
+      corpusFile,
+      receiptFile,
+      allowV1ToV2Migration: true,
+      fetchImpl: mock.fetchImpl,
+      sleepImpl: async () => {},
+      mutationPollIntervalMs: 0,
+      convergencePollIntervalMs: 0,
+      convergenceWaitTimeoutMs: 0,
+      logger: { log: () => {} },
+    }),
+    /did not converge: 0 missing and 6 unexpected/u,
+  );
+
+  assert.equal(
+    mock.calls.filter(({ url }) => url.endsWith("/upsert")).length,
+    1,
+  );
+  assert.equal(
+    mock.calls.filter(({ url }) => url.endsWith("/delete_by_ids")).length,
+    1,
+  );
+  const receipt = JSON.parse(await readFile(receiptFile, "utf8"));
+  assert.equal(receipt.status, "failure");
+  assert.match(receipt.error.message, /did not converge/u);
+});
+
+test("収束待機中の管理外IDは即停止してmutationを再送しない", async (t) => {
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const expectedIds = corpus.chunks.map(({ id }) => id);
+  const v1Ids = expectedIds.map((_, index) => v1VectorId(index + 1));
+  const mock = createSyncFetch(v1Ids, expectedIds, {
+    convergenceUnmanagedId: "another-project-vector",
+  });
+
+  await assert.rejects(
+    syncVectorize({
+      accountId: "account",
+      apiToken: "token",
+      indexName: PREVIEW_INDEX_NAME,
+      corpusFile,
+      allowV1ToV2Migration: true,
+      fetchImpl: mock.fetchImpl,
+      sleepImpl: async () => {},
+      mutationPollIntervalMs: 0,
+      convergencePollIntervalMs: 0,
+      logger: { log: () => {} },
+    }),
+    /contains 1 unmanaged vector id/u,
+  );
+
+  assert.equal(
+    mock.calls.filter(({ url }) => url.endsWith("/upsert")).length,
+    1,
+  );
+  assert.equal(
+    mock.calls.filter(({ url }) => url.endsWith("/delete_by_ids")).length,
+    1,
   );
 });
 
