@@ -264,7 +264,6 @@ if (page === "activity") {
       url: eventIds[index],
       startDate: eventDate.startDate,
       endDate: eventDate.endDate,
-      eventStatus: "https://schema.org/EventCompleted",
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
       location: {
         "@type": "Place",
@@ -895,7 +894,7 @@ const homeOverview = [
                     alt={content.activityRecord.imageAlt}
                     width="1536"
                     height="1024"
-                    loading="eager"
+                    loading="lazy"
                   />
                   <figcaption>{content.activityRecord.imageCaption}</figcaption>
                 </figure>
