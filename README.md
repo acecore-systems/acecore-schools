@@ -31,8 +31,9 @@ Outlook などの外部カレンダー連携は read-only ICS feed に限定す�
 `deploy:preview` は開発時の確認用です。Direct Upload を本番完了条件にせず、GitHub の push deploy と custom domain の状態を確認します。
 
 意味検索は OpenAI Embeddings API、Vectorize、検索回数制御と匿名の時間集計専用の D1 を使用します。
-Preview と Production のリソースを分離し、検索UIはhealthのkill switchが有効な環境だけで
-表示します。Productionは`SEARCH_ENABLED=true`で公開し、healthに連動して検索UIを表示します。
+Pages PreviewではVectorizeをbindせず、`SEARCH_ENABLED=false`で静的ページと既存ナビゲーションを
+利用します。ProductionはOpenAI用1536次元の候補indexへ同期・収束するまで
+`SEARCH_ENABLED=false`を維持し、確認後の別PRでhealthに連動した検索UIを有効化します。
 client keyはCloudflare Pagesの暗号化secretでHMAC化し、期限切れD1行は検索処理と毎時の
 maintenance Workerで削除します。
 構成、同期手順、監視、費用の上限試算、rollbackは

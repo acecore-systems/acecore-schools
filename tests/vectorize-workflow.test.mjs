@@ -78,54 +78,53 @@ test("mutation後の公開identity確認が成功証跡より先にある", asyn
   );
 });
 
-test("Preview同期もmoving mainではなくdispatch時のSHAへ固定する", async () => {
-  const workflow = await readFile(workflowUrl, "utf8");
-  const previewJob = workflow.slice(
-    workflow.indexOf("  sync-preview:"),
-    workflow.indexOf("\n  build-production-corpus:"),
+test("PreviewにはVectorizeをbind・同期せずProduction候補だけを扱う", async () => {
+  const [workflow, wrangler] = await Promise.all([
+    readFile(workflowUrl, "utf8"),
+    readFile(wranglerUrl, "utf8"),
+  ]);
+  const buildJob = workflow.slice(
+    workflow.indexOf("  build-production-corpus:"),
+    workflow.indexOf("\n  sync-production:"),
   );
   const productionJob = workflow.slice(workflow.indexOf("  sync-production:"));
 
+  assert.doesNotMatch(workflow, /sync-preview/u);
+  assert.doesNotMatch(workflow, /CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN/u);
+  assert.doesNotMatch(workflow, /inputs\.target/u);
+  assert.match(buildJob, /github\.event_name == 'workflow_dispatch'/u);
+  assert.equal(wrangler.match(/"vectorize":/gu)?.length, 1);
+  assert.equal(wrangler.match(/"binding": "SEARCH_INDEX"/gu)?.length, 1);
+  assert.match(wrangler, /"preview":\s*\{[\s\S]*?"SEARCH_ENABLED": "false"/u);
   assert.match(
-    previewJob,
-    /name: Check out the exact dispatched main commit[\s\S]*?ref: \$\{\{ github\.sha \}\}/u,
+    wrangler,
+    /"production":\s*\{[\s\S]*?"SEARCH_ENABLED": "false"/u,
   );
-  assert.match(previewJob, /Preview sync only accepts current main\./u);
-  assert.match(previewJob, /CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN/u);
-  assert.match(
-    previewJob,
-    /OPENAI_API_KEY: \$\{\{ secrets\.OPENAI_API_KEY \}\}/u,
-  );
-  assert.match(previewJob, /node verifier\/scripts\/sync-vectorize\.mjs/u);
   assert.doesNotMatch(workflow, /allow_large_delete/u);
   assert.match(
     workflow,
     /migration:\s+description: 初回v1→v2移行だけで使う限定モード[\s\S]*?- v1-to-v2/u,
   );
-  assert.equal(workflow.match(/--migrate-v1-to-v2/g)?.length, 2);
+  assert.equal(workflow.match(/--migrate-v1-to-v2/g)?.length, 1);
   assert.match(
     productionJob,
     /if \[\[ "\$GITHUB_EVENT_NAME" != "workflow_dispatch" \]\]; then[\s\S]*?Migration mode is manual-only\./u,
   );
-  assert.match(
-    previewJob,
-    /name: Upload preview sync evidence\s+if: always\(\)/u,
-  );
 });
 
-test("Pages binding・sync allowlist・workflowのindex名を一致させる", async () => {
+test("Pages binding・sync allowlist・workflowをProduction候補indexへ限定する", async () => {
   const [workflow, wrangler, syncScript] = await Promise.all([
     readFile(workflowUrl, "utf8"),
     readFile(wranglerUrl, "utf8"),
     readFile(syncScriptUrl, "utf8"),
   ]);
 
-  for (const indexName of [
-    "acecore-schools-search-openai-1536-preview",
-    "acecore-schools-search-openai-1536-production",
-  ]) {
-    assert.match(workflow, new RegExp(indexName, "u"));
-    assert.match(wrangler, new RegExp(indexName, "u"));
-    assert.match(syncScript, new RegExp(indexName, "u"));
-  }
+  const productionIndex = "acecore-schools-search-openai-1536-production";
+  const previewIndex = "acecore-schools-search-openai-1536-preview";
+  assert.match(workflow, new RegExp(productionIndex, "u"));
+  assert.match(wrangler, new RegExp(productionIndex, "u"));
+  assert.match(syncScript, new RegExp(productionIndex, "u"));
+  assert.doesNotMatch(workflow, new RegExp(previewIndex, "u"));
+  assert.doesNotMatch(wrangler, new RegExp(previewIndex, "u"));
+  assert.doesNotMatch(syncScript, new RegExp(previewIndex, "u"));
 });

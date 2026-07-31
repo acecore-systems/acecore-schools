@@ -132,7 +132,7 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
       env.OPENAI_EMBEDDING_DIMENSIONS || EMBEDDING_DIMENSIONS,
     );
     if (
-      env.SEARCH_ENABLED !== "true" ||
+      String(env.SEARCH_ENABLED) !== "true" ||
       typeof openAiApiKey !== "string" ||
       !openAiApiKey.trim() ||
       embeddingModel !== EMBEDDING_MODEL ||

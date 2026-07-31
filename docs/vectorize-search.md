@@ -8,22 +8,23 @@ Acecore Schools の公開ページを、日本語の自然文から探すため�
 
 | Environment | Vectorize index                                 | Search D1                           | Search |
 | ----------- | ----------------------------------------------- | ----------------------------------- | ------ |
-| Preview     | `acecore-schools-search-openai-1536-preview`    | `acecore-schools-search-preview`    | ON     |
-| Production  | `acecore-schools-search-openai-1536-production` | `acecore-schools-search-production` | ON     |
+| Preview     | bindingなし                                     | `acecore-schools-search-preview`    | OFF    |
+| Production  | `acecore-schools-search-openai-1536-production` | `acecore-schools-search-production` | OFF    |
 
-旧BGE-M3用1024次元indexはrollback用に残し、新しい1536次元indexの同期とPreview QAが完了するまで
-削除しません。
+Pages PreviewはVectorizeを利用せず、静的ページと既存ナビゲーションを確認する環境です。
+Productionは新しい1536次元候補indexが公開corpusへ収束するまで`SEARCH_ENABLED=false`を維持します。
+旧BGE-M3用1024次元indexはrollback用に残し、新indexの同期と本番検索QAが完了するまで削除しません。
 
-2026-07-30に両D1へmigration `0001`〜`0003`を適用し、同じ6件のcorpusを両indexへ収束させました。
-同日、公開routeを持たない`acecore-schools-search-maintenance`をdeployし、
-cron `17 * * * *`をCloudflare APIで確認しました。
-Production は `SEARCH_ENABLED=true` で、health確認に連動した検索UIとAPIを提供します。
-障害時は直前の検索OFF deploymentへ即時rollbackし、続けてGitのkill switchも`false`へ戻します。
+2026-07-30に両D1へmigration `0001`〜`0003`を適用し、当時のcorpusを旧BGE-M3用
+Preview／Production indexへ収束させました。この実績は新しい1536次元候補indexへ引き継ぎません。
+同日、公開routeを持たない`acecore-schools-search-maintenance`をdeployし、cron `17 * * * *`を
+Cloudflare APIで確認しました。
+このOpenAI移行PRではProductionも検索OFFでmergeし、空の候補indexへ切り替わっても検索APIを
+呼び出しません。Production同期と収束確認後、別PRで検索を有効化します。
 
 その後の本文追加でmain corpusが7件になったため、`.github/workflows/sync-vectorize.yml`は
-Productionをmain push直後と6時間ごとに公開buildへ再収束させます。Previewはmainからの手動同期、
-Productionは手動再実行にも対応します。各成功runは同期対象corpusと構造化sync logを
-GitHub Actions artifactとして保存します。
+Productionをmain push直後と6時間ごとに公開buildへ再収束させ、手動再実行にも対応します。
+各成功runは同期対象corpusと構造化sync logをGitHub Actions artifactとして保存します。
 
 ## Data flow
 
@@ -73,26 +74,25 @@ const payload = await response.json();
 
 ## Bindings
 
-`wrangler.jsonc` は公開可能な Cloudflare Pages 設定の source of truth です。Vectorize、D1、
-vars は environment 間で暗黙継承されないため、Preview と Production にそれぞれ明示しています。
-`OPENAI_API_KEY`と`SEARCH_RATE_LIMIT_SECRET`はrepositoryへ値を置かず、Pagesの暗号化secret
-bindingとして設定します。
+`wrangler.jsonc` は公開可能な Cloudflare Pages 設定の source of truth です。Vectorize bindingは
+Productionだけに置き、top-levelとPreviewには置きません。D1とvarsはenvironment間で暗黙継承
+されないため、必要な環境へ明示しています。`OPENAI_API_KEY`と`SEARCH_RATE_LIMIT_SECRET`は
+repositoryへ値を置かず、Production Pagesの暗号化secret bindingとして設定します。
 
 | Binding                       | Purpose                                        |
 | ----------------------------- | ---------------------------------------------- |
 | `OPENAI_API_KEY`              | OpenAI project service-account key             |
 | `OPENAI_EMBEDDING_MODEL`      | Fixed embedding model identity                 |
 | `OPENAI_EMBEDDING_DIMENSIONS` | Fixed Vectorize-compatible dimensions          |
-| `SEARCH_INDEX`                | Environment-specific Vectorize index           |
+| `SEARCH_INDEX`                | Production-only Vectorize candidate index      |
 | `SEARCH_RATE_LIMIT_DB`        | Rate limits and hourly search metrics          |
 | `SEARCH_RATE_LIMIT_SECRET`    | Encrypted HMAC key for pseudonymous client key |
 | `SEARCH_ENABLED`              | Fail-closed runtime kill switch                |
 | `SEARCH_MIN_SCORE`            | Minimum cosine similarity score                |
 
-ローカルの top-level 設定は Preview リソースを指しますが、`SEARCH_ENABLED=false` です。
-`remote: true` の binding は実 Cloudflare リソースへ接続し、Vectorizeの読み書きが
-発生し得ます。ローカル確認のためにキルスイッチを変更する場合も Production を指定しないで
-ください。
+top-levelとPreviewは`SEARCH_ENABLED=false`で、`SEARCH_INDEX`を持ちません。検索UIはhealthの
+kill switchに従って表示されず、`POST /api/search`もembeddingやVectorize queryの前に503で
+fail closedします。ローカルやPR PreviewからProduction indexへ直接接続しません。
 
 ## Build and validation
 
@@ -147,19 +147,18 @@ repositoryへ残さないでください。
 $env:CLOUDFLARE_ACCOUNT_ID = "<account-id>"
 $env:CLOUDFLARE_API_TOKEN = "<scoped-token>"
 $env:OPENAI_API_KEY = "<schools-project-key>"
-$env:VECTORIZE_INDEX_NAME = "acecore-schools-search-openai-1536-preview"
+$env:VECTORIZE_INDEX_NAME = "acecore-schools-search-openai-1536-production"
 npm run sync:vectorize
 ```
 
-GitHub Actionsでは次のEnvironmentをmain限定で作成し、同名のsecretへ環境別tokenを保存します。
+GitHub Actionsでは次のEnvironmentをmain限定で作成し、同名のsecretへProduction tokenを保存します。
 
 | GitHub Environment                     | Secrets                                                            |
 | -------------------------------------- | ------------------------------------------------------------------ |
-| `cloudflare-schools-search-preview`    | `CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN`, `OPENAI_API_KEY`    |
 | `cloudflare-schools-search-production` | `CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN`, `OPENAI_API_KEY` |
 
 Productionのpush／schedule自動同期はrepository variable
-`SCHOOLS_VECTORIZE_SYNC_ENABLED=true`の場合だけ起動します。Environment、secret、Preview QA、
+`SCHOOLS_VECTORIZE_SYNC_ENABLED=true`の場合だけ起動します。Environment、secret、候補index、
 初回Production同期を揃えるまではvariableを作成しません。手動Production dispatchは段階導入と
 障害修復のため、このvariableが未設定でも実行できます。
 
@@ -173,7 +172,7 @@ mainの祖先と確認して再収束します。
 checkoutし、artifactのSHA-256とcorpus versionを再検証してから、そのverifierの同期scriptだけを
 実行します。公開中の古いcommitへProduction tokenを渡しません。
 
-同期処理は対象 index 名を2件に限定し、index を暗黙作成しません。既存の管理外IDを検出した場合、
+同期処理は対象index名をProduction候補の1件に限定し、indexを暗黙作成しません。既存の管理外IDを検出した場合、
 または削除が既存vectorの20%を超える場合は変更前に停止します。upsert/delete 後は
 `processedUpToMutation` を待ち、最終ID集合の一致を検証します。既存vectorのID、namespace、
 metadata内の本文・metadata・embedding／chunk設定digestがcorpusとすべて一致する場合はno-opとし、
@@ -184,11 +183,11 @@ namespace・embeddingをreview済み入力へ戻します。List Vectors APIへ�
 自動同期で通常の本文変更が20%削除gateへ掛からないよう、vector IDは`schools-v2`として
 locale、URL、chunk slotから安定生成します。corpus versionは本文、metadata、embedding設定、
 chunk設定を含む全内容hashなので、本文変更時はIDを維持しつつ公開identityが更新されます。
-既存`schools-v1`からの初回移行だけは全ID置換になります。Preview QAと明示承認後、
-GitHub Actionsのmanual dispatchで`migration=v1-to-v2`を選び、Preview、Productionの順に
-実行します。この限定モードは削除対象がv1、期待IDがv2である場合にしか20%超削除を許可せず、
-通常の大規模削除overrideには使えません。Production migrationも公開marker、GitHub Environment、
-corpus SHA-256、corpus versionの検証を迂回しません。
+既存`schools-v1`からの初回移行だけは全ID置換になります。Production候補にv1 IDが存在する場合だけ、
+GitHub Actionsのmanual dispatchで`migration=v1-to-v2`を選びます。この限定モードは削除対象がv1、
+期待IDがv2である場合にしか20%超削除を許可せず、通常の大規模削除overrideには使えません。
+Production migrationも公開marker、GitHub Environment、corpus SHA-256、corpus versionの検証を
+迂回しません。新しい空indexへの初回同期では`migration=none`を使います。
 
 各実行はtokenを含まない`receipt.json`を作成し、attemptからsuccessまたはfailureへ状態を更新します。
 GitHubのrun情報、対象index、corpus version、no-op、mutation ID、件数をsync logと一緒にartifactへ
@@ -197,24 +196,24 @@ GitHubのrun情報、対象index、corpus version、no-op、mutation ID、件数
 ## Production gate
 
 Production 同期は通常の同期コマンドでは実行できません。Production indexが
-1536 dimensions / cosineであること、Production D1 migration、corpus件数、Preview検索結果を
-再確認し、GitHub Actionsのmanual dispatchまたは有効化済みのpush／scheduleから実行します。
-同期scriptも公開markerと一致したcorpus versionそのものを確認値として要求します。
-2026-07-30の同期は6件upsert、0件deleteで収束しました。
+1536 dimensions / cosineであること、Production D1 migration、corpus件数を再確認し、
+GitHub Actionsのmanual dispatchまたは有効化済みのpush／scheduleから実行します。同期scriptも
+公開markerと一致したcorpus versionそのものを確認値として要求します。旧BGE-M3 indexの同期実績は
+新しい1536次元候補indexの収束証跡として扱いません。
 
-検索対象のHTML・`src/data/`・corpus生成処理を変更するPRは、merge前にcorpus buildとPreview
-同期を行い、merge後のProduction有効化前にProduction同期を再実行します。別の本文変更PRが
-同時に開いている場合はmerge順を固定し、後からmergeする側でreview済みcorpusをbuildして
-Preview、Productionの順に全件upsertします。同期完了をPagesの公開内容と独立して確認します。
+検索対象のHTML・`src/data/`・corpus生成処理を変更するPRは、merge前にcorpus buildとdry-runを
+行い、merge後に公開されたcommitをProductionへ同期します。別の本文変更PRが同時に開いている場合は
+merge順を固定し、後からmergeする側の公開corpusへProductionを再収束させます。同期完了をPagesの
+公開内容と独立して確認します。
 
-Production同期後も実装PRでは検索を無効のまま維持し、2026-07-30の本番有効化PRで
-`wrangler.jsonc`のProduction `SEARCH_ENABLED`を`true`に変更しました。
+このOpenAI移行PRではProductionの`SEARCH_ENABLED=false`を維持します。Production同期artifact、
+vector件数、`ja` namespace、embedding設定と代表queryを確認した後に、検索有効化を別PRとして
+行います。
 リリース完了判定は次をすべて満たした状態です。
 
 1. PagesのGit ProviderがYes、source repositoryが`acecore-systems/acecore-schools`、
    production branchが`main`である。
-2. Preview／Productionの両方に、別々に生成した32 bytes以上の
-   `SEARCH_RATE_LIMIT_SECRET`が暗号化bindingとして存在する。
+2. Productionに32 bytes以上の`SEARCH_RATE_LIMIT_SECRET`が暗号化bindingとして存在する。
 3. `acecore-schools-search-maintenance`の最新deploymentがrepoのconfigと一致し、cron
    `17 * * * *`と成功したscheduled eventを確認できる。
 4. GitHub push deploymentが成功し、Pages deploymentのSource SHAが有効化PRのmerge SHAと
