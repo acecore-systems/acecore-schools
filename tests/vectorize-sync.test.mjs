@@ -11,7 +11,6 @@ import {
   calculateSearchCorpusVersion,
 } from "../scripts/build-search-corpus.mjs";
 import {
-  PREVIEW_INDEX_NAME,
   PRODUCTION_INDEX_NAME,
   extractEmbeddingData,
   syncVectorize,
@@ -140,7 +139,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}`,
+        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}`,
       ) &&
       (init.method || "GET") === "GET"
     ) {
@@ -151,7 +150,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}/list`,
+        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}/list`,
       )
     ) {
       assert.equal(parsedUrl.searchParams.has("namespace"), false);
@@ -170,7 +169,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}/get_by_ids`,
+        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}/get_by_ids`,
       )
     ) {
       const ids = JSON.parse(init.body).ids;
@@ -215,7 +214,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}/upsert`,
+        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}/upsert`,
       )
     ) {
       staleUpsertVectors = new Map(currentVectors);
@@ -232,7 +231,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}/delete_by_ids`,
+        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}/delete_by_ids`,
       )
     ) {
       staleDeleteIds = new Set(currentIds);
@@ -247,7 +246,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PREVIEW_INDEX_NAME}/info`,
+        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}/info`,
       )
     ) {
       return cloudflareResponse({ processedUpToMutation: lastMutationId });
@@ -335,7 +334,7 @@ test("dry-runは認証なしでcorpusとindex allowlistを検証する", async (
   const result = await syncVectorize({
     corpusFile,
     dryRun: true,
-    indexName: PREVIEW_INDEX_NAME,
+    indexName: PRODUCTION_INDEX_NAME,
     logger: { log: (value) => logs.push(value) },
   });
   assert.equal(result.dryRun, true);
@@ -354,7 +353,8 @@ test("dry-runは認証なしでcorpusとindex allowlistを検証する", async (
 });
 
 test("存在しないindexを同期処理から暗黙作成しない", async (t) => {
-  const { corpusFile, directory } = await writeCorpusFile(createCorpus());
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
   t.after(() => rm(directory, { recursive: true, force: true }));
   const calls = [];
 
@@ -362,8 +362,9 @@ test("存在しないindexを同期処理から暗黙作成しない", async (t)
     syncVectorize({
       accountId: "account",
       apiToken: "token",
-      indexName: PREVIEW_INDEX_NAME,
+      indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
+      confirmProductionVersion: corpus.version,
       fetchImpl: async (url, init = {}) => {
         calls.push({ url, init });
         return cloudflareResponse("not found", 404);
@@ -431,8 +432,9 @@ test("全corpusを再embedding・upsertし、古いIDを削除して収束確認
   const result = await syncVectorize({
     accountId: "account",
     apiToken: "token",
-    indexName: PREVIEW_INDEX_NAME,
+    indexName: PRODUCTION_INDEX_NAME,
     corpusFile,
+    confirmProductionVersion: corpus.version,
     fetchImpl: mock.fetchImpl,
     sleepImpl: async () => {},
     mutationPollIntervalMs: 0,
@@ -461,8 +463,9 @@ test("本文digestが一致するcorpusはmutationせず成功receiptを残す",
   const result = await syncVectorize({
     accountId: "account",
     apiToken: "token",
-    indexName: PREVIEW_INDEX_NAME,
+    indexName: PRODUCTION_INDEX_NAME,
     corpusFile,
+    confirmProductionVersion: corpus.version,
     receiptFile,
     fetchImpl: mock.fetchImpl,
     logger: { log: () => {} },
@@ -528,8 +531,9 @@ test("20%超削除はv1からv2への限定migrationだけ許可する", async (
     syncVectorize({
       accountId: "account",
       apiToken: "token",
-      indexName: PREVIEW_INDEX_NAME,
+      indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
+      confirmProductionVersion: corpus.version,
       fetchImpl: blocked.fetchImpl,
       logger: { log: () => {} },
     }),
@@ -540,8 +544,9 @@ test("20%超削除はv1からv2への限定migrationだけ許可する", async (
   const result = await syncVectorize({
     accountId: "account",
     apiToken: "token",
-    indexName: PREVIEW_INDEX_NAME,
+    indexName: PRODUCTION_INDEX_NAME,
     corpusFile,
+    confirmProductionVersion: corpus.version,
     allowV1ToV2Migration: true,
     fetchImpl: migration.fetchImpl,
     sleepImpl: async () => {},
@@ -559,8 +564,9 @@ test("20%超削除はv1からv2への限定migrationだけ許可する", async (
     syncVectorize({
       accountId: "account",
       apiToken: "token",
-      indexName: PREVIEW_INDEX_NAME,
+      indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
+      confirmProductionVersion: corpus.version,
       allowV1ToV2Migration: true,
       fetchImpl: unsafeV2Delete.fetchImpl,
       logger: { log: () => {} },
@@ -583,8 +589,9 @@ test("delete反映が遅れてもfresh listを再取得して収束する", asyn
   const result = await syncVectorize({
     accountId: "account",
     apiToken: "token",
-    indexName: PREVIEW_INDEX_NAME,
+    indexName: PRODUCTION_INDEX_NAME,
     corpusFile,
+    confirmProductionVersion: corpus.version,
     allowV1ToV2Migration: true,
     fetchImpl: mock.fetchImpl,
     sleepImpl: async () => {},
@@ -634,8 +641,9 @@ test("v1とv2が混在する再dispatchをmigration時だけ収束させる", as
     syncVectorize({
       accountId: "account",
       apiToken: "token",
-      indexName: PREVIEW_INDEX_NAME,
+      indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
+      confirmProductionVersion: corpus.version,
       fetchImpl: blocked.fetchImpl,
       logger: { log: () => {} },
     }),
@@ -654,8 +662,9 @@ test("v1とv2が混在する再dispatchをmigration時だけ収束させる", as
   const result = await syncVectorize({
     accountId: "account",
     apiToken: "token",
-    indexName: PREVIEW_INDEX_NAME,
+    indexName: PRODUCTION_INDEX_NAME,
     corpusFile,
+    confirmProductionVersion: corpus.version,
     receiptFile,
     allowV1ToV2Migration: true,
     fetchImpl: migration.fetchImpl,
@@ -701,8 +710,9 @@ test("ID一致後もmetadata反映をfresh readで確認する", async (t) => {
   const result = await syncVectorize({
     accountId: "account",
     apiToken: "token",
-    indexName: PREVIEW_INDEX_NAME,
+    indexName: PRODUCTION_INDEX_NAME,
     corpusFile,
+    confirmProductionVersion: corpus.version,
     fetchImpl: mock.fetchImpl,
     sleepImpl: async () => {},
     mutationPollIntervalMs: 0,
@@ -740,8 +750,9 @@ test("収束timeout時はmutationを再送せずfailure receiptを残す", async
     syncVectorize({
       accountId: "account",
       apiToken: "token",
-      indexName: PREVIEW_INDEX_NAME,
+      indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
+      confirmProductionVersion: corpus.version,
       receiptFile,
       allowV1ToV2Migration: true,
       fetchImpl: mock.fetchImpl,
@@ -781,8 +792,9 @@ test("収束待機中の管理外IDは即停止してmutationを再送しない"
     syncVectorize({
       accountId: "account",
       apiToken: "token",
-      indexName: PREVIEW_INDEX_NAME,
+      indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
+      confirmProductionVersion: corpus.version,
       allowV1ToV2Migration: true,
       fetchImpl: mock.fetchImpl,
       sleepImpl: async () => {},
@@ -817,8 +829,9 @@ test("管理外ID、20%超削除、index設定不一致では変更前に停止�
     syncVectorize({
       accountId: "account",
       apiToken: "token",
-      indexName: PREVIEW_INDEX_NAME,
+      indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
+      confirmProductionVersion: corpus.version,
       fetchImpl: unmanaged.fetchImpl,
       logger: { log: () => {} },
     }),
@@ -833,8 +846,9 @@ test("管理外ID、20%超削除、index設定不一致では変更前に停止�
     syncVectorize({
       accountId: "account",
       apiToken: "token",
-      indexName: PREVIEW_INDEX_NAME,
+      indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
+      confirmProductionVersion: corpus.version,
       fetchImpl: largeDelete.fetchImpl,
       logger: { log: () => {} },
     }),
@@ -848,8 +862,9 @@ test("管理外ID、20%超削除、index設定不一致では変更前に停止�
     syncVectorize({
       accountId: "account",
       apiToken: "token",
-      indexName: PREVIEW_INDEX_NAME,
+      indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
+      confirmProductionVersion: corpus.version,
       fetchImpl: wrongDimensions.fetchImpl,
       logger: { log: () => {} },
     }),

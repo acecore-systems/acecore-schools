@@ -8,14 +8,6 @@ on:
     - cron: "17 */6 * * *"
   workflow_dispatch:
     inputs:
-      target:
-        description: 同期先のVectorize index
-        required: true
-        type: choice
-        default: preview
-        options:
-          - preview
-          - production
       migration:
         description: 初回v1→v2移行だけで使う限定モード
         required: true
@@ -33,154 +25,6 @@ env:
   PRODUCTION_BUILD_MARKER_URL: https://schools.acecore.net/.well-known/acecore-schools-build.json
 
 jobs:
-  sync-preview:
-    name: Sync preview index from exact main
-    if: >-
-      github.event_name == 'workflow_dispatch' &&
-      github.ref == 'refs/heads/main' &&
-      inputs.target == 'preview'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    environment:
-      name: cloudflare-schools-search-preview
-    concurrency:
-      group: vectorize-schools-search-preview
-      cancel-in-progress: false
-
-    steps:
-      - name: Check out the exact dispatched main commit
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          path: site
-          persist-credentials: false
-
-      - name: Verify the dispatched commit is current main
-        shell: bash
-        env:
-          EXPECTED_COMMIT: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          checked_commit="$(git -C site rev-parse HEAD)"
-          git -C site fetch --no-tags origin \
-            "+refs/heads/main:refs/remotes/origin/main"
-          current_main="$(git -C site rev-parse refs/remotes/origin/main)"
-
-          if [[ "$checked_commit" != "$EXPECTED_COMMIT" ]] ||
-             [[ "$checked_commit" != "$current_main" ]]; then
-            echo "::error::Preview sync only accepts current main."
-            exit 1
-          fi
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version-file: site/.node-version
-          cache: npm
-          cache-dependency-path: site/package-lock.json
-
-      - name: Install dependencies
-        working-directory: site
-        run: npm ci
-
-      - name: Validate the exact main site
-        working-directory: site
-        run: |
-          npm run format:check
-          npm run test:search
-          npm run test:structured-data
-          npm run types:cloudflare:check
-          npm run check:pages-config
-          npm run check:maintenance-config
-          npm run typecheck:functions
-
-      - name: Build and dry-run the exact main corpus
-        working-directory: site
-        env:
-          COMMIT_SHA: ${{ github.sha }}
-        run: |
-          npm run build
-          npm run sync:vectorize:dry-run
-
-      - name: Reconfirm main before mutation
-        shell: bash
-        env:
-          EXPECTED_COMMIT: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          git -C site fetch --no-tags origin \
-            "+refs/heads/main:refs/remotes/origin/main"
-          current_main="$(git -C site rev-parse refs/remotes/origin/main)"
-          if [[ "$current_main" != "$EXPECTED_COMMIT" ]]; then
-            echo "::error::Main changed while the Preview corpus was built."
-            exit 1
-          fi
-
-      - name: Check out fresh verifier tooling before mutation
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          path: verifier
-          persist-credentials: false
-
-      - name: Sync preview Vectorize index
-        shell: bash
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          MIGRATION_MODE: ${{ inputs.migration }}
-          VECTORIZE_INDEX_NAME: acecore-schools-search-openai-1536-preview
-        run: |
-          set -euo pipefail
-          if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
-            echo "::error::CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN is not configured."
-            exit 1
-          fi
-          if [[ -z "${OPENAI_API_KEY:-}" ]]; then
-            echo "::error::OPENAI_API_KEY is not configured."
-            exit 1
-          fi
-
-          args=(
-            --corpus site/.vectorize/corpus.json
-            --receipt "$RUNNER_TEMP/vectorize-receipt.json"
-          )
-          if [[ "$MIGRATION_MODE" == "v1-to-v2" ]]; then
-            args+=(--migrate-v1-to-v2)
-          elif [[ "$MIGRATION_MODE" != "none" ]]; then
-            echo "::error::Unknown migration mode."
-            exit 1
-          fi
-
-          node verifier/scripts/sync-vectorize.mjs "${args[@]}" |
-            tee "$RUNNER_TEMP/vectorize-sync.log"
-
-      - name: Stage preview sync evidence
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p evidence
-          if [[ -f site/.vectorize/corpus.json ]]; then
-            install -m 0644 site/.vectorize/corpus.json evidence/corpus.json
-          fi
-          if [[ -f "$RUNNER_TEMP/vectorize-sync.log" ]]; then
-            install -m 0644 "$RUNNER_TEMP/vectorize-sync.log" evidence/sync.log
-          fi
-          if [[ -f "$RUNNER_TEMP/vectorize-receipt.json" ]]; then
-            install -m 0644 "$RUNNER_TEMP/vectorize-receipt.json" evidence/receipt.json
-          fi
-
-      - name: Upload preview sync evidence
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: acecore-schools-vectorize-preview-${{ github.sha }}-${{ github.run_id }}
-          path: evidence
-          if-no-files-found: error
-          retention-days: 7
-
   build-production-corpus:
     name: Build the public Production corpus without secrets
     if: >-
@@ -193,10 +37,7 @@ jobs:
             github.event_name == 'schedule'
           )
         ) ||
-        (
-          github.event_name == 'workflow_dispatch' &&
-          inputs.target == 'production'
-        )
+        github.event_name == 'workflow_dispatch'
       )
     runs-on: ubuntu-latest
     timeout-minutes: 45

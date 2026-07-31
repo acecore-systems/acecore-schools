@@ -17,7 +17,6 @@ import {
   calculateSearchCorpusVersion,
 } from "./build-search-corpus.mjs";
 
-export const PREVIEW_INDEX_NAME = "acecore-schools-search-openai-1536-preview";
 export const PRODUCTION_INDEX_NAME =
   "acecore-schools-search-openai-1536-production";
 
@@ -43,10 +42,7 @@ const MANAGED_VECTOR_ID_PATTERN = /^schools-v(?:1|2)-[0-9a-f]{48}$/u;
 const V1_VECTOR_ID_PATTERN = /^schools-v1-[0-9a-f]{48}$/u;
 const V2_VECTOR_ID_PATTERN = /^schools-v2-[0-9a-f]{48}$/u;
 const CORPUS_VERSION_PATTERN = /^[0-9a-f]{20}$/u;
-const ALLOWED_INDEX_NAMES = new Set([
-  PREVIEW_INDEX_NAME,
-  PRODUCTION_INDEX_NAME,
-]);
+const ALLOWED_INDEX_NAMES = new Set([PRODUCTION_INDEX_NAME]);
 
 class CloudflareApiError extends Error {
   constructor(message, status) {
