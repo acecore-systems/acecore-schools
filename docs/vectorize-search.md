@@ -8,7 +8,7 @@ Acecore Schools の公開ページを、日本語の自然文から探すため�
 
 | Environment | Vectorize index                                 | Search D1                           | Index state | Search |
 | ----------- | ----------------------------------------------- | ----------------------------------- | ----------- | ------ |
-| Preview     | bindingなし                                     | `acecore-schools-search-preview`    | 対象外      | OFF    |
+| Preview     | bindingなし                                     | `acecore-schools-search-production` | 対象外      | OFF    |
 | Production  | `acecore-schools-search-openai-1536-production` | `acecore-schools-search-production` | 7件同期済み | ON     |
 
 Pages PreviewはVectorizeを利用せず、静的ページと既存ナビゲーションを確認する環境です。
@@ -16,8 +16,8 @@ Pages PreviewはVectorizeを利用せず、静的ページと既存ナビゲー�
 1536 dimensions / cosine、vector件数7、`ja` namespaceのqueryを照合済みです。
 Productionの`SEARCH_ENABLED=true`を維持します。
 
-2026-07-30に両D1へmigration `0001`〜`0003`を適用し、当時のcorpusを旧BGE-M3用
-Preview／Production indexへ収束させました。この実績は新しい1536次元indexへ引き継ぎません。
+2026-07-30に検索用D1へmigration `0001`〜`0003`を適用し、当時のcorpusを旧BGE-M3用の
+検索基盤へ収束させました。この実績は新しい1536次元indexへ引き継ぎません。
 同日、公開routeを持たない`acecore-schools-search-maintenance`をdeployし、cron `17 * * * *`を
 Cloudflare APIで確認しました。旧BGE-M3用1024次元indexはrollback確認が終わるまで削除しません。
 
@@ -122,14 +122,13 @@ npm run types:cloudflare
 
 ## D1 migration
 
-`migrations/search/` は検索回数制御と匿名の時間集計専用です。2026-07-30に現在の
-Preview／Production D1へ`0001_create_semantic_search_rate_limits.sql`と
-`0002_create_semantic_search_metrics.sql`、`0003_index_semantic_search_metrics_expiry.sql`を
-Wrangler経由で適用し、migration履歴とschemaを確認済みです。D1を再作成した場合や新しい
-environmentを追加した場合は、検索を有効にする前にdatabase名とenvironmentを明示して適用します。
+`migrations/search/` は検索回数制御と匿名の時間集計専用です。PreviewとProductionは
+`acecore-schools-search-production` を共有し、Previewの検索は無効のまま維持します。2026-07-30に
+`0001_create_semantic_search_rate_limits.sql`、`0002_create_semantic_search_metrics.sql`、
+`0003_index_semantic_search_metrics_expiry.sql`をWrangler経由で適用し、migration履歴とschemaを
+確認済みです。D1を再作成した場合は、検索を有効にする前にProduction databaseへ明示適用します。
 
 ```powershell
-npx wrangler d1 migrations apply SEARCH_RATE_LIMIT_DB --remote --env preview
 npx wrangler d1 migrations apply SEARCH_RATE_LIMIT_DB --remote --env production
 ```
 
@@ -246,7 +245,7 @@ client hash、例外messageはlogや時間集計へ保存しません。レー�
 415、429などは時間集計のD1書き込みを増やさず、Pages Functions Metricsとリアルタイムlogで
 確認します。
 
-`acecore-schools-search-maintenance`はPreview／Production D1だけをbindingしたscheduled Worker
+`acecore-schools-search-maintenance`は共有するProduction D1だけをbindingしたscheduled Worker
 です。サイト本体のPages deploymentとは分離し、変更時はdry-run後にdeployしてcronを確認します。
 
 ```powershell
