@@ -1,0 +1,531 @@
+---
+import {
+  acecoreContactUrl,
+  acecoreOrigin,
+  lineUrl,
+  schoolsContent,
+} from "../data/schools";
+
+const chat = schoolsContent.aiChat;
+const privacyUrl = `${acecoreOrigin}/privacy/`;
+---
+
+<div
+  class="schools-ai-chat"
+  data-schools-ai-chat
+  data-search-ignore
+  data-endpoint="https://acecore.net/api/ai-contact"
+  data-greeting={chat.greeting}
+  data-loading={chat.loading}
+  data-error={chat.errors.generic}
+  data-timeout={chat.errors.timeout}
+  data-too-long={chat.errors.tooLong}
+>
+  <section
+    class="schools-ai-chat-panel"
+    id="schools-ai-chat-panel"
+    role="dialog"
+    aria-modal="false"
+    aria-labelledby="schools-ai-chat-title"
+    aria-describedby="schools-ai-chat-description"
+    data-schools-ai-chat-panel
+    hidden
+  >
+    <header class="schools-ai-chat-header">
+      <div class="schools-ai-chat-heading">
+        <span class="schools-ai-chat-mark" aria-hidden="true">
+          <i class="ph ph-chats-circle"></i>
+        </span>
+        <div>
+          <h2 id="schools-ai-chat-title">{chat.title}</h2>
+          <p id="schools-ai-chat-description">{chat.lead}</p>
+        </div>
+      </div>
+      <button
+        class="schools-ai-chat-close"
+        type="button"
+        aria-label={chat.close}
+        data-schools-ai-chat-close
+      >
+        <i class="ph ph-x" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <div
+      class="schools-ai-chat-messages"
+      role="log"
+      aria-live="polite"
+      aria-relevant="additions"
+      data-schools-ai-chat-messages
+    >
+    </div>
+
+    <div class="schools-ai-chat-composer">
+      <div class="schools-ai-chat-prompts" aria-label={chat.quickPromptLabel}>
+        {
+          chat.quickPrompts.map((prompt) => (
+            <button
+              type="button"
+              data-schools-ai-chat-prompt
+              data-prompt={prompt}
+            >
+              {prompt}
+            </button>
+          ))
+        }
+      </div>
+
+      <form data-schools-ai-chat-form>
+        <label for="schools-ai-chat-input" class="sr-only">
+          {chat.inputLabel}
+        </label>
+        <textarea
+          id="schools-ai-chat-input"
+          rows="2"
+          maxlength="800"
+          placeholder={chat.placeholder}
+          aria-describedby="schools-ai-chat-hint schools-ai-chat-count"
+          data-schools-ai-chat-input
+          required></textarea>
+        <button type="submit" data-schools-ai-chat-submit>
+          <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>
+          <span>{chat.send}</span>
+        </button>
+      </form>
+
+      <div class="schools-ai-chat-input-meta">
+        <p id="schools-ai-chat-hint">{chat.inputHint}</p>
+        <p id="schools-ai-chat-count" data-schools-ai-chat-count>0 / 800</p>
+      </div>
+
+      <nav class="schools-ai-chat-contact" aria-label={chat.contactLabel}>
+        <a href={acecoreContactUrl}>{chat.contactForm}</a>
+        <a href={lineUrl} target="_blank" rel="noopener noreferrer">
+          {chat.line}
+        </a>
+      </nav>
+
+      <p class="schools-ai-chat-privacy">
+        {chat.privacyBefore}
+        <a href={privacyUrl}>{chat.privacyLink}</a>
+        {chat.privacyAfter}
+      </p>
+    </div>
+  </section>
+
+  <button
+    class="schools-ai-chat-toggle"
+    type="button"
+    aria-controls="schools-ai-chat-panel"
+    aria-expanded="false"
+    aria-label={chat.open}
+    data-schools-ai-chat-toggle
+  >
+    <i class="ph ph-chats-circle" aria-hidden="true"></i>
+    <span>{chat.toggleLabel}</span>
+  </button>
+</div>
+
+<script>
+  import { initSchoolsAiChat } from "./schools-ai-chat";
+
+  const initializeSchoolsAiChat = () => {
+    document
+      .querySelectorAll<HTMLElement>("[data-schools-ai-chat]")
+      .forEach(initSchoolsAiChat);
+  };
+
+  initializeSchoolsAiChat();
+  document.addEventListener("astro:page-load", initializeSchoolsAiChat);
+</script>
+
+<style is:global>
+  .schools-ai-chat {
+    position: fixed;
+    z-index: 90;
+    right: clamp(16px, 3vw, 28px);
+    bottom: clamp(16px, 3vw, 28px);
+    display: grid;
+    justify-items: end;
+    color: var(--ink);
+    font-family: var(--sans);
+  }
+
+  .schools-ai-chat-panel {
+    display: grid;
+    width: min(390px, calc(100vw - 32px));
+    max-height: min(720px, calc(100dvh - 104px));
+    margin-bottom: 12px;
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--paper);
+    box-shadow: 0 24px 64px rgba(5, 40, 79, 0.2);
+  }
+
+  .schools-ai-chat-panel[hidden] {
+    display: none;
+  }
+
+  .schools-ai-chat-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--line);
+    padding: 16px;
+    background: var(--canvas-blue);
+  }
+
+  .schools-ai-chat-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .schools-ai-chat-mark {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--green-dark);
+    font-size: 1.35rem;
+  }
+
+  .schools-ai-chat-header h2 {
+    color: var(--navy);
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .schools-ai-chat-header p {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  .schools-ai-chat-close {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  .schools-ai-chat-close:hover {
+    background: var(--paper);
+    color: var(--navy);
+  }
+
+  .schools-ai-chat-messages {
+    min-height: 210px;
+    max-height: min(43vh, 390px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 18px 16px;
+    background: var(--paper);
+    scrollbar-gutter: stable;
+  }
+
+  .schools-ai-chat-message {
+    display: flex;
+  }
+
+  .schools-ai-chat-message + .schools-ai-chat-message {
+    margin-top: 12px;
+  }
+
+  .schools-ai-chat-message[data-role="user"] {
+    justify-content: flex-end;
+  }
+
+  .schools-ai-chat-bubble {
+    max-width: 88%;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: var(--canvas);
+    color: var(--ink);
+    font-size: 0.84rem;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+
+  .schools-ai-chat-message[data-role="user"] .schools-ai-chat-bubble {
+    border-color: var(--navy);
+    background: var(--navy);
+    color: white;
+    white-space: pre-wrap;
+  }
+
+  .schools-ai-chat-message[data-error="true"] .schools-ai-chat-bubble {
+    border-color: #d7a1a1;
+    background: #fff6f6;
+    color: #8a2525;
+    white-space: pre-wrap;
+  }
+
+  .schools-ai-chat-message[data-loading="true"] .schools-ai-chat-bubble {
+    color: var(--muted);
+  }
+
+  .schools-ai-chat-markdown p + p,
+  .schools-ai-chat-markdown p + ul,
+  .schools-ai-chat-markdown p + ol,
+  .schools-ai-chat-markdown ul + p,
+  .schools-ai-chat-markdown ol + p {
+    margin-top: 0.55rem;
+  }
+
+  .schools-ai-chat-markdown ul,
+  .schools-ai-chat-markdown ol {
+    margin: 0.35rem 0 0;
+    padding-left: 1.25rem;
+  }
+
+  .schools-ai-chat-markdown ul {
+    list-style: disc;
+  }
+
+  .schools-ai-chat-markdown ol {
+    list-style: decimal;
+  }
+
+  .schools-ai-chat-markdown li + li {
+    margin-top: 0.25rem;
+  }
+
+  .schools-ai-chat-markdown strong {
+    color: var(--navy);
+    font-weight: 700;
+  }
+
+  .schools-ai-chat-markdown a {
+    color: var(--green-dark);
+    font-weight: 700;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .schools-ai-chat-markdown code {
+    border-radius: 3px;
+    padding: 0.05rem 0.25rem;
+    background: #e6edf2;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.9em;
+  }
+
+  .schools-ai-chat-composer {
+    border-top: 1px solid var(--line);
+    padding: 14px 16px 16px;
+    background: var(--canvas);
+  }
+
+  .schools-ai-chat-prompts {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 11px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+  }
+
+  .schools-ai-chat-prompts button {
+    flex: 0 0 auto;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: var(--paper);
+    color: var(--navy);
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .schools-ai-chat-prompts button:hover {
+    border-color: var(--green);
+    color: var(--green-dark);
+  }
+
+  .schools-ai-chat-composer form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 8px;
+  }
+
+  .schools-ai-chat-composer textarea {
+    width: 100%;
+    min-height: 50px;
+    max-height: 120px;
+    resize: vertical;
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 10px 11px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 16px/1.5 var(--sans);
+  }
+
+  .schools-ai-chat-composer textarea::placeholder {
+    color: #667782;
+    opacity: 1;
+  }
+
+  .schools-ai-chat-composer form button {
+    display: inline-flex;
+    min-height: 50px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid var(--navy);
+    border-radius: 4px;
+    padding: 9px 13px;
+    background: var(--navy);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .schools-ai-chat-composer form button:hover:not(:disabled) {
+    background: var(--navy-dark);
+  }
+
+  .schools-ai-chat-composer form button:disabled,
+  .schools-ai-chat-prompts button:disabled {
+    cursor: wait;
+    opacity: 0.62;
+  }
+
+  .schools-ai-chat-input-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 0.68rem;
+    line-height: 1.45;
+  }
+
+  .schools-ai-chat-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 11px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .schools-ai-chat-contact a {
+    color: var(--green-dark);
+    text-underline-offset: 3px;
+  }
+
+  .schools-ai-chat-privacy {
+    margin-top: 9px;
+    color: var(--muted);
+    font-size: 0.66rem;
+    line-height: 1.55;
+  }
+
+  .schools-ai-chat-privacy a {
+    color: var(--navy);
+    text-underline-offset: 2px;
+  }
+
+  .schools-ai-chat-toggle {
+    display: inline-flex;
+    min-height: 56px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid var(--navy);
+    border-radius: 999px;
+    padding: 12px 18px;
+    background: var(--navy);
+    color: white;
+    box-shadow: 0 14px 34px rgba(5, 40, 79, 0.24);
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .schools-ai-chat-toggle i {
+    font-size: 1.35rem;
+  }
+
+  .schools-ai-chat-toggle:hover {
+    background: var(--navy-dark);
+    transform: translateY(-2px);
+  }
+
+  .schools-ai-chat[data-busy="true"] .schools-ai-chat-toggle i {
+    animation: schools-ai-chat-pulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes schools-ai-chat-pulse {
+    50% {
+      opacity: 0.48;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .schools-ai-chat {
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+    }
+
+    .schools-ai-chat-panel {
+      width: 100%;
+      max-height: calc(100dvh - 88px);
+      margin-bottom: 8px;
+    }
+
+    .schools-ai-chat-header {
+      padding: 13px;
+    }
+
+    .schools-ai-chat-messages {
+      min-height: 170px;
+      max-height: 36vh;
+      padding: 15px 13px;
+    }
+
+    .schools-ai-chat-composer {
+      padding: 12px 13px 13px;
+    }
+
+    .schools-ai-chat-toggle {
+      min-height: 52px;
+      padding: 10px 15px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .schools-ai-chat-toggle {
+      transition: none;
+    }
+
+    .schools-ai-chat[data-busy="true"] .schools-ai-chat-toggle i {
+      animation: none;
+    }
+  }
+</style>
