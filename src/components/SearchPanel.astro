@@ -10,6 +10,7 @@ const search = schoolsContent.search;
   aria-labelledby="site-search-title"
   data-search-entry
   data-search-ignore
+  data-pagefind-ignore
   data-search-panel
   hidden
 >
@@ -34,6 +35,8 @@ const search = schoolsContent.search;
       data-view-result={search.viewResult}
       data-fallback-title={search.fallbackTitle}
       data-fallback-excerpt={search.fallbackExcerpt}
+      data-pagefind-loading={search.pagefindLoading}
+      data-pagefind-unavailable={search.pagefindUnavailable}
       data-error-rate-limited={search.errors.rateLimited}
       data-error-provider={search.errors.provider}
       data-error-unavailable={search.errors.unavailable}
@@ -51,7 +54,7 @@ const search = schoolsContent.search;
           placeholder={search.placeholder}
           autocomplete="off"
           enterkeyhint="search"
-          aria-describedby="site-search-hint site-search-status"
+          aria-describedby="site-search-hint site-search-privacy site-search-status"
           aria-controls="site-search-results"
           data-search-input
           required
@@ -62,6 +65,9 @@ const search = schoolsContent.search;
         </button>
       </div>
       <p class="site-search-hint" id="site-search-hint">{search.hint}</p>
+      <p class="site-search-privacy" id="site-search-privacy">
+        {search.privacy}
+      </p>
       <p
         class="site-search-status"
         id="site-search-status"
@@ -91,9 +97,42 @@ const search = schoolsContent.search;
     hidden
   >
     <div class="site-search-results-heading">
-      <h4 id="site-search-results-title">{search.resultsTitle}</h4>
+      <h4 id="site-search-results-title">{search.semanticResultsTitle}</h4>
     </div>
     <ol data-search-list></ol>
+  </div>
+
+  <div
+    class="site-search-results site-search-pagefind"
+    id="site-search-pagefind"
+    aria-labelledby="site-search-pagefind-title"
+    data-pagefind-results
+    hidden
+  >
+    <div class="site-search-results-heading">
+      <h4 id="site-search-pagefind-title">{search.pagefindResultsTitle}</h4>
+    </div>
+    <p
+      class="site-search-status"
+      data-pagefind-status
+      role="status"
+      aria-live="polite"
+    >
+    </p>
+    <div class="site-search-pagefind-ui" data-pagefind-ui></div>
+  </div>
+
+  <div
+    class="site-search-results site-search-network"
+    id="site-search-network"
+    aria-labelledby="site-search-network-title"
+    data-network-search
+    hidden
+  >
+    <div class="site-search-results-heading">
+      <h4 id="site-search-network-title">{search.networkResultsTitle}</h4>
+    </div>
+    <ol data-network-list></ol>
   </div>
 
   <noscript>
@@ -102,12 +141,26 @@ const search = schoolsContent.search;
 </section>
 
 <script>
+  import {
+    fetchNetworkSearch,
+    type NetworkSearchResult,
+  } from "../scripts/network-search";
+  import { isStrictUuid } from "../scripts/search-response-safety.ts";
+  import { getSafeInternalUrl } from "../scripts/search-url-safety.ts";
+
   type SearchResult = {
     url?: unknown;
     title?: unknown;
     section?: unknown;
     excerpt?: unknown;
   };
+
+  type PagefindUiConstructor = new (options: {
+    element: HTMLElement;
+    resetStyles?: boolean;
+    showImages?: boolean;
+    showSubResults?: boolean;
+  }) => unknown;
 
   const form = document.querySelector("[data-search-form]");
   const input = document.querySelector("[data-search-input]");
@@ -117,6 +170,11 @@ const search = schoolsContent.search;
   const errorMessage = document.querySelector("[data-search-error]");
   const results = document.querySelector("[data-search-results]");
   const resultList = document.querySelector("[data-search-list]");
+  const pagefindResults = document.querySelector("[data-pagefind-results]");
+  const pagefindStatus = document.querySelector("[data-pagefind-status]");
+  const pagefindMount = document.querySelector("[data-pagefind-ui]");
+  const networkResults = document.querySelector("[data-network-search]");
+  const networkList = document.querySelector("[data-network-list]");
 
   if (
     form instanceof HTMLFormElement &&
@@ -126,15 +184,34 @@ const search = schoolsContent.search;
     status instanceof HTMLElement &&
     errorMessage instanceof HTMLElement &&
     results instanceof HTMLElement &&
-    resultList instanceof HTMLOListElement
+    resultList instanceof HTMLOListElement &&
+    pagefindResults instanceof HTMLElement &&
+    pagefindStatus instanceof HTMLElement &&
+    pagefindMount instanceof HTMLElement &&
+    networkResults instanceof HTMLElement &&
+    networkList instanceof HTMLOListElement
   ) {
     const messages = form.dataset;
     const idleSubmitLabel = submitLabel.textContent ?? "";
     let activeController: AbortController | null = null;
+    let networkController: AbortController | null = null;
+    let requestSequence = 0;
+    let pagefindLoader: Promise<PagefindUiConstructor | null> | null = null;
+    let pagefindInitialized = false;
 
-    const clearResults = () => {
+    const clearSemanticResults = () => {
       resultList.replaceChildren();
       results.hidden = true;
+    };
+
+    const clearNetworkResults = () => {
+      networkList.replaceChildren();
+      networkResults.hidden = true;
+    };
+
+    const hidePagefindResults = () => {
+      pagefindResults.hidden = true;
+      pagefindStatus.textContent = "";
     };
 
     const setLoading = (loading: boolean) => {
@@ -149,7 +226,7 @@ const search = schoolsContent.search;
       status.textContent = "";
       errorMessage.textContent = message;
       errorMessage.hidden = false;
-      clearResults();
+      clearSemanticResults();
     };
 
     const clearMessages = () => {
@@ -158,16 +235,8 @@ const search = schoolsContent.search;
       errorMessage.hidden = true;
     };
 
-    const safeInternalHref = (value: unknown) => {
-      if (typeof value !== "string") return null;
-      try {
-        const url = new URL(value, window.location.origin);
-        if (url.origin !== window.location.origin) return null;
-        return `${url.pathname}${url.search}${url.hash}`;
-      } catch {
-        return null;
-      }
-    };
+    const safeInternalHref = (value: unknown) =>
+      getSafeInternalUrl(value, window.location.origin);
 
     const createResultItem = (result: SearchResult) => {
       const href = safeInternalHref(result.url);
@@ -215,32 +284,229 @@ const search = schoolsContent.search;
       return item;
     };
 
-    const renderResults = (searchResults: SearchResult[]) => {
-      const items = searchResults
-        .slice(0, 5)
-        .map(createResultItem)
-        .filter((item): item is HTMLLIElement => item !== null);
+    const renderSemanticResults = (searchResults: SearchResult[]) => {
+      const items: HTMLLIElement[] = [];
+      for (const result of searchResults) {
+        const item = createResultItem(result);
+        if (item) items.push(item);
+        if (items.length === 5) break;
+      }
 
       resultList.replaceChildren(...items);
       if (items.length === 0) {
         results.hidden = true;
-        status.textContent = messages.noResults ?? "";
-        return;
+        return 0;
       }
 
       results.hidden = false;
-      status.textContent = `${items.length}${messages.resultCountSuffix ?? ""}`;
+      status.textContent =
+        String(items.length) + (messages.resultCountSuffix ?? "");
+      return items.length;
+    };
+
+    const getPagefindConstructor = () =>
+      (window as Window & { PagefindUI?: PagefindUiConstructor }).PagefindUI ??
+      null;
+
+    const loadPagefind = () => {
+      if (pagefindLoader) return pagefindLoader;
+
+      const loaded = getPagefindConstructor();
+      if (loaded) return Promise.resolve(loaded);
+
+      const existingStyle = document.querySelector(
+        "link[data-site-search-pagefind-style]",
+      );
+      if (!existingStyle) {
+        const stylesheet = document.createElement("link");
+        stylesheet.rel = "stylesheet";
+        stylesheet.href = "/pagefind/pagefind-ui.css";
+        stylesheet.dataset.siteSearchPagefindStyle = "true";
+        document.head.append(stylesheet);
+      }
+
+      pagefindLoader = new Promise<PagefindUiConstructor | null>((resolve) => {
+        let existingScript = document.querySelector<HTMLScriptElement>(
+          "script[data-site-search-pagefind-script]",
+        );
+        if (existingScript?.dataset.loadState === "error") {
+          existingScript.remove();
+          existingScript = null;
+        }
+
+        if (existingScript) {
+          if (getPagefindConstructor()) {
+            resolve(getPagefindConstructor());
+            return;
+          }
+          existingScript.addEventListener(
+            "load",
+            () => resolve(getPagefindConstructor()),
+            { once: true },
+          );
+          existingScript.addEventListener("error", () => resolve(null), {
+            once: true,
+          });
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = "/pagefind/pagefind-ui.js";
+        script.async = true;
+        script.dataset.siteSearchPagefindScript = "true";
+        script.addEventListener(
+          "load",
+          () => {
+            script.dataset.loadState = "loaded";
+            resolve(getPagefindConstructor());
+          },
+          {
+            once: true,
+          },
+        );
+        script.addEventListener(
+          "error",
+          () => {
+            script.dataset.loadState = "error";
+            resolve(null);
+          },
+          { once: true },
+        );
+        document.head.append(script);
+      }).then((constructor) => {
+        if (!constructor) pagefindLoader = null;
+        return constructor;
+      });
+
+      return pagefindLoader;
+    };
+
+    const updatePagefindQuery = (query: string) => {
+      const pagefindInput = pagefindMount.querySelector<HTMLInputElement>(
+        ".pagefind-ui__search-input",
+      );
+      if (!pagefindInput) return;
+
+      pagefindInput.value = query;
+      pagefindInput.dispatchEvent(new Event("input", { bubbles: true }));
+    };
+
+    const showPagefindResults = async (query: string, sequence: number) => {
+      pagefindResults.hidden = false;
+      pagefindStatus.textContent = messages.pagefindLoading ?? "";
+      const PagefindUI = await loadPagefind();
+      if (sequence !== requestSequence) return;
+
+      if (!PagefindUI) {
+        pagefindStatus.textContent = messages.pagefindUnavailable ?? "";
+        return;
+      }
+
+      if (!pagefindInitialized) {
+        pagefindMount.replaceChildren();
+        new PagefindUI({
+          element: pagefindMount,
+          resetStyles: false,
+          showImages: false,
+          showSubResults: true,
+        });
+        pagefindInitialized = true;
+      }
+
+      pagefindStatus.textContent = "";
+      window.requestAnimationFrame(() => {
+        if (sequence === requestSequence) updatePagefindQuery(query);
+      });
+    };
+
+    const createNetworkResultItem = (result: NetworkSearchResult) => {
+      const item = document.createElement("li");
+      const link = document.createElement("a");
+      const title = document.createElement("strong");
+      const source = document.createElement("span");
+      const section = document.createElement("span");
+      const excerpt = document.createElement("p");
+      const viewResult = document.createElement("span");
+
+      link.className = "site-search-result";
+      link.href = result.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+
+      title.className = "site-search-result-title";
+      title.textContent = result.title;
+      link.append(title);
+
+      source.className = "site-search-result-source";
+      source.textContent = result.sourceLabel;
+      link.append(source);
+
+      if (result.section && result.section !== result.title) {
+        section.className = "site-search-result-section";
+        section.textContent = result.section;
+        link.append(section);
+      }
+
+      if (result.excerpt) {
+        excerpt.className = "site-search-result-excerpt";
+        excerpt.textContent = result.excerpt;
+        link.append(excerpt);
+      }
+
+      viewResult.className = "site-search-result-link";
+      viewResult.textContent = messages.viewResult ?? "";
+      link.append(viewResult);
+
+      item.append(link);
+      return item;
+    };
+
+    const renderNetworkResults = (searchResults: NetworkSearchResult[]) => {
+      const items = searchResults.slice(0, 3).map(createNetworkResultItem);
+      networkList.replaceChildren(...items);
+      networkResults.hidden = items.length === 0;
+    };
+
+    const runNetworkSearch = (query: string, sequence: number) => {
+      networkController?.abort();
+      const controller = new AbortController();
+      networkController = controller;
+      const timeout = window.setTimeout(() => controller.abort(), 8_000);
+
+      void fetchNetworkSearch(query, "schools", controller.signal)
+        .then((networkSearchResults) => {
+          if (
+            controller === networkController &&
+            sequence === requestSequence
+          ) {
+            renderNetworkResults(networkSearchResults);
+          }
+        })
+        .catch(() => {
+          // A supplementary cross-site request must never block local search.
+        })
+        .finally(() => {
+          window.clearTimeout(timeout);
+          if (controller === networkController) networkController = null;
+        });
+    };
+
+    const resetForInput = () => {
+      requestSequence += 1;
+      activeController?.abort();
+      activeController = null;
+      networkController?.abort();
+      networkController = null;
+      setLoading(false);
+      clearMessages();
+      clearSemanticResults();
+      clearNetworkResults();
+      hidePagefindResults();
     };
 
     input.addEventListener("input", () => {
       input.setCustomValidity("");
-      if (activeController) {
-        activeController.abort();
-        activeController = null;
-        setLoading(false);
-      }
-      clearMessages();
-      clearResults();
+      resetForInput();
     });
 
     form.addEventListener("submit", async (event) => {
@@ -255,13 +521,30 @@ const search = schoolsContent.search;
       }
 
       input.setCustomValidity("");
-      activeController?.abort();
+      resetForInput();
+      const sequence = requestSequence;
       const controller = new AbortController();
       activeController = controller;
       clearMessages();
-      clearResults();
       status.textContent = messages.loading ?? "";
       setLoading(true);
+
+      const startNetworkSearch = () => {
+        if (
+          controller !== activeController ||
+          sequence !== requestSequence ||
+          controller.signal.aborted
+        ) {
+          return;
+        }
+
+        runNetworkSearch(query, sequence);
+      };
+
+      const showPagefindFallback = async () => {
+        await showPagefindResults(query, sequence);
+        startNetworkSearch();
+      };
 
       try {
         const response = await fetch(messages.endpoint ?? "/api/search", {
@@ -275,7 +558,8 @@ const search = schoolsContent.search;
           signal: controller.signal,
         });
 
-        if (controller !== activeController) return;
+        if (controller !== activeController || sequence !== requestSequence)
+          return;
 
         if (!response.ok) {
           const message =
@@ -287,30 +571,45 @@ const search = schoolsContent.search;
                   ? messages.errorUnavailable
                   : messages.errorGeneric;
           showError(message ?? "");
+          await showPagefindFallback();
           return;
         }
 
         const payload: unknown = await response.json();
-        if (controller !== activeController) return;
+        if (controller !== activeController || sequence !== requestSequence)
+          return;
         if (
           !payload ||
           typeof payload !== "object" ||
+          Array.isArray(payload) ||
           !("ok" in payload) ||
           payload.ok !== true ||
+          !("requestId" in payload) ||
+          !isStrictUuid(payload.requestId) ||
           !("results" in payload) ||
           !Array.isArray(payload.results)
         ) {
           showError(messages.errorGeneric ?? "");
+          await showPagefindFallback();
           return;
         }
 
-        renderResults(payload.results as SearchResult[]);
+        const count = renderSemanticResults(payload.results as SearchResult[]);
+        if (count === 0) {
+          status.textContent = messages.noResults ?? "";
+          await showPagefindFallback();
+          return;
+        }
+
+        startNetworkSearch();
       } catch (error) {
-        if (controller !== activeController) return;
+        if (controller !== activeController || sequence !== requestSequence)
+          return;
         if (error instanceof DOMException && error.name === "AbortError") {
           return;
         }
         showError(messages.errorNetwork ?? "");
+        await showPagefindFallback();
       } finally {
         if (controller === activeController) {
           activeController = null;
@@ -323,6 +622,7 @@ const search = schoolsContent.search;
       "pagehide",
       () => {
         activeController?.abort();
+        networkController?.abort();
       },
       { once: true },
     );
@@ -434,13 +734,15 @@ const search = schoolsContent.search;
   }
 
   .site-search-hint,
+  .site-search-privacy,
   .site-search-status,
   .site-search-error {
     min-height: 1.5em;
     font-size: 0.8rem;
   }
 
-  .site-search-hint {
+  .site-search-hint,
+  .site-search-privacy {
     color: var(--muted);
   }
 
@@ -478,6 +780,24 @@ const search = schoolsContent.search;
     list-style: none;
   }
 
+  .site-search-pagefind-ui {
+    min-height: 2rem;
+  }
+
+  .site-search-pagefind-ui .pagefind-ui__form {
+    margin-top: 0;
+  }
+
+  .site-search-pagefind-ui .pagefind-ui__search-input {
+    border-color: var(--line-strong);
+    border-radius: 3px;
+    color: var(--ink);
+  }
+
+  .site-search-pagefind-ui .pagefind-ui__result {
+    border-color: var(--line);
+  }
+
   .site-search-result {
     display: grid;
     gap: 5px;
@@ -505,10 +825,15 @@ const search = schoolsContent.search;
     font-size: 1.08rem;
   }
 
+  .site-search-result-source,
   .site-search-result-section {
     color: var(--green-dark);
     font-size: 0.78rem;
     font-weight: 700;
+  }
+
+  .site-search-result-source {
+    color: var(--navy);
   }
 
   .site-search-result-excerpt {
