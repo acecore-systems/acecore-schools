@@ -6,22 +6,21 @@ Acecore Schools の公開ページを、日本語の自然文から探すため�
 
 ## Current rollout state
 
-| Environment | Vectorize index                                 | Search D1                           | Index state      | Search |
-| ----------- | ----------------------------------------------- | ----------------------------------- | ---------------- | ------ |
-| Preview     | `acecore-schools-search-openai-1536-preview`    | `acecore-schools-search-preview`    | 作成済み・未同期 | OFF    |
-| Production  | `acecore-schools-search-openai-1536-production` | `acecore-schools-search-production` | 作成済み・未同期 | OFF    |
+| Environment | Vectorize index                                 | Search D1                           | Index state | Search |
+| ----------- | ----------------------------------------------- | ----------------------------------- | ----------- | ------ |
+| Preview     | `acecore-schools-search-openai-1536-preview`    | `acecore-schools-search-preview`    | 7件同期済み | ON     |
+| Production  | `acecore-schools-search-openai-1536-production` | `acecore-schools-search-production` | 7件同期済み | ON     |
 
-新しい1536次元indexは1536 dimensions / cosineで作成済みですが、OpenAI embeddingによるcorpusは
-まだ同期していません。PreviewとProductionの`SEARCH_ENABLED`はどちらも`false`を維持します。
-Preview同期とQA、Production同期、vector件数・`ja` namespace・embedding設定の照合を完了した後に、
-別の変更で検索を有効化します。旧BGE-M3用1024次元indexはrollback用に残し、この移行が完了するまで
-削除しません。
+2026-07-31にProduction run `30599692065`とPreview run `30599864266`で、main corpus 7件を
+新しい1536次元indexへ同期しました。両indexの1536 dimensions / cosine、vector件数7、
+`ja` namespaceのqueryを照合済みです。PreviewとProductionの`SEARCH_ENABLED`はどちらも
+`true`です。旧BGE-M3用1024次元indexはrollback確認が終わるまで削除しません。
 
 2026-07-30に両D1へmigration `0001`〜`0003`を適用し、同じ6件のcorpusを旧BGE-M3用indexへ
 収束させました。この同期実績は新しい1536次元indexへ引き継がれません。
 同日、公開routeを持たない`acecore-schools-search-maintenance`をdeployし、
 cron `17 * * * *`をCloudflare APIで確認しました。
-現在は両環境とも検索OFFで、静的ページはそのまま利用できます。
+現在は両環境とも検索ONで、障害時はkill switchにより静的ページへ切り戻せます。
 
 その後の本文追加でmain corpusが7件になったため、`.github/workflows/sync-vectorize.yml`は
 Productionをmain push直後と6時間ごとに公開buildへ再収束させます。Previewはmainからの手動同期、
@@ -203,17 +202,17 @@ Production 同期は通常の同期コマンドでは実行できません。Pro
 1536 dimensions / cosineであること、Production D1 migration、corpus件数、Preview検索結果を
 再確認し、GitHub Actionsのmanual dispatchまたは有効化済みのpush／scheduleから実行します。
 同期scriptも公開markerと一致したcorpus versionそのものを確認値として要求します。
-2026-07-30の6件upsert、0件deleteという実績は旧BGE-M3用indexの証跡であり、新しい1536次元
-indexのProduction gateには使いません。新indexについてPreviewとProductionそれぞれの同期artifact、
-vector件数、`ja` namespace、embedding設定を新たに確認します。
+2026-07-30の6件upsert、0件deleteという実績は旧BGE-M3用indexの証跡です。新しい1536次元
+indexは2026-07-31のProduction run `30599692065`とPreview run `30599864266`でmain corpus 7件へ
+収束させ、両環境でvector件数と`ja` namespace queryを確認しました。
 
 検索対象のHTML・`src/data/`・corpus生成処理を変更するPRは、merge前にcorpus buildとPreview
 同期を行い、merge後のProduction有効化前にProduction同期を再実行します。別の本文変更PRが
 同時に開いている場合はmerge順を固定し、後からmergeする側でreview済みcorpusをbuildして
 Preview、Productionの順に全件upsertします。同期完了をPagesの公開内容と独立して確認します。
 
-このOpenAI移行PRではPreviewとProductionの`SEARCH_ENABLED=false`を維持します。新しい1536次元
-indexのPreview同期とQA、Production同期の証跡を確認した後に、検索有効化を別の変更として行います。
+新しい1536次元indexのPreview同期とQA、Production同期の証跡を確認したため、PreviewとProductionの
+`SEARCH_ENABLED=true`で検索を有効化します。
 リリース完了判定は次をすべて満たした状態です。
 
 1. PagesのGit ProviderがYes、source repositoryが`acecore-systems/acecore-schools`、
