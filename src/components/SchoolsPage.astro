@@ -456,7 +456,7 @@ const homeOverview = [
       </a>
     </header>
 
-    <main id="main-content" tabindex="-1">
+    <main id="main-content" tabindex="-1" data-pagefind-body>
       {
         page !== "home" && (
           <section class="subpage-hero" aria-labelledby="page-title">
@@ -1083,41 +1083,21 @@ const homeOverview = [
       redirectLegacyHash();
       window.addEventListener("hashchange", redirectLegacyHash);
 
-      const revealSearchWhenEnabled = async () => {
-        try {
-          const response = await fetch("/api/health", {
-            credentials: "same-origin",
-            headers: { Accept: "application/json" },
+      const revealSearch = () => {
+        searchEntries.forEach((entry) => {
+          if (entry instanceof HTMLElement) entry.hidden = false;
+        });
+
+        if (window.location.hash === "#site-search") {
+          requestAnimationFrame(() => {
+            document
+              .getElementById("site-search")
+              ?.scrollIntoView({ block: "start" });
           });
-          if (!response.ok) return;
-
-          const payload: unknown = await response.json();
-          if (
-            !payload ||
-            typeof payload !== "object" ||
-            !("searchEnabled" in payload) ||
-            payload.searchEnabled !== true
-          ) {
-            return;
-          }
-
-          searchEntries.forEach((entry) => {
-            if (entry instanceof HTMLElement) entry.hidden = false;
-          });
-
-          if (window.location.hash === "#site-search") {
-            requestAnimationFrame(() => {
-              document
-                .getElementById("site-search")
-                ?.scrollIntoView({ block: "start" });
-            });
-          }
-        } catch {
-          // 検索が有効だと確認できない場合は、導線を表示しない。
         }
       };
 
-      void revealSearchWhenEnabled();
+      revealSearch();
 
       const closeMenu = (restoreFocus = false) => {
         if (

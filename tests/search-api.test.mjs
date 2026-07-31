@@ -19,7 +19,7 @@ test("同一originの日本語検索だけをja namespaceで問い合わせる",
         id: "one",
         score: 0.81,
         metadata: {
-          url: "/learning/#programming",
+          url: "/learning/",
           title: "学べること",
           section: "IT学習・プログラミング",
           excerpt: "Web制作や小さなツールの公開を目指します。",
@@ -31,7 +31,7 @@ test("同一originの日本語検索だけをja namespaceで問い合わせる",
         id: "duplicate-url",
         score: 0.79,
         metadata: {
-          url: "/learning/#programming",
+          url: "/learning/",
           title: "学べること",
           section: "プログラミング",
           excerpt: "同じURLの別チャンクです。",
@@ -72,7 +72,7 @@ test("同一originの日本語検索だけをja namespaceで問い合わせる",
   assert.equal(response.headers.get("X-Content-Type-Options"), "nosniff");
   assert.match(response.headers.get("Server-Timing"), /^search;dur=/);
   assert.equal(body.results.length, 1);
-  assert.equal(body.results[0].url, "/learning/#programming");
+  assert.equal(body.results[0].url, "/learning/");
   assert.equal(body.results[0].rank, 1);
   assert.deepEqual(queryOptions, {
     namespace: "ja",
@@ -617,7 +617,7 @@ test("rate-limit secretが未設定ならfail closedで503を返す", async () =
   assert.equal(rateLimitQueried, false);
 });
 
-test("root-relativeでないURLとlocale不一致のmetadataを除外する", async () => {
+test("公開path以外とlocale不一致のmetadataを除外する", async () => {
   const env = createEnv({
     matches: [
       {
@@ -657,10 +657,118 @@ test("root-relativeでないURLとlocale不一致のmetadataを除外する", as
         },
       },
       {
+        id: "admin",
+        score: 0.875,
+        metadata: {
+          url: "/admin/private/",
+          title: "管理ページ",
+          section: "管理ページ",
+          excerpt: "管理ページ",
+          contentType: "page",
+          locale: "ja",
+        },
+      },
+      {
+        id: "encoded-admin",
+        score: 0.872,
+        metadata: {
+          url: "/%EF%BC%85%36%31dmin/",
+          title: "管理ページ",
+          section: "管理ページ",
+          excerpt: "管理ページ",
+          contentType: "page",
+          locale: "ja",
+        },
+      },
+      {
+        id: "encoded-api",
+        score: 0.87,
+        metadata: {
+          url: "/%EF%BC%85%36%31pi/private/",
+          title: "API",
+          section: "API",
+          excerpt: "API",
+          contentType: "page",
+          locale: "ja",
+        },
+      },
+      {
+        id: "query",
+        score: 0.868,
+        metadata: {
+          url: "/faq/?from=search",
+          title: "query",
+          section: "query",
+          excerpt: "query",
+          contentType: "page",
+          locale: "ja",
+        },
+      },
+      {
+        id: "hash",
+        score: 0.866,
+        metadata: {
+          url: "/faq/#answer",
+          title: "hash",
+          section: "hash",
+          excerpt: "hash",
+          contentType: "page",
+          locale: "ja",
+        },
+      },
+      {
+        id: "dot-segment",
+        score: 0.864,
+        metadata: {
+          url: "/safe/../admin/",
+          title: "dot",
+          section: "dot",
+          excerpt: "dot",
+          contentType: "page",
+          locale: "ja",
+        },
+      },
+      {
+        id: "encoded-slash",
+        score: 0.863,
+        metadata: {
+          url: "/safe%252fprivate/",
+          title: "encoded slash",
+          section: "encoded slash",
+          excerpt: "encoded slash",
+          contentType: "page",
+          locale: "ja",
+        },
+      },
+      {
+        id: "backslash",
+        score: 0.862,
+        metadata: {
+          url: "/safe\\private/",
+          title: "backslash",
+          section: "backslash",
+          excerpt: "backslash",
+          contentType: "page",
+          locale: "ja",
+        },
+      },
+      {
+        id: "tab",
+        score: 0.86,
+        metadata: {
+          url: "\t/faq/",
+          title: "tab",
+          section: "tab",
+          excerpt: "tab",
+          contentType: "page",
+          locale: "ja",
+        },
+      },
+      {
         id: "valid",
         score: 0.87,
         metadata: {
-          url: "/faq/#faq",
+          url: "/faq/",
           title: "よくあるご質問",
           section: "料金はいつ分かりますか？",
           excerpt: "料金の目安を掲載しています。",
@@ -681,7 +789,7 @@ test("root-relativeでないURLとlocale不一致のmetadataを除外する", as
   assert.equal(response.status, 200);
   assert.deepEqual(
     body.results.map((result) => result.url),
-    ["/faq/#faq"],
+    ["/faq/"],
   );
 });
 

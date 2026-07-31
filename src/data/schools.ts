@@ -23,14 +23,21 @@ export const schoolsContent = {
     hint: "2〜160文字で入力してください。",
     submit: "検索する",
     loading: "検索しています…",
-    resultsTitle: "検索結果",
+    semanticResultsTitle: "意味の近い内容",
+    pagefindResultsTitle: "キーワード検索",
+    networkResultsTitle: "Acecore関連サイト",
     resultCountSuffix: "件見つかりました。",
     noResults:
       "該当する内容が見つかりませんでした。言葉を変えて、もう一度お試しください。",
+    pagefindLoading: "キーワード検索を準備しています…",
+    pagefindUnavailable:
+      "キーワード検索を利用できませんでした。各ページはメニューから確認できます。",
     validation: "検索キーワードを2〜160文字で入力してください。",
     viewResult: "ページを見る",
     fallbackTitle: "Acecore Schoolsのページ",
     fallbackExcerpt: "ページで詳しい内容をご確認ください。",
+    privacy:
+      "検索語は、このサイトとAcecore関連サイトの公開情報を検索するために送信されます。個人情報・非公開情報は入力しないでください。",
     errors: {
       rateLimited:
         "検索が混み合っています。1分ほど時間をおいて、もう一度お試しください。",

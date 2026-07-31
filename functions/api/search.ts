@@ -1,3 +1,5 @@
+import { getSafeInternalUrl } from "../../src/scripts/search-url-safety.ts";
+
 const EMBEDDING_MODEL = "text-embedding-3-large";
 const EMBEDDING_DIMENSIONS = 1536;
 const OPENAI_EMBEDDINGS_ENDPOINT = "https://api.openai.com/v1/embeddings";
@@ -781,31 +783,29 @@ function normalizeMetadata(
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const metadata = value as Record<string, unknown>;
 
-  const url = readString(metadata.url, 500);
+  const rawUrl = metadata.url;
   const title = readString(metadata.title, 240);
   const section = readString(metadata.section, 240) || title;
   const excerpt = readString(metadata.excerpt, 500);
   const contentType = readString(metadata.contentType, 40) || "page";
   const locale = readString(metadata.locale, 16);
   if (
-    !url ||
+    typeof rawUrl !== "string" ||
+    [...rawUrl].length > 500 ||
     !title ||
-    locale !== expectedLocale ||
-    !url.startsWith("/") ||
-    url.startsWith("//")
+    locale !== expectedLocale
   ) {
     return null;
   }
 
   try {
     const requestOrigin = new URL(requestUrl).origin;
-    const resolved = new URL(url, requestOrigin);
-    if (resolved.origin !== requestOrigin) return null;
+    const url = getSafeInternalUrl(rawUrl, requestOrigin);
+    if (!url) return null;
+    return { url, title, section, excerpt, contentType, locale };
   } catch {
     return null;
   }
-
-  return { url, title, section, excerpt, contentType, locale };
 }
 
 function getErrorCode(error: unknown, fallback: string): string {

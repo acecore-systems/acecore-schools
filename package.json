@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && npm run audit:ai-chat && npm run audit:image-alts && npm run audit:links && npm run audit:structured-data && node scripts/build-search-corpus.mjs && npm run write:build-meta",
+    "build": "astro build && pagefind --site dist && npm run audit:ai-chat && npm run audit:image-alts && npm run audit:links && npm run audit:structured-data && node scripts/build-search-corpus.mjs && npm run write:build-meta",
     "audit:ai-chat": "node scripts/audit-built-ai-chat.mjs",
     "audit:image-alts": "node scripts/audit-built-image-alts.mjs",
     "audit:links": "node scripts/audit-built-links.mjs",
@@ -13,7 +13,7 @@
     "preview": "astro preview",
     "deploy:preview": "npm run build && wrangler pages deploy dist --project-name acecore-schools",
     "format:check": "prettier . --check",
-    "test:search": "node --experimental-strip-types --test tests/ai-chat-ui.test.mjs tests/deployment-marker.test.mjs tests/health-api.test.mjs tests/search-api.test.mjs tests/search-corpus.test.mjs tests/search-maintenance.test.mjs tests/vectorize-sync.test.mjs tests/vectorize-workflow.test.mjs",
+    "test:search": "node --experimental-strip-types --test tests/ai-chat-ui.test.mjs tests/deployment-marker.test.mjs tests/health-api.test.mjs tests/network-search-client.test.mjs tests/search-api.test.mjs tests/search-corpus.test.mjs tests/search-maintenance.test.mjs tests/vectorize-sync.test.mjs tests/vectorize-workflow.test.mjs",
     "test:ai-chat": "node --experimental-strip-types --test tests/ai-chat-ui.test.mjs",
     "test:structured-data": "node --test tests/structured-data.test.mjs",
     "sync:vectorize": "node scripts/sync-vectorize.mjs",
@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20260730.1",
+    "pagefind": "^1.5.2",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^7.0.2",
