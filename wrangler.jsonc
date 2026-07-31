@@ -6,8 +6,8 @@
   "d1_databases": [
     {
       "binding": "SEARCH_RATE_LIMIT_DB",
-      "database_name": "acecore-schools-search-preview",
-      "database_id": "9ec6b1bb-92c1-4706-9977-aeedd7f27111",
+      "database_name": "acecore-schools-search-production",
+      "database_id": "60908c5d-897e-4d17-9b17-2632ac4fde14",
       "migrations_dir": "./migrations/search",
       "remote": true,
     },
@@ -26,8 +26,8 @@
       "d1_databases": [
         {
           "binding": "SEARCH_RATE_LIMIT_DB",
-          "database_name": "acecore-schools-search-preview",
-          "database_id": "9ec6b1bb-92c1-4706-9977-aeedd7f27111",
+          "database_name": "acecore-schools-search-production",
+          "database_id": "60908c5d-897e-4d17-9b17-2632ac4fde14",
           "migrations_dir": "./migrations/search",
           "remote": true,
         },

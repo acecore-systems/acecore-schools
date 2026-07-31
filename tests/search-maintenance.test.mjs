@@ -24,21 +24,17 @@ test("期限切れrate keyと90日超metricを同じbatchで削除する", async
   ]);
 });
 
-test("scheduled eventはPreviewとProductionを同じ時刻でcleanupする", async () => {
-  const previewCalls = [];
-  const productionCalls = [];
+test("scheduled eventは共有Production D1を一度だけcleanupする", async () => {
+  const calls = [];
 
   await maintenanceWorker.scheduled(
     {},
     {
-      SEARCH_PREVIEW_DB: createDatabase(previewCalls),
-      SEARCH_PRODUCTION_DB: createDatabase(productionCalls),
+      SEARCH_PRODUCTION_DB: createDatabase(calls),
     },
   );
 
-  assert.equal(previewCalls.length, 2);
-  assert.equal(productionCalls.length, 2);
-  assert.equal(previewCalls[0].values[0], productionCalls[0].values[0]);
+  assert.equal(calls.length, 2);
 });
 
 test("D1 batch失敗を成功扱いにしない", async () => {

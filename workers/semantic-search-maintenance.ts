@@ -1,5 +1,4 @@
 type SearchMaintenanceEnv = {
-  SEARCH_PREVIEW_DB: D1Database;
   SEARCH_PRODUCTION_DB: D1Database;
 };
 
@@ -27,9 +26,6 @@ export default {
     env: SearchMaintenanceEnv,
   ): Promise<void> {
     const now = Math.floor(Date.now() / 1000);
-    await Promise.all([
-      deleteExpiredSearchData(env.SEARCH_PREVIEW_DB, now),
-      deleteExpiredSearchData(env.SEARCH_PRODUCTION_DB, now),
-    ]);
+    await deleteExpiredSearchData(env.SEARCH_PRODUCTION_DB, now);
   },
 } satisfies ExportedHandler<SearchMaintenanceEnv>;
