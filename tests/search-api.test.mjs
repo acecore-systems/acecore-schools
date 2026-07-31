@@ -4,7 +4,12 @@ import { test } from "node:test";
 
 import { onRequestPost } from "../functions/api/search.ts";
 
-const queryVector = Array.from({ length: 1024 }, () => 0.01);
+const queryVector = Array.from({ length: 1536 }, () => 0.01);
+const originalFetch = globalThis.fetch;
+
+test.after(() => {
+  globalThis.fetch = originalFetch;
+});
 
 test("同一originの日本語検索だけをja namespaceで問い合わせる", async () => {
   let queryOptions;
@@ -298,7 +303,7 @@ test("metric永続化の失敗はresponseを変えずdiagnostic logだけを残�
   }
 });
 
-test("OriginがないrequestはWorkers AIを呼ばずに拒否する", async () => {
+test("OriginがないrequestはOpenAIを呼ばずに拒否する", async () => {
   let aiCalled = false;
   const env = createEnv({
     onAiRun() {
@@ -696,7 +701,7 @@ test("binding未設定または無効化中は503でfail closedする", async ()
   assert.equal(disabledResponse.status, 503);
 });
 
-test("D1障害はWorkers AIを呼ばず503でfail closedする", async () => {
+test("D1障害はOpenAIを呼ばず503でfail closedする", async () => {
   let aiCalled = false;
   const env = createEnv({
     rateLimitError: new Error("D1 unavailable"),
@@ -716,7 +721,7 @@ test("D1障害はWorkers AIを呼ばず503でfail closedする", async () => {
   assert.equal(aiCalled, false);
 });
 
-test("Workers AIとVectorizeの障害は502でfail closedする", async () => {
+test("OpenAIとVectorizeの障害は502でfail closedする", async () => {
   const aiResponse = await withCapturedErrors(() =>
     onRequestPost({
       request: searchRequest({ query: "料金について", locale: "ja" }),
@@ -793,9 +798,33 @@ function createEnv({
   onMetric = () => {},
   onMetricCleanup = () => {},
 } = {}) {
+  globalThis.fetch = async (url, init = {}) => {
+    onAiRun(url, init);
+    if (aiError) throw aiError;
+
+    assert.equal(url, "https://api.openai.com/v1/embeddings");
+    assert.equal(init.method, "POST");
+    assert.equal(init.headers.Authorization, "Bearer sk-test-openai-key");
+    const input = JSON.parse(init.body);
+    assert.deepEqual(input, {
+      model: "text-embedding-3-large",
+      input: [input.input[0]],
+      dimensions: 1536,
+      encoding_format: "float",
+    });
+    return Response.json({
+      object: "list",
+      model: "text-embedding-3-large",
+      data: [{ object: "embedding", index: 0, embedding }],
+    });
+  };
+
   return {
     SEARCH_ENABLED: searchEnabled ? "true" : "false",
     SEARCH_MIN_SCORE: "0.50",
+    OPENAI_API_KEY: "sk-test-openai-key",
+    OPENAI_EMBEDDING_MODEL: "text-embedding-3-large",
+    OPENAI_EMBEDDING_DIMENSIONS: "1536",
     SEARCH_RATE_LIMIT_SECRET: rateLimitSecret,
     SEARCH_RATE_LIMIT_DB: createRateLimitDatabase({
       clientRateLimitSuccess,
@@ -808,22 +837,10 @@ function createEnv({
       onMetric,
       onMetricCleanup,
     }),
-    AI: {
-      async run(model, input) {
-        onAiRun(model, input);
-        if (aiError) throw aiError;
-        assert.equal(model, "@cf/baai/bge-m3");
-        assert.deepEqual(input, {
-          text: [input.text[0]],
-          truncate_inputs: true,
-        });
-        return { data: [embedding] };
-      },
-    },
     SEARCH_INDEX: {
       async query(values, options) {
         if (vectorizeError) throw vectorizeError;
-        assert.equal(values.length, 1024);
+        assert.equal(values.length, 1536);
         onQuery(values, options);
         return { count: matches.length, matches };
       },

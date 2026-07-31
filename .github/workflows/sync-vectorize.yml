@@ -128,12 +128,17 @@ jobs:
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           MIGRATION_MODE: ${{ inputs.migration }}
-          VECTORIZE_INDEX_NAME: acecore-schools-search-preview
+          VECTORIZE_INDEX_NAME: acecore-schools-search-openai-1536-preview
         run: |
           set -euo pipefail
           if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
             echo "::error::CLOUDFLARE_SCHOOLS_SEARCH_PREVIEW_API_TOKEN is not configured."
+            exit 1
+          fi
+          if [[ -z "${OPENAI_API_KEY:-}" ]]; then
+            echo "::error::OPENAI_API_KEY is not configured."
             exit 1
           fi
 
@@ -421,13 +426,18 @@ jobs:
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           CORPUS_VERSION: ${{ needs.build-production-corpus.outputs.corpus_version }}
           MIGRATION_MODE: ${{ inputs.migration }}
-          VECTORIZE_INDEX_NAME: acecore-schools-search-production
+          VECTORIZE_INDEX_NAME: acecore-schools-search-openai-1536-production
         run: |
           set -euo pipefail
           if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
             echo "::error::CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN is not configured."
+            exit 1
+          fi
+          if [[ -z "${OPENAI_API_KEY:-}" ]]; then
+            echo "::error::OPENAI_API_KEY is not configured."
             exit 1
           fi
 

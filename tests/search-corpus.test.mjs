@@ -125,7 +125,7 @@ test("6つの公開routeからja namespaceのcorpusを生成する", async (t) =
   const corpus = await buildSearchCorpus({ distDir, write: false });
 
   assert.equal(corpus.schemaVersion, 1);
-  assert.equal(corpus.embedding.model, "@cf/baai/bge-m3");
+  assert.equal(corpus.embedding.model, "text-embedding-3-large");
   assert.equal(corpus.embedding.dimensions, SEARCH_EMBEDDING_DIMENSIONS);
   assert.equal(corpus.embedding.metric, "cosine");
   assert.equal(corpus.sourceCount, 6);

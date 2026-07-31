@@ -3,14 +3,10 @@
   "name": "acecore-schools",
   "pages_build_output_dir": "./dist",
   "compatibility_date": "2026-06-07",
-  "ai": {
-    "binding": "AI",
-    "remote": true,
-  },
   "vectorize": [
     {
       "binding": "SEARCH_INDEX",
-      "index_name": "acecore-schools-search-preview",
+      "index_name": "acecore-schools-search-openai-1536-preview",
       "remote": true,
     },
   ],
@@ -29,17 +25,15 @@
     "ALLOWED_ORIGINS": "https://acecore-schools.pages.dev,https://acecore.net",
     "SEARCH_ENABLED": "false",
     "SEARCH_MIN_SCORE": "0.50",
+    "OPENAI_EMBEDDING_MODEL": "text-embedding-3-large",
+    "OPENAI_EMBEDDING_DIMENSIONS": "1536",
   },
   "env": {
     "preview": {
-      "ai": {
-        "binding": "AI",
-        "remote": true,
-      },
       "vectorize": [
         {
           "binding": "SEARCH_INDEX",
-          "index_name": "acecore-schools-search-preview",
+          "index_name": "acecore-schools-search-openai-1536-preview",
           "remote": true,
         },
       ],
@@ -56,18 +50,17 @@
         "ACECORE_NET_URL": "https://acecore.net",
         "PUBLIC_APP_URL": "https://acecore-schools.pages.dev",
         "ALLOWED_ORIGINS": "https://acecore-schools.pages.dev,https://acecore.net",
-        "SEARCH_ENABLED": "true",
+        "SEARCH_ENABLED": "false",
         "SEARCH_MIN_SCORE": "0.50",
+        "OPENAI_EMBEDDING_MODEL": "text-embedding-3-large",
+        "OPENAI_EMBEDDING_DIMENSIONS": "1536",
       },
     },
     "production": {
-      "ai": {
-        "binding": "AI",
-      },
       "vectorize": [
         {
           "binding": "SEARCH_INDEX",
-          "index_name": "acecore-schools-search-production",
+          "index_name": "acecore-schools-search-openai-1536-production",
         },
       ],
       "d1_databases": [
@@ -82,8 +75,10 @@
         "ACECORE_NET_URL": "https://acecore.net",
         "PUBLIC_APP_URL": "https://schools.acecore.net",
         "ALLOWED_ORIGINS": "https://schools.acecore.net,https://acecore.net",
-        "SEARCH_ENABLED": "true",
+        "SEARCH_ENABLED": "false",
         "SEARCH_MIN_SCORE": "0.50",
+        "OPENAI_EMBEDDING_MODEL": "text-embedding-3-large",
+        "OPENAI_EMBEDDING_DIMENSIONS": "1536",
       },
     },
   },
