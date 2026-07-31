@@ -46,6 +46,40 @@ export const schoolsContent = {
     noscript:
       "サイト内検索にはJavaScriptが必要です。各ページはメニューから確認できます。",
   },
+  aiChat: {
+    title: "Schools AI案内",
+    lead: "公開情報をもとに、学びや受講方法をご案内します。",
+    toggleLabel: "AIに相談",
+    open: "Schools AI案内を開く",
+    close: "Schools AI案内を閉じる",
+    greeting:
+      "こんにちは。Acecore Schoolsで学べること、料金、受講方法などをご案内します。個別の判断が必要な内容は、無料相談をご利用ください。",
+    quickPromptLabel: "よくある質問",
+    quickPrompts: [
+      "学べる内容を知りたい",
+      "料金や受講方法を知りたい",
+      "無料相談の進め方を知りたい",
+    ],
+    inputLabel: "Schoolsについて質問する",
+    placeholder: "例：高卒認定とIT学習を一緒に進められますか？",
+    inputHint: "Enterで送信、Shift+Enterで改行",
+    send: "送信",
+    loading: "公開情報を確認しています…",
+    contactLabel: "人への相談窓口",
+    contactForm: "問い合わせフォーム",
+    line: "LINEで無料相談",
+    privacyBefore:
+      "入力内容は回答生成のためAcecoreのAI機能へ送信され、この画面の履歴はページを開いている間だけ保持します。個人情報・秘密情報は入力しないでください。",
+    privacyLink: "プライバシーポリシー",
+    privacyAfter: "もあわせてご確認ください。",
+    errors: {
+      generic:
+        "AI案内を利用できませんでした。問い合わせフォームまたはLINEをご利用ください。",
+      timeout:
+        "応答に時間がかかっています。少し時間をおいて、もう一度お試しください。",
+      tooLong: "質問は800文字以内で入力してください。",
+    },
+  },
   hero: {
     title: "何のために。",
     lead: "目的から、必要な学びを組み立てる。",
