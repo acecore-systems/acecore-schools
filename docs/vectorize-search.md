@@ -216,6 +216,9 @@ merge順を固定し、後からmergeする側の公開corpusへProductionを再
    `17 * * * *`と成功したscheduled eventを確認できる。
 4. GitHub push deploymentが成功し、Pages deploymentのSource SHAが有効化PRのmerge SHAと
    一致する。Direct UploadはProduction完了条件にしない。
+   Git連携が既存の`main` mergeを取りこぼした場合も、Deploy HookやDirect Uploadで本番完了扱いにせず、
+   実ファイル差分を持つ通常のPRをmergeして`github:push`を再発生させ、公開markerまで検証する。
+   空コミットはrebase mergeで省略されうるため、この再通知の手段にしない。
 5. `schools.acecore.net`のcustom domainがactiveで、TLSが正常である。
 6. `/api/health`の`searchEnabled`が`true`で、desktop/mobileの公開UI、既知query、結果リンクを
    実ブラウザで確認する。
