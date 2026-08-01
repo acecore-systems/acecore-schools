@@ -521,6 +521,7 @@ export const schoolsContent = {
 
 export const schoolsOrigin = "https://schools.acecore.net";
 export const acecoreOrigin = "https://acecore.net";
+export const acecoreLegalName = "株式会社Acecore";
 export const acecoreContactUrl =
   "https://acecore.net/contact/?category=service&service=education#contact-form";
 export const lineUrl = "https://lin.ee/DjIrdqj";

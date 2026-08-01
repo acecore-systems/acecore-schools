@@ -6,6 +6,7 @@ import SearchPanel from "./SearchPanel.astro";
 import SchoolsAiChat from "./SchoolsAiChat.astro";
 import {
   acecoreContactUrl,
+  acecoreLegalName,
   acecoreOrigin,
   lineUrl,
   schoolsContent,
@@ -185,6 +186,7 @@ const jsonLdGraph: Record<string, unknown>[] = [
     parentOrganization: {
       "@type": "Organization",
       name: "Acecore",
+      legalName: acecoreLegalName,
       url: acecoreOrigin,
     },
   },
@@ -1009,7 +1011,7 @@ const homeOverview = [
             <a href="/">Schools</a>
           </div>
           <p>{content.footer.tagline}</p>
-          <small>運営：Acecore</small>
+          <small>運営：{acecoreLegalName}</small>
         </div>
         <div class="footer-nav-grid">
           <nav aria-label="Schools メニュー">
@@ -1045,7 +1047,7 @@ const homeOverview = [
         </div>
       </div>
       <div class="footer-bottom page-shell">
-        <span>© {currentYear} Acecore</span>
+        <span>© {currentYear} {acecoreLegalName}</span>
         <span>Acecore Schools</span>
       </div>
     </footer>
