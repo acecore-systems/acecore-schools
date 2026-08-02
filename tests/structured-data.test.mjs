@@ -59,28 +59,19 @@ test("EventCompletedの再混入を拒否する", () => {
   assert.match(result.failures[0], /EventCompleted/u);
 });
 
-test("終了済み記録はeventStatusを省略できる", () => {
+test("終了済みの活動記録はArticleとして残し、Eventを出力しない", () => {
   const result = auditStructuredDataHtml(
     htmlWithStructuredData({
       "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "Event",
-          startDate: "2023-08-20T14:00:00+09:00",
-          endDate: "2023-08-20T15:30:00+09:00",
-        },
-        {
-          "@type": "Event",
-          startDate: "2023-08-27T14:00:00+09:00",
-          endDate: "2023-08-27T15:30:00+09:00",
-        },
-      ],
+      "@type": "Article",
+      headline: "2023年夏のロボット工作体験",
     }),
     { source: "past-events.html" },
   );
 
-  assert.equal(result.eventNodes, 2);
+  assert.equal(result.eventNodes, 0);
   assert.equal(result.eventStatuses, 0);
+  assert.equal(result.articleNodes, 1);
   assert.deepEqual(result.failures, []);
 });
 
@@ -94,11 +85,18 @@ test("不正なJSON-LDを拒否する", () => {
   assert.match(result.failures[0], /JSON-LD script/u);
 });
 
-test("活動記録ページに移管した2件のEventを必須にする", () => {
-  assert.deepEqual(validateWorkshopStructuredData({ eventNodes: 2 }), []);
+test("終了済み活動記録にはArticleのみを必須にする", () => {
+  assert.deepEqual(
+    validateWorkshopStructuredData({ eventNodes: 0, articleNodes: 1 }),
+    [],
+  );
   assert.match(
-    validateWorkshopStructuredData({ eventNodes: 1 })[0],
-    /expected 2 Event nodes/u,
+    validateWorkshopStructuredData({ eventNodes: 1, articleNodes: 1 })[0],
+    /expected 0 Event nodes/u,
+  );
+  assert.match(
+    validateWorkshopStructuredData({ eventNodes: 0, articleNodes: 0 })[0],
+    /expected 1 Article node/u,
   );
   assert.match(
     validateWorkshopStructuredData()[0],

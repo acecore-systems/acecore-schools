@@ -11,20 +11,28 @@ export const OFFICIAL_EVENT_STATUS_TYPES = new Set([
 ]);
 export const WORKSHOP_ACTIVITY_OUTPUT =
   "activities/2023-summer-robot-workshop/index.html";
-export const WORKSHOP_EVENT_COUNT = 2;
+export const WORKSHOP_EVENT_NODE_COUNT = 0;
+export const WORKSHOP_ARTICLE_NODE_COUNT = 1;
 
 export function validateWorkshopStructuredData(result) {
   if (!result) {
     return [`${WORKSHOP_ACTIVITY_OUTPUT}: built activity page is missing`];
   }
 
-  if (result.eventNodes !== WORKSHOP_EVENT_COUNT) {
-    return [
-      `${WORKSHOP_ACTIVITY_OUTPUT}: expected ${WORKSHOP_EVENT_COUNT} Event nodes, found ${result.eventNodes}`,
-    ];
+  const failures = [];
+  if (result.eventNodes !== WORKSHOP_EVENT_NODE_COUNT) {
+    failures.push(
+      `${WORKSHOP_ACTIVITY_OUTPUT}: expected ${WORKSHOP_EVENT_NODE_COUNT} Event nodes for a past activity record, found ${result.eventNodes}`,
+    );
   }
 
-  return [];
+  if (result.articleNodes !== WORKSHOP_ARTICLE_NODE_COUNT) {
+    failures.push(
+      `${WORKSHOP_ACTIVITY_OUTPUT}: expected ${WORKSHOP_ARTICLE_NODE_COUNT} Article node, found ${result.articleNodes}`,
+    );
+  }
+
+  return failures;
 }
 
 async function listHtmlFiles(directory) {
@@ -55,11 +63,16 @@ function isEventType(type) {
   return type === "Event" || type === "https://schema.org/Event";
 }
 
+function isArticleType(type) {
+  return type === "Article" || type === "https://schema.org/Article";
+}
+
 export function auditStructuredDataHtml(html, { source = "unknown" } = {}) {
   const failures = [];
   let structuredDataScripts = 0;
   let eventNodes = 0;
   let eventStatuses = 0;
+  let articleNodes = 0;
   const scripts = html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi);
 
   for (const [index, script] of [...scripts].entries()) {
@@ -105,6 +118,8 @@ export function auditStructuredDataHtml(html, { source = "unknown" } = {}) {
         }
       }
 
+      if (types.some(isArticleType)) articleNodes += 1;
+
       for (const [key, child] of Object.entries(value)) {
         visit(child, `${jsonPath}.${key}`);
       }
@@ -117,6 +132,7 @@ export function auditStructuredDataHtml(html, { source = "unknown" } = {}) {
     structuredDataScripts,
     eventNodes,
     eventStatuses,
+    articleNodes,
     failures,
   };
 }
@@ -134,6 +150,7 @@ export async function auditBuiltStructuredData({
     structuredDataScripts: 0,
     eventNodes: 0,
     eventStatuses: 0,
+    articleNodes: 0,
     failures: [],
   };
   const resultsBySource = new Map();
@@ -146,6 +163,7 @@ export async function auditBuiltStructuredData({
     totals.structuredDataScripts += result.structuredDataScripts;
     totals.eventNodes += result.eventNodes;
     totals.eventStatuses += result.eventStatuses;
+    totals.articleNodes += result.articleNodes;
     totals.failures.push(...result.failures);
   }
   totals.failures.push(
