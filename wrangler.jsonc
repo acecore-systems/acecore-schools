@@ -12,6 +12,12 @@
       "remote": true,
     },
   ],
+  "services": [
+    {
+      "binding": "ACECORE_CHAT",
+      "service": "acecore-chat-worker",
+    },
+  ],
   "vars": {
     "ACECORE_NET_URL": "https://acecore.net",
     "PUBLIC_APP_URL": "https://acecore-schools.pages.dev",
@@ -30,6 +36,12 @@
           "database_id": "60908c5d-897e-4d17-9b17-2632ac4fde14",
           "migrations_dir": "./migrations/search",
           "remote": true,
+        },
+      ],
+      "services": [
+        {
+          "binding": "ACECORE_CHAT",
+          "service": "acecore-chat-worker-preview",
         },
       ],
       "vars": {
@@ -55,6 +67,12 @@
           "database_name": "acecore-schools-search-production",
           "database_id": "60908c5d-897e-4d17-9b17-2632ac4fde14",
           "migrations_dir": "./migrations/search",
+        },
+      ],
+      "services": [
+        {
+          "binding": "ACECORE_CHAT",
+          "service": "acecore-chat-worker",
         },
       ],
       "vars": {
