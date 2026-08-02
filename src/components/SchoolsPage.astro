@@ -255,29 +255,6 @@ if (page === "faq") {
 }
 
 if (page === "activity") {
-  const eventIds = content.activityRecord.eventDates.map(
-    (_, index) => `${canonicalUrl}#event-${index + 1}`,
-  );
-
-  content.activityRecord.eventDates.forEach((eventDate, index) => {
-    jsonLdGraph.push({
-      "@type": "Event",
-      "@id": eventIds[index],
-      name: `${content.activityRecord.title}（${eventDate.label}）`,
-      description: content.activityRecord.description,
-      image: pageHeroImageUrl,
-      url: eventIds[index],
-      startDate: eventDate.startDate,
-      endDate: eventDate.endDate,
-      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-      location: {
-        "@type": "Place",
-        name: content.activityRecord.locationName,
-      },
-      organizer: { "@id": organizationId },
-    });
-  });
-
   jsonLdGraph.push({
     "@type": "Article",
     "@id": activityArticleId,
@@ -289,10 +266,10 @@ if (page === "activity") {
     dateModified: content.activityRecord.modifiedAt,
     inLanguage: "ja",
     isPartOf: { "@id": websiteId },
+    articleSection: "活動記録",
     mainEntityOfPage: { "@id": webpageId },
     author: { "@id": organizationId },
     publisher: { "@id": organizationId },
-    about: eventIds.map((eventId) => ({ "@id": eventId })),
   });
 }
 

@@ -330,18 +330,6 @@ export const schoolsContent = {
     locationName: "桜台市民センター 3階 講座室2",
     publishedAt: "2023-07-19",
     modifiedAt: "2026-07-30",
-    eventDates: [
-      {
-        label: "2023年8月20日",
-        startDate: "2023-08-20T14:00:00+09:00",
-        endDate: "2023-08-20T15:30:00+09:00",
-      },
-      {
-        label: "2023年8月27日",
-        startDate: "2023-08-27T14:00:00+09:00",
-        endDate: "2023-08-27T15:30:00+09:00",
-      },
-    ],
     facts: [
       { label: "対象", value: "小学生〜中学生（幼児は相談）" },
       {
