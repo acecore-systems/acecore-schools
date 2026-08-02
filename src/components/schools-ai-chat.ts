@@ -274,8 +274,7 @@ export function initSchoolsAiChat(root: HTMLElement): void {
   }
 
   root.dataset.initialized = "true";
-  const endpoint =
-    root.dataset.endpoint || "https://acecore.net/api/ai-contact";
+  const endpoint = root.dataset.endpoint || "/api/ai-chat";
   const greeting = root.dataset.greeting || "";
   const loadingText = root.dataset.loading || "回答を確認しています…";
   const genericError = root.dataset.error || "AI案内を利用できません。";

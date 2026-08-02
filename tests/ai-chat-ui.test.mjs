@@ -104,10 +104,7 @@ test("全ページの共通layoutへ安全な中央AI案内を組み込む", asy
     readFile(new URL("../src/data/schools.ts", import.meta.url), "utf8"),
   ]);
 
-  assert.match(
-    component,
-    /data-endpoint="https:\/\/acecore\.net\/api\/ai-contact"/u,
-  );
+  assert.match(component, /data-endpoint="\/api\/ai-chat"/u);
   assert.match(component, /role="dialog"/u);
   assert.match(component, /aria-modal="false"/u);
   assert.match(component, /aria-live="polite"/u);

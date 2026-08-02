@@ -2,7 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
 const DIST_DIRECTORY = path.resolve("dist");
-const API_ENDPOINT = "https://acecore.net/api/ai-contact";
+const API_ENDPOINT = "/api/ai-chat";
 
 async function listHtmlFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
