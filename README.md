@@ -38,7 +38,9 @@ healthに連動した検索UIは維持します。
 client keyはCloudflare Pagesの暗号化secretでHMAC化し、期限切れD1行は検索処理と毎時の
 maintenance Workerで削除します。
 構成、同期手順、監視、費用の上限試算、rollbackは
-[`docs/vectorize-search.md`](docs/vectorize-search.md)を参照してください。
+[Vectorize検索運用](docs/04_運用設計/01_Vectorize検索運用.md)を参照してください。
+
+設計文書の入口は [docs/README.md](docs/README.md) です。
 
 予約用の`SCHOOLS_DB`はまだ作成していません。検索専用の`SEARCH_RATE_LIMIT_DB`と、将来の
 予約データベースは責務を分離します。
