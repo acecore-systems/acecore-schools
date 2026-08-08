@@ -1,4 +1,4 @@
-# Cloudflare Vectorize semantic search
+# Vectorize検索運用
 
 Acecore Schools の公開ページを、日本語の自然文から探すための検索基盤です。予約、問い合わせ、
 会員情報は索引へ含めません。同一 origin の`POST /api/search`、公開検索 UI、安全な同期経路、
