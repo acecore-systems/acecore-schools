@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from "node:url";
 
 const astroPrerenderEntry = fileURLToPath(
@@ -27,6 +28,7 @@ export default defineConfig({
     }),
   ],
   vite: {
+    plugins: [tailwindcss()],
     resolve: {
       alias: {
         "astro/entrypoints/prerender": astroPrerenderEntry,

@@ -16,6 +16,7 @@
     "test:search": "node --experimental-strip-types --test tests/ai-chat-ui.test.mjs tests/deployment-marker.test.mjs tests/health-api.test.mjs tests/network-search-client.test.mjs tests/search-api.test.mjs tests/search-corpus.test.mjs tests/search-maintenance.test.mjs tests/vectorize-sync.test.mjs tests/vectorize-workflow.test.mjs",
     "test:ai-chat": "node --experimental-strip-types --test tests/ai-chat-ui.test.mjs",
     "test:structured-data": "node --test tests/structured-data.test.mjs",
+    "test:ui-foundation": "node --test tests/tailwind-ui-foundation.test.mjs",
     "sync:vectorize": "node scripts/sync-vectorize.mjs",
     "sync:vectorize:dry-run": "node scripts/sync-vectorize.mjs --dry-run",
     "write:build-meta": "node scripts/write-build-meta.mjs",
@@ -33,9 +34,11 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20260804.1",
+    "@tailwindcss/vite": "^4.3.3",
     "pagefind": "^1.5.2",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "wrangler": "^4.119.0"
   },
