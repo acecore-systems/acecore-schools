@@ -26,6 +26,9 @@
   --color-error-action: #0f766e;
   --font-sans:
     "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  --font-error:
+    Inter, "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
   --font-serif: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
   --shadow-card: 0 18px 44px rgba(20, 50, 73, 0.09);
   --shadow-focus: 0 0 0 2px var(--color-paper), 0 0 0 6px var(--color-green);
