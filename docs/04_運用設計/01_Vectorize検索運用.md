@@ -6,20 +6,19 @@ Acecore Schools の公開ページを、日本語の自然文から探すため�
 
 ## Current rollout state
 
-| Environment | Vectorize index                                 | Search D1                           | Index state | Search |
-| ----------- | ----------------------------------------------- | ----------------------------------- | ----------- | ------ |
-| Preview     | bindingなし                                     | `acecore-schools-search-production` | 対象外      | OFF    |
-| Production  | `acecore-schools-search-openai-1536-production` | `acecore-schools-search-production` | 7件同期済み | ON     |
+| Environment | Vectorize index                                    | Search D1                           | Index state  | Search |
+| ----------- | -------------------------------------------------- | ----------------------------------- | ------------ | ------ |
+| Preview     | bindingなし                                        | `acecore-schools-search-production` | 対象外       | OFF    |
+| Production  | `acecore-schools-search-bge-m3-1024-production-v1` | `acecore-schools-search-production` | 全件同期対象 | ON     |
 
 Pages PreviewはVectorizeを利用せず、静的ページと既存ナビゲーションを確認する環境です。
-2026-07-31のProduction run `30599692065`でmain corpus 7件を1536次元indexへ同期し、
-1536 dimensions / cosine、vector件数7、`ja` namespaceのqueryを照合済みです。
+旧OpenAI用1536次元indexは2026-07-31のProduction run `30599692065`でmain corpus 7件へ同期したrollback資産です。BGE-M3用indexの完了判定には使いません。
 Productionの`SEARCH_ENABLED=true`を維持します。
 
 2026-07-30に検索用D1へmigration `0001`〜`0003`を適用し、当時のcorpusを旧BGE-M3用の
-検索基盤へ収束させました。この実績は新しい1536次元indexへ引き継ぎません。
+検索基盤へ収束させました。この実績は今回の新しいBGE-M3用1024次元indexへ引き継ぎません。
 同日、公開routeを持たない`acecore-schools-search-maintenance`をdeployし、cron `17 * * * *`を
-Cloudflare APIで確認しました。旧BGE-M3用1024次元indexはrollback確認が終わるまで削除しません。
+Cloudflare APIで確認しました。旧index `acecore-schools-search-production` は参照しませんが削除せず、今回の即時rollbackには直前のOpenAI用1536次元indexを使います。
 
 その後の本文追加でmain corpusが7件になったため、`.github/workflows/sync-vectorize.yml`は
 Productionをmain push直後と6時間ごとに公開buildへ再収束させ、手動再実行にも対応します。
@@ -32,9 +31,9 @@ Productionをmain push直後と6時間ごとに公開buildへ再収束させ、�
    `.vectorize/corpus.json` を生成します。
 3. `scripts/write-build-meta.mjs`がGitHub連携Pagesから渡されるcommitとcorpus identityを
    `/.well-known/acecore-schools-build.json`へ出力します。
-4. `scripts/sync-vectorize.mjs` が OpenAI Embeddings API の `text-embedding-3-large`へ
-   `dimensions: 1536`を指定してembeddingを生成し、`ja` namespaceへupsertします。
-5. `/api/search` が同じモデルで質問を embedding し、Vectorize の cosine 類似検索結果を
+4. `scripts/sync-vectorize.mjs` が Cloudflare Workers AI の `@cf/baai/bge-m3`で
+   1024次元embeddingを生成し、`ja` namespaceへupsertします。
+5. `/api/search` がネイティブ `AI` bindingの同じモデルで質問を embedding し、Vectorize の cosine 類似検索結果を
    最大5ページへ正規化します。
 6. D1 がクライアント10回/分、全体20回/分を1 SQL statementで同時判定し、片方が上限なら
    client・globalのどちらも増やしません。
@@ -65,7 +64,7 @@ const payload = await response.json();
 ```
 
 成功時は`results`にroot-relative URL、title、section、excerpt、contentType、rankを返します。
-質問本文はlogへ残しません。キルスイッチ、OpenAI API key、D1、OpenAI、Vectorizeのいずれかが
+質問本文はlogへ残しません。キルスイッチ、Workers AI binding、D1、Vectorizeのいずれかが
 利用できなければfail closedし、検索結果を推測で返しません。
 
 検索UIは`GET /api/health`の`searchEnabled`が`true`のときだけ導線とフォームを表示します。
@@ -75,14 +74,13 @@ const payload = await response.json();
 
 `wrangler.jsonc` は公開可能な Cloudflare Pages 設定の source of truth です。Vectorize bindingは
 Productionだけに置き、top-levelとPreviewには置きません。D1とvarsはenvironment間で暗黙継承
-されないため、必要な環境へ明示しています。`OPENAI_API_KEY`と`SEARCH_RATE_LIMIT_SECRET`は
-repositoryへ値を置かず、Production Pagesの暗号化secret bindingとして設定します。
+されないため、必要な環境へ明示しています。`SEARCH_RATE_LIMIT_SECRET`はrepositoryへ値を置かず、Production Pagesの暗号化secret bindingとして設定します。検索embeddingにOpenAI keyは使用しません。
 
 | Binding                       | Purpose                                        |
 | ----------------------------- | ---------------------------------------------- |
-| `OPENAI_API_KEY`              | OpenAI project service-account key             |
-| `OPENAI_EMBEDDING_MODEL`      | Fixed embedding model identity                 |
-| `OPENAI_EMBEDDING_DIMENSIONS` | Fixed Vectorize-compatible dimensions          |
+| `AI`                          | Production-only Workers AI binding             |
+| `SEARCH_EMBEDDING_MODEL`      | Fixed embedding model identity                 |
+| `SEARCH_EMBEDDING_DIMENSIONS` | Fixed Vectorize-compatible dimensions          |
 | `SEARCH_INDEX`                | Production-only Vectorize index                |
 | `SEARCH_RATE_LIMIT_DB`        | Rate limits and hourly search metrics          |
 | `SEARCH_RATE_LIMIT_SECRET`    | Encrypted HMAC key for pseudonymous client key |
@@ -137,23 +135,20 @@ environmentを確認してから承認してください。
 
 ## Environment sync
 
-同期には、対象CloudflareアカウントのVectorize Read／Writeだけに限定したAPI tokenと、
-Schools専用OpenAI projectのservice-account keyを別々に使います。どちらもログ、引数、
-repositoryへ残さないでください。
+同期には、対象CloudflareアカウントのWorkers AI ReadとVectorize Read／Writeだけに限定したAPI tokenを使います。値はログ、引数、repositoryへ残さないでください。
 
 ```powershell
 $env:CLOUDFLARE_ACCOUNT_ID = "<account-id>"
 $env:CLOUDFLARE_API_TOKEN = "<scoped-token>"
-$env:OPENAI_API_KEY = "<schools-project-key>"
-$env:VECTORIZE_INDEX_NAME = "acecore-schools-search-openai-1536-production"
+$env:VECTORIZE_INDEX_NAME = "acecore-schools-search-bge-m3-1024-production-v1"
 npm run sync:vectorize
 ```
 
 GitHub Actionsでは次のEnvironmentをmain限定で作成し、同名のsecretへProduction tokenを保存します。
 
-| GitHub Environment                     | Secrets                                                            |
-| -------------------------------------- | ------------------------------------------------------------------ |
-| `cloudflare-schools-search-production` | `CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN`, `OPENAI_API_KEY` |
+| GitHub Environment                     | Secrets                                          |
+| -------------------------------------- | ------------------------------------------------ |
+| `cloudflare-schools-search-production` | `CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN` |
 
 Productionのpush／schedule自動同期はrepository variable
 `SCHOOLS_VECTORIZE_SYNC_ENABLED=true`の場合だけ起動します。手動Production dispatchは
@@ -173,7 +168,7 @@ checkoutし、artifactのSHA-256とcorpus versionを再検証してから、そ�
 または削除が既存vectorの20%を超える場合は変更前に停止します。upsert/delete 後は
 `processedUpToMutation` を待ち、最終ID集合の一致を検証します。既存vectorのID、namespace、
 metadata内の本文・metadata・embedding／chunk設定digestがcorpusとすべて一致する場合はno-opとし、
-OpenAIとmutationを呼びません。一致しない場合はcorpus全件をupsertして、本文・metadata・
+Workers AIとmutationを呼びません。一致しない場合はcorpus全件をupsertして、本文・metadata・
 namespace・embeddingをreview済み入力へ戻します。List Vectors APIへ送るquery parameterは
 公式仕様の`count`と`cursor`だけです。namespaceは各vectorの書き込みとqueryで`ja`を指定します。
 
@@ -193,19 +188,17 @@ GitHubのrun情報、対象index、corpus version、no-op、mutation ID、件数
 ## Production gate
 
 Production 同期は通常の同期コマンドでは実行できません。Production indexが
-1536 dimensions / cosineであること、Production D1 migration、corpus件数を再確認し、
+1024 dimensions / cosineであること、Production D1 migration、corpus件数を再確認し、
 GitHub Actionsのmanual dispatchまたは有効化済みのpush／scheduleから実行します。同期scriptも
 公開markerと一致したcorpus versionそのものを確認値として要求します。2026-07-30の6件upsert、
-0件deleteは旧BGE-M3用indexの証跡であり、新しい1536次元indexの収束証跡として扱いません。
-新しいindexは2026-07-31のProduction run `30599692065`でmain corpus 7件へ収束させ、
-vector件数と`ja` namespace queryを確認しました。
+0件deleteは旧indexの証跡であり、新しいBGE-M3用1024次元indexの収束証跡として扱いません。
 
 検索対象のHTML・`src/data/`・corpus生成処理を変更するPRは、merge前にcorpus buildとdry-runを
 行い、merge後に公開されたcommitをProductionへ同期します。別の本文変更PRが同時に開いている場合は
 merge順を固定し、後からmergeする側の公開corpusへProductionを再収束させます。同期完了をPagesの
 公開内容と独立して確認します。
 
-新しい1536次元Production indexの同期とQA証跡を確認したため、Productionの
+新しい1024次元Production indexの同期とQA証跡を確認した後、Productionの
 `SEARCH_ENABLED=true`を維持します。Previewは`SEARCH_ENABLED=false`かつVectorize bindingなしです。
 リリース完了判定は次をすべて満たした状態です。
 
@@ -279,20 +272,17 @@ ORDER BY hour_start DESC, outcome, stage;
 ```
 
 Pages dashboardではrequest、invocation status、CPU time、durationを最大3か月確認できます。リリース時は
-HTTP 5xx、`provider_error`／`internal_error`、0件率、平均・最大latency、OpenAI input tokens、
+HTTP 5xx、`provider_error`／`internal_error`、0件率、平均・最大latency、Workers AI input tokens、
 Vectorize queried dimensions、D1 rows writtenを一緒に確認します。
 
 ## Cost guardrails
 
-`text-embedding-3-large`は100万input tokenあたり$0.13です。`dimensions: 1536`はOpenAI側で
-短縮して受け取り、Vectorizeの1536次元上限に合わせます。VectorizeはFreeで月3,000万
+`@cf/baai/bge-m3`は100万input tokenあたり$0.012です。1024次元のdense vectorをそのままVectorizeへ保存します。VectorizeはFreeで月3,000万
 queried dimensions／500万stored dimensions、Paidで最初の5,000万／1,000万が含まれます。
-保存量7件なら`7 vectors × 1,536 dimensions = 10,752 stored dimensions`です。
+保存量7件なら`7 vectors × 1,024 dimensions = 7,168 stored dimensions`です。
 
 全体上限20検索/分が30日間続く仮定では、最大864,000 query、約1,327.1 million queried
-dimensionsです。Paidのincluded分を超えるVectorize query費用は現行単価で約$12.77/月です。
-OpenAI embedding費用は`月間input token ÷ 1,000,000 × $0.13`で、平均40 token/queryなら
-約$4.49/月、平均100 token/queryなら約$11.23/月です。いずれも上限からの試算であり実績では
+dimensionsです。BGE-M3 embedding費用は`月間input token ÷ 1,000,000 × $0.012`で計算します。いずれも上限からの試算であり実績では
 ありません。
 
 client/global判定は1 statementで、許可時だけ2行をinsert/updateします。global上限後に新しいIPを
@@ -306,11 +296,11 @@ Functions requests、D1 rows read、WAFイベントも監視します。急増�
 - [Vectorize introduction](https://developers.cloudflare.com/vectorize/get-started/intro/)
 - [Vectorize limits](https://developers.cloudflare.com/vectorize/platform/limits/)
 - [Vectorize client API](https://developers.cloudflare.com/vectorize/reference/client-api/)
-- [OpenAI text-embedding-3-large](https://developers.openai.com/api/docs/models/text-embedding-3-large)
+- [Workers AI BGE-M3](https://developers.cloudflare.com/workers-ai/models/bge-m3/)
 - [Pages Functions bindings](https://developers.cloudflare.com/pages/functions/bindings/)
 - [Pages Wrangler configuration](https://developers.cloudflare.com/pages/functions/wrangler-configuration/)
 - [Pages Functions metrics](https://developers.cloudflare.com/pages/functions/metrics/)
 - [Pages Functions logging](https://developers.cloudflare.com/pages/functions/debugging-and-logging/)
-- [OpenAI API pricing](https://openai.com/api/pricing/)
+- [Workers AI pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/)
 - [Vectorize pricing](https://developers.cloudflare.com/vectorize/platform/pricing/)
 - [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/)

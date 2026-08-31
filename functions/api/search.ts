@@ -1,10 +1,7 @@
 import { getSafeInternalUrl } from "../../src/scripts/search-url-safety.ts";
 
-const EMBEDDING_MODEL = "text-embedding-3-large";
-const EMBEDDING_DIMENSIONS = 1536;
-const OPENAI_EMBEDDINGS_ENDPOINT = "https://api.openai.com/v1/embeddings";
-const OPENAI_TIMEOUT_MS = 8_000;
-const MAX_OPENAI_RESPONSE_BYTES = 256 * 1024;
+const EMBEDDING_MODEL = "@cf/baai/bge-m3";
+const EMBEDDING_DIMENSIONS = 1024;
 const SEARCH_LOCALE = "ja";
 const DEFAULT_MIN_SCORE = 0.5;
 const MAX_REQUEST_BYTES = 2048;
@@ -125,18 +122,17 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
       return errorResponse("unsupported_media_type", 415, requestId, startedAt);
     }
 
-    const openAiApiKey = env.OPENAI_API_KEY;
+    const ai = env.AI;
     const searchIndex = env.SEARCH_INDEX;
     const rateLimitDatabase = env.SEARCH_RATE_LIMIT_DB;
     const rateLimitSecret = env.SEARCH_RATE_LIMIT_SECRET;
-    const embeddingModel = env.OPENAI_EMBEDDING_MODEL || EMBEDDING_MODEL;
+    const embeddingModel = env.SEARCH_EMBEDDING_MODEL || EMBEDDING_MODEL;
     const embeddingDimensions = Number(
-      env.OPENAI_EMBEDDING_DIMENSIONS || EMBEDDING_DIMENSIONS,
+      env.SEARCH_EMBEDDING_DIMENSIONS || EMBEDDING_DIMENSIONS,
     );
     if (
       String(env.SEARCH_ENABLED) !== "true" ||
-      typeof openAiApiKey !== "string" ||
-      !openAiApiKey.trim() ||
+      !ai ||
       embeddingModel !== EMBEDDING_MODEL ||
       embeddingDimensions !== EMBEDDING_DIMENSIONS ||
       !searchIndex ||
@@ -253,12 +249,7 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
 
     let embedding: number[];
     try {
-      embedding = await createOpenAiEmbedding({
-        apiKey: openAiApiKey,
-        query,
-        model: embeddingModel,
-        dimensions: embeddingDimensions,
-      });
+      embedding = await createWorkersAiEmbedding(ai, query);
     } catch (error) {
       logSearchError(
         requestId,
@@ -622,127 +613,47 @@ function normalizeMinScore(value: string | undefined): number {
     : DEFAULT_MIN_SCORE;
 }
 
-async function createOpenAiEmbedding({
-  apiKey,
-  query,
-  model,
-  dimensions,
-}: {
-  apiKey: string;
-  query: string;
-  model: string;
-  dimensions: number;
-}): Promise<number[]> {
-  const timeoutController = new AbortController();
-  const timeout = setTimeout(
-    () => timeoutController.abort(),
-    OPENAI_TIMEOUT_MS,
-  );
-
+async function createWorkersAiEmbedding(
+  ai: Ai,
+  query: string,
+): Promise<number[]> {
+  let payload: unknown;
   try {
-    let response: Response;
-    try {
-      response = await fetch(OPENAI_EMBEDDINGS_ENDPOINT, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model,
-          input: [query],
-          dimensions,
-          encoding_format: "float",
-        }),
-        signal: timeoutController.signal,
-      });
-    } catch (error) {
-      throw new EmbeddingProviderError(
-        timeoutController.signal.aborted ||
-          (error instanceof Error && error.name === "AbortError")
-          ? "timeout"
-          : "network_error",
-      );
-    }
-
-    if (!response.ok) {
-      await response.body?.cancel().catch(() => undefined);
-      throw new EmbeddingProviderError(`http_${response.status}`);
-    }
-
-    const payload = await readBoundedOpenAiJson(response);
-    const embedding = extractOpenAiEmbedding(payload, dimensions);
-    if (!embedding) {
-      throw new EmbeddingProviderError("invalid_embedding");
-    }
-    return embedding;
-  } finally {
-    clearTimeout(timeout);
+    payload = await ai.run(EMBEDDING_MODEL, {
+      text: [query],
+      truncate_inputs: false,
+    });
+  } catch (error) {
+    throw new EmbeddingProviderError(getErrorCode(error, "provider_error"));
   }
-}
 
-async function readBoundedOpenAiJson(response: Response): Promise<unknown> {
-  const declaredLength = Number(response.headers.get("Content-Length"));
+  if (!isJsonObject(payload) || !Array.isArray(payload.data)) {
+    throw new EmbeddingProviderError("invalid_embedding");
+  }
+  if (payload.data.length !== 1 || !Array.isArray(payload.data[0])) {
+    throw new EmbeddingProviderError("invalid_embedding");
+  }
+  const values = payload.data[0];
   if (
-    Number.isFinite(declaredLength) &&
-    declaredLength > MAX_OPENAI_RESPONSE_BYTES
+    values.length !== EMBEDDING_DIMENSIONS ||
+    !values.every(
+      (value): value is number =>
+        typeof value === "number" && Number.isFinite(value),
+    )
   ) {
-    await response.body?.cancel().catch(() => undefined);
-    throw new EmbeddingProviderError("response_too_large");
+    throw new EmbeddingProviderError("invalid_embedding");
   }
-
-  const reader = response.body?.getReader();
-  if (!reader) {
-    throw new EmbeddingProviderError("invalid_json");
-  }
-
-  const decoder = new TextDecoder();
-  let bytesRead = 0;
-  let text = "";
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      bytesRead += value.byteLength;
-      if (bytesRead > MAX_OPENAI_RESPONSE_BYTES) {
-        await reader.cancel().catch(() => undefined);
-        throw new EmbeddingProviderError("response_too_large");
-      }
-      text += decoder.decode(value, { stream: true });
-    }
-    text += decoder.decode();
-  } finally {
-    reader.releaseLock();
-  }
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new EmbeddingProviderError("invalid_json");
-  }
-}
-
-function extractOpenAiEmbedding(
-  result: unknown,
-  dimensions: number,
-): number[] | null {
-  if (!isJsonObject(result) || result.model !== EMBEDDING_MODEL) return null;
-  const data = result.data;
-  if (!Array.isArray(data) || data.length !== 1 || !isJsonObject(data[0])) {
-    return null;
-  }
-  if (data[0].index !== 0 || !Array.isArray(data[0].embedding)) return null;
-
-  const values = data[0].embedding;
   if (
-    values.length !== dimensions ||
-    values.some((value) => typeof value !== "number" || !Number.isFinite(value))
+    (payload.pooling !== undefined && payload.pooling !== "cls") ||
+    (payload.shape !== undefined &&
+      (!Array.isArray(payload.shape) ||
+        payload.shape.length !== 2 ||
+        payload.shape[0] !== 1 ||
+        payload.shape[1] !== EMBEDDING_DIMENSIONS))
   ) {
-    return null;
+    throw new EmbeddingProviderError("invalid_embedding_contract");
   }
-
-  return values as number[];
+  return values;
 }
 
 function normalizeMatches(

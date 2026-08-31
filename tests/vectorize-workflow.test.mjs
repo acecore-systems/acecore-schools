@@ -116,8 +116,8 @@ test("Pages binding・sync allowlist・workflowをProduction indexへ限定す�
     readFile(syncScriptUrl, "utf8"),
   ]);
 
-  const productionIndex = "acecore-schools-search-openai-1536-production";
-  const previewIndex = "acecore-schools-search-openai-1536-preview";
+  const productionIndex = "acecore-schools-search-bge-m3-1024-production-v1";
+  const previewIndex = "acecore-schools-search-bge-m3-1024-preview";
   assert.match(workflow, new RegExp(productionIndex, "u"));
   assert.match(wrangler, new RegExp(productionIndex, "u"));
   assert.match(syncScript, new RegExp(productionIndex, "u"));
