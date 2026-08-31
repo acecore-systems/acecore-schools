@@ -24,8 +24,8 @@
     "ALLOWED_ORIGINS": "https://acecore-schools.pages.dev,https://acecore.net",
     "SEARCH_ENABLED": "false",
     "SEARCH_MIN_SCORE": "0.50",
-    "OPENAI_EMBEDDING_MODEL": "text-embedding-3-large",
-    "OPENAI_EMBEDDING_DIMENSIONS": "1536",
+    "SEARCH_EMBEDDING_MODEL": "@cf/baai/bge-m3",
+    "SEARCH_EMBEDDING_DIMENSIONS": "1024",
   },
   "env": {
     "preview": {
@@ -50,15 +50,18 @@
         "ALLOWED_ORIGINS": "https://acecore-schools.pages.dev,https://acecore.net",
         "SEARCH_ENABLED": "false",
         "SEARCH_MIN_SCORE": "0.50",
-        "OPENAI_EMBEDDING_MODEL": "text-embedding-3-large",
-        "OPENAI_EMBEDDING_DIMENSIONS": "1536",
+        "SEARCH_EMBEDDING_MODEL": "@cf/baai/bge-m3",
+        "SEARCH_EMBEDDING_DIMENSIONS": "1024",
       },
     },
     "production": {
+      "ai": {
+        "binding": "AI",
+      },
       "vectorize": [
         {
           "binding": "SEARCH_INDEX",
-          "index_name": "acecore-schools-search-openai-1536-production",
+          "index_name": "acecore-schools-search-bge-m3-1024-production-v1",
         },
       ],
       "d1_databases": [
@@ -81,8 +84,8 @@
         "ALLOWED_ORIGINS": "https://schools.acecore.net,https://acecore.net",
         "SEARCH_ENABLED": "true",
         "SEARCH_MIN_SCORE": "0.50",
-        "OPENAI_EMBEDDING_MODEL": "text-embedding-3-large",
-        "OPENAI_EMBEDDING_DIMENSIONS": "1536",
+        "SEARCH_EMBEDDING_MODEL": "@cf/baai/bge-m3",
+        "SEARCH_EMBEDDING_DIMENSIONS": "1024",
       },
     },
   },

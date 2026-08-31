@@ -21,16 +21,6 @@ const embedding = Array.from(
   { length: SEARCH_EMBEDDING_DIMENSIONS },
   () => 0.01,
 );
-const originalOpenAiApiKey = process.env.OPENAI_API_KEY;
-process.env.OPENAI_API_KEY = "openai-key";
-
-test.after(() => {
-  if (originalOpenAiApiKey === undefined) {
-    delete process.env.OPENAI_API_KEY;
-  } else {
-    process.env.OPENAI_API_KEY = originalOpenAiApiKey;
-  }
-});
 
 function vectorId(index) {
   return `schools-v2-${index.toString(16).padStart(48, "0")}`;
@@ -68,7 +58,7 @@ function createCorpus({ vectorCount = 6 } = {}) {
     schemaVersion: 1,
     version,
     embedding: {
-      model: "text-embedding-3-large",
+      model: "@cf/baai/bge-m3",
       dimensions: SEARCH_EMBEDDING_DIMENSIONS,
       metric: "cosine",
     },
@@ -108,7 +98,7 @@ function createSyncFetch(
   initialIds,
   expectedIds,
   {
-    dimensions = 1536,
+    dimensions = 1024,
     existingChunks = [],
     deleteVisibilityDelayLists = 0,
     upsertVisibilityDelayReads = 0,
@@ -192,23 +182,14 @@ function createSyncFetch(
       );
     }
 
-    if (
-      parsedUrl.origin === "https://api.openai.com" &&
-      parsedUrl.pathname === "/v1/embeddings"
-    ) {
+    if (parsedUrl.pathname.endsWith("/ai/run/@cf/baai/bge-m3")) {
       const input = JSON.parse(init.body);
-      assert.equal(init.headers.get("Authorization"), "Bearer openai-key");
-      assert.equal(input.model, "text-embedding-3-large");
-      assert.equal(input.dimensions, 1536);
-      assert.equal(input.encoding_format, "float");
-      return Response.json({
-        object: "list",
-        model: "text-embedding-3-large",
-        data: input.input.map((_, index) => ({
-          object: "embedding",
-          index,
-          embedding,
-        })),
+      assert.equal(init.headers.get("Authorization"), "Bearer token");
+      assert.equal(input.truncate_inputs, false);
+      return cloudflareResponse({
+        data: input.text.map(() => embedding),
+        shape: [input.text.length, 1024],
+        pooling: "cls",
       });
     }
 
@@ -298,27 +279,25 @@ test("ja以外、重複ID、改変versionを拒否する", () => {
   assert.throws(() => validateCorpus(wrongVersion), /version/u);
 });
 
-test("embedding件数・index・1536次元を検証する", () => {
+test("Workers AI embeddingの件数・1024次元・有限値を検証する", () => {
   assert.deepEqual(
-    extractEmbeddingData({ data: [{ index: 0, embedding }] }, 1),
+    extractEmbeddingData(
+      { data: [embedding], shape: [1, 1024], pooling: "cls" },
+      1,
+    ),
     [embedding],
   );
   assert.throws(
-    () => extractEmbeddingData({ data: [{ index: 0, embedding: [0.1] }] }, 1),
-    /1536 finite values/u,
+    () => extractEmbeddingData({ data: [[0.1]] }, 1),
+    /1024 finite values/u,
   );
   assert.throws(
     () =>
       extractEmbeddingData(
-        {
-          data: [
-            { index: 0, embedding },
-            { index: 0, embedding },
-          ],
-        },
+        { data: [embedding, embedding], shape: [1, 1024] },
         2,
       ),
-    /unique valid index/u,
+    /invalid embedding shape/u,
   );
   assert.throws(
     () => extractEmbeddingData({ data: [] }, 1),
@@ -475,7 +454,7 @@ test("本文digestが一致するcorpusはmutationせず成功receiptを残す",
   assert.equal(result.upserted, 0);
   assert.equal(result.mutationId, null);
   assert.equal(
-    mock.calls.some(({ url }) => url.endsWith("/v1/embeddings")),
+    mock.calls.some(({ url }) => url.endsWith("/ai/run/@cf/baai/bge-m3")),
     false,
   );
   assert.equal(
@@ -500,7 +479,6 @@ test("失敗時もtokenを含まないfailure receiptを残す", async (t) => {
     syncVectorize({
       accountId: "account",
       apiToken: "secret-token-value",
-      openAiApiKey: "secret-openai-value",
       indexName: PRODUCTION_INDEX_NAME,
       corpusFile,
       receiptFile,
@@ -516,7 +494,6 @@ test("失敗時もtokenを含まないfailure receiptを残す", async (t) => {
   assert.equal(receipt.status, "failure");
   assert.match(receipt.error.message, /Production sync requires/u);
   assert.equal(receiptText.includes("secret-token-value"), false);
-  assert.equal(receiptText.includes("secret-openai-value"), false);
 });
 
 test("20%超削除はv1からv2への限定migrationだけ許可する", async (t) => {
@@ -868,6 +845,6 @@ test("管理外ID、20%超削除、index設定不一致では変更前に停止�
       fetchImpl: wrongDimensions.fetchImpl,
       logger: { log: () => {} },
     }),
-    /must use 1536 dimensions/u,
+    /must use 1024 dimensions/u,
   );
 });

@@ -30,10 +30,10 @@ Outlook などの外部カレンダー連携は read-only ICS feed に限定す�
 
 `deploy:preview` は開発時の確認用です。Direct Upload を本番完了条件にせず、GitHub の push deploy と custom domain の状態を確認します。
 
-意味検索は OpenAI Embeddings API、Vectorize、検索回数制御と匿名の時間集計専用の D1 を使用します。
+意味検索は Cloudflare Workers AI の BGE-M3、Vectorize、検索回数制御と匿名の時間集計専用の D1 を使用します。
 Pages PreviewではVectorizeをbindせず、`SEARCH_ENABLED=false`で静的ページと既存ナビゲーションを
-利用します。ProductionはOpenAI用1536次元indexへmainの7件を同期し、1536 dimensions / cosine、
-vector件数、`ja` namespaceの照合を完了しています。Productionの`SEARCH_ENABLED=true`と
+利用します。ProductionはBGE-M3用1024次元indexへmain corpusを同期し、1024 dimensions / cosine、
+vector件数、`ja` namespaceを照合します。旧OpenAI用1536次元indexはrollback用に保持します。Productionの`SEARCH_ENABLED=true`と
 healthに連動した検索UIは維持します。
 client keyはCloudflare Pagesの暗号化secretでHMAC化し、期限切れD1行は検索処理と毎時の
 maintenance Workerで削除します。
