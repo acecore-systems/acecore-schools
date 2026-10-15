@@ -415,7 +415,13 @@ export const schoolsContent = {
     title: "現場の技術を、学びへつなぐ。",
     body: "Acecoreは、Web制作・サーバー運用・デザインなどを横断して支援しています。Schoolsは、その現場で培う視点を学習支援へつなぐAcecoreの教育事業です。",
     principle: "技術、運用、表現、教育を分断せず、一つの支援線として扱う。",
+    philosophy:
+      "「世界を次のステージへ」。Acecoreは、本質的でない負担を減らし、誰もが「やりたいこと」に挑戦できる環境を目指しています。Schoolsは、目的からの学びでその一歩を支えます。",
     links: [
+      {
+        label: "Acecoreの企業理念",
+        href: "/about/#corporate-philosophy-heading",
+      },
       { label: "Acecoreの事業", href: "/services/" },
       { label: "Acecoreについて", href: "/about/" },
       { label: "Acecoreのニュース", href: "/blog/" },
