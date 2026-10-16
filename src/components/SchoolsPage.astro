@@ -5,7 +5,6 @@ import ActivitySection from "./ActivitySection.astro";
 import ConsultationSection from "./ConsultationSection.astro";
 import SearchPanel from "./SearchPanel.astro";
 import SchoolsAiChat from "./SchoolsAiChat.astro";
-import LearningStarts from "./LearningStarts.astro";
 import {
   acecoreContactUrl,
   acecoreLegalName,
@@ -608,8 +607,6 @@ const homeOverview = [
           </section>
         )
       }
-
-      {page === "learning" && <LearningStarts />}
 
       {
         page === "learning" && (
