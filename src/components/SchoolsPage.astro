@@ -5,6 +5,7 @@ import ActivitySection from "./ActivitySection.astro";
 import ConsultationSection from "./ConsultationSection.astro";
 import SearchPanel from "./SearchPanel.astro";
 import SchoolsAiChat from "./SchoolsAiChat.astro";
+import { castScene, castSceneAsset } from "../data/cast-scenes";
 import {
   acecoreContactUrl,
   acecoreLegalName,
@@ -37,10 +38,10 @@ const pageConfigs = {
     title: "目的から学びを組み立てるスクール",
     description: content.description,
     heroImage: {
-      src: "/images/schools/purpose-city/hero-city.webp",
+      src: castScene("hero-city"),
       alt: content.hero.imageAlt,
-      width: 1800,
-      height: 900,
+      width: castSceneAsset("hero-city").width,
+      height: castSceneAsset("hero-city").height,
       position: "center center",
     },
   },
@@ -51,10 +52,10 @@ const pageConfigs = {
     description:
       "高卒認定、IT・プログラミング、PC・スマホ活用、ロボット／メイキングの4領域と、学びの先で目指すことを紹介します。",
     heroImage: {
-      src: "/images/schools/purpose-city/hero-learning.webp",
-      alt: "教材、ノートパソコン、スマートフォン、小型電子部品を並べて学ぶ内容を整理する受講者",
-      width: 1536,
-      height: 806,
+      src: castScene("hero-learning"),
+      alt: "教材、ノートパソコン、スマートフォン、小型電子部品を並べて学ぶ内容を整理する様子",
+      width: castSceneAsset("hero-learning").width,
+      height: castSceneAsset("hero-learning").height,
       position: "68% center",
     },
   },
@@ -65,10 +66,10 @@ const pageConfigs = {
     description:
       "目的の整理から計画、実践、見直しまでの進め方と、オンラインでの受講方法を紹介します。",
     heroImage: {
-      src: "/images/schools/purpose-city/hero-how-it-works.webp",
-      alt: "カードとノートを使って学習の順番を相談する受講者と講師",
-      width: 1536,
-      height: 806,
+      src: castScene("hero-how-it-works"),
+      alt: "カードとノートを使って学習の順番を相談する様子",
+      width: castSceneAsset("hero-how-it-works").width,
+      height: castSceneAsset("hero-how-it-works").height,
       position: "68% center",
     },
   },
@@ -79,10 +80,10 @@ const pageConfigs = {
     description:
       "Acecore Schoolsの入会金、月謝、教材・管理費の税込目安と、受講前に確認できる内容を紹介します。",
     heroImage: {
-      src: "/images/schools/purpose-city/hero-pricing.webp",
-      alt: "受講内容と費用の提案資料を相談相手と確認する受講希望者",
-      width: 1536,
-      height: 806,
+      src: castScene("hero-pricing"),
+      alt: "学習内容と費用の提案資料を相談相手と確認する様子",
+      width: castSceneAsset("hero-pricing").width,
+      height: castSceneAsset("hero-pricing").height,
       position: "70% center",
     },
   },
@@ -93,10 +94,10 @@ const pageConfigs = {
     description:
       "Acecore Schoolsの考え方、運営元Acecoreとのつながり、これまでの取り組みを紹介します。",
     heroImage: {
-      src: "/images/schools/purpose-city/hero-about.webp",
-      alt: "ノートパソコンと電子機材のあるスタジオで教材を準備する運営者",
-      width: 1536,
-      height: 806,
+      src: castScene("hero-about"),
+      alt: "ノートパソコンと電子機材のあるスタジオで教材を準備する様子",
+      width: castSceneAsset("hero-about").width,
+      height: castSceneAsset("hero-about").height,
       position: "70% center",
     },
   },
@@ -107,10 +108,10 @@ const pageConfigs = {
     description:
       "学習内容、対象、料金、必要な機器、対面企画など、Acecore Schoolsによく寄せられる質問に回答します。",
     heroImage: {
-      src: "/images/schools/purpose-city/hero-faq.webp",
-      alt: "オンライン相談で受講前の疑問を質問する受講希望者",
-      width: 1536,
-      height: 806,
+      src: castScene("hero-faq"),
+      alt: "オンライン相談で学習前の疑問を質問する様子",
+      width: castSceneAsset("hero-faq").width,
+      height: castSceneAsset("hero-faq").height,
       position: "68% center",
     },
   },
@@ -120,7 +121,7 @@ const pageConfigs = {
     title: content.activityRecord.title,
     description: content.activityRecord.description,
     heroImage: {
-      src: "/images/schools/purpose-city/workshop-robot-summer.webp",
+      src: castScene("workshop-robot-summer"),
       alt: content.activityRecord.imageAlt,
       width: 1536,
       height: 1024,
@@ -155,7 +156,7 @@ const pageHeroImageUrl = new URL(pageConfig.heroImage.src, schoolsOrigin).href;
 const homeHeroImageUrl = new URL(pageConfigs.home.heroImage.src, schoolsOrigin)
   .href;
 const workshopImage = pageConfigs.activity.heroImage.src;
-const supportImage = "/images/schools/purpose-city/support-call.webp";
+const supportImage = castScene("support-call");
 const acecoreLogo = `${acecoreOrigin}/favicon.svg`;
 const currentYear = new Date().getFullYear();
 const searchHref = page === "home" ? "#site-search" : "/#site-search";
@@ -991,6 +992,12 @@ const homeOverview = [
           </div>
           <p>{content.footer.tagline}</p>
           <small>運営：{acecoreLegalName}</small>
+          <p class="footer-image-credit" data-cast-scene-credit>
+            {content.footer.imageDisclosure}{" "}
+            <a href="https://cast.acecore.net/"
+              >{content.footer.imageCreditLabel}</a
+            >
+          </p>
         </div>
         <div class="footer-nav-grid">
           <nav aria-label="Schools メニュー">

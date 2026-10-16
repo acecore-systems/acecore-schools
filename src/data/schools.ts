@@ -1,3 +1,5 @@
+import { castScene } from "./cast-scenes";
+
 export const schoolsContent = {
   title: "Acecore Schools",
   description:
@@ -93,7 +95,8 @@ export const schoolsContent = {
     body: "学歴や決められた順番より、いま何を変えたいのか。その目的に必要な学びを、一緒に整理して実践へつなげます。",
     primary: "無料相談を申し込む",
     secondary: "学べることを見る",
-    imageAlt: "都市の中でこれからの進路を考える、バックパックを背負った若者",
+    imageAlt:
+      "都市を見渡しながら学びや進路を考える、バックパックを背負った人物",
   },
   purposes: [
     {
@@ -124,7 +127,7 @@ export const schoolsContent = {
   support: {
     title: "一人ひとりに、\n必要な支えを。",
     body: "目標も、得意なことも、使える時間も人それぞれ。決まったコースへ当てはめるのではなく、話しながら学び方を組み直します。",
-    imageAlt: "自宅からビデオ通話で相談しながらノートを取る受講者",
+    imageAlt: "自宅からビデオ通話で相談しながらノートを取る様子",
     audience: {
       label: "対象",
       title: "学生から社会人、シニアまで。",
@@ -167,8 +170,8 @@ export const schoolsContent = {
         "受験時期から逆算した学習計画",
         "進学・仕事など次の選択",
       ],
-      image: "/images/schools/purpose-city/area-ged.webp",
-      imageAlt: "高卒認定に向けて教材とノートで学習する若者",
+      image: castScene("area-ged"),
+      imageAlt: "高卒認定に向けて教材とノートで学習する様子",
     },
     {
       id: "programming",
@@ -183,8 +186,8 @@ export const schoolsContent = {
         "データベース・API・クラウド",
         "Git・公開までの流れ",
       ],
-      image: "/images/schools/purpose-city/area-programming.webp",
-      imageAlt: "自宅のノートパソコンでWeb制作に取り組む若者",
+      image: castScene("area-programming"),
+      imageAlt: "自宅のノートパソコンでWeb制作に取り組む様子",
     },
     {
       id: "digital",
@@ -199,8 +202,8 @@ export const schoolsContent = {
         "メール・SNS・オンライン会議",
         "セキュリティ・トラブル対応",
       ],
-      image: "/images/schools/purpose-city/area-digital.webp",
-      imageAlt: "パソコンとスマートフォンを使って資料を整理する受講者",
+      image: castScene("area-digital"),
+      imageAlt: "パソコンとスマートフォンを使って資料を整理する様子",
     },
     {
       id: "making",
@@ -215,8 +218,8 @@ export const schoolsContent = {
         "制御と動作確認",
         "実施方法・時期の相談",
       ],
-      image: "/images/schools/purpose-city/area-making.webp",
-      imageAlt: "机の上で小型ロボットの機構と配線を調整する若者",
+      image: castScene("area-making"),
+      imageAlt: "机の上で小型ロボットの機構と配線を調整する様子",
     },
   ],
   process: {
@@ -508,6 +511,8 @@ export const schoolsContent = {
     ],
   },
   footer: {
+    imageDisclosure: "人物を含むイメージ画像にはAI生成素材を使用しています。",
+    imageCreditLabel: "画像素材について",
     tagline:
       "Acecoreの教育事業として、あなたの「何のために。」から学びを支えます。",
   },

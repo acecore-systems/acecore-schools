@@ -1661,6 +1661,17 @@
     font-size: 0.82rem;
   }
 
+  .footer-brand .footer-image-credit {
+    margin-top: 16px;
+    font-size: 0.75rem;
+    line-height: 1.8;
+  }
+
+  .footer-image-credit a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   .footer-brand small {
     display: block;
     margin-top: 18px;
@@ -2004,26 +2015,35 @@
     }
 
     .hero {
-      min-height: 620px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 0;
     }
 
     .hero-image {
+      position: relative;
+      inset: auto;
+      grid-area: 1 / 1;
+      height: clamp(300px, 76vw, 380px);
       object-position: 70% center;
     }
 
     .hero-layout {
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-end;
-      padding-block: 40px;
-      flex-direction: column;
+      display: contents;
+      min-height: 0;
+      padding: 0;
     }
 
     .hero h1 {
-      position: absolute;
-      top: 62px;
-      left: 0;
+      position: relative;
+      z-index: 1;
+      grid-area: 1 / 1;
+      align-self: start;
+      justify-self: start;
+      top: auto;
+      left: auto;
       max-height: none;
+      margin: 20px 14px;
       padding: 13px 16px;
       font-size: 3.2rem;
       letter-spacing: 0.03em;
@@ -2031,7 +2051,10 @@
     }
 
     .hero-message {
-      width: min(100%, 430px);
+      grid-area: 2 / 1;
+      justify-self: center;
+      width: min(calc(100% - 28px), 430px);
+      margin: 20px 0 26px;
     }
 
     .hero-lead {
@@ -2210,11 +2233,7 @@
     }
 
     .hero {
-      min-height: 610px;
-    }
-
-    .hero-layout {
-      padding-bottom: 26px;
+      min-height: 0;
     }
 
     .hero-message {

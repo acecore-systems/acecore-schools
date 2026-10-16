@@ -7,3 +7,4 @@
 dist/
 node_modules/
 .dev-server.*.log
+vendor/cast/

@@ -5,7 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && pagefind --site dist && npm run audit:ai-chat && npm run audit:image-alts && npm run audit:links && npm run audit:structured-data && node scripts/build-search-corpus.mjs && npm run write:build-meta",
+    "prebuild": "npm run validate:cast-scenes && npm run test:cast-scenes",
+    "build": "astro build && pagefind --site dist && npm run audit:ai-chat && npm run audit:image-alts && npm run audit:links && npm run audit:structured-data && node scripts/build-search-corpus.mjs && npm run write:build-meta && npm run validate:cast-scenes:build",
+    "validate:cast-scenes": "node scripts/validate-cast-scenes.mjs",
+    "test:cast-scenes": "node --test --test-isolation=none tests/cast-scenes.test.mjs",
+    "validate:cast-scenes:build": "node scripts/validate-cast-scenes-build.mjs",
     "audit:ai-chat": "node scripts/audit-built-ai-chat.mjs",
     "audit:image-alts": "node scripts/audit-built-image-alts.mjs",
     "audit:links": "node scripts/audit-built-links.mjs",
