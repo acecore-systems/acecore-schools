@@ -1735,6 +1735,52 @@
     }
   }
 
+  @media (max-width: 1200px) {
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 0;
+    }
+
+    .hero-image {
+      position: relative;
+      inset: auto;
+      grid-area: 1 / 1;
+      height: clamp(300px, 76vw, 380px);
+      object-position: 70% center;
+    }
+
+    .hero-layout {
+      display: contents;
+      min-height: 0;
+      padding: 0;
+    }
+
+    .hero h1 {
+      position: relative;
+      z-index: 1;
+      grid-area: 1 / 1;
+      align-self: start;
+      justify-self: start;
+      top: auto;
+      left: auto;
+      max-height: none;
+      margin: 20px 14px;
+      padding: 13px 16px;
+      font-size: 4rem;
+      letter-spacing: 0.03em;
+      writing-mode: horizontal-tb;
+    }
+
+    .hero-message {
+      grid-area: 2 / 1;
+      justify-self: center;
+      width: min(calc(100% - 28px), 430px);
+      margin: 20px 0 26px;
+      padding: 24px;
+    }
+  }
+
   @media (max-width: 1180px) {
     .site-header {
       grid-template-columns: auto auto minmax(160px, auto);
@@ -1813,50 +1859,6 @@
       display: block;
       padding: 10px 12px;
       font-size: 0.9rem !important;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      min-height: 0;
-    }
-
-    .hero-image {
-      position: relative;
-      inset: auto;
-      grid-area: 1 / 1;
-      height: clamp(300px, 76vw, 380px);
-      object-position: 70% center;
-    }
-
-    .hero-layout {
-      display: contents;
-      min-height: 0;
-      padding: 0;
-    }
-
-    .hero h1 {
-      position: relative;
-      z-index: 1;
-      grid-area: 1 / 1;
-      align-self: start;
-      justify-self: start;
-      top: auto;
-      left: auto;
-      max-height: none;
-      margin: 20px 14px;
-      padding: 13px 16px;
-      font-size: 4rem;
-      letter-spacing: 0.03em;
-      writing-mode: horizontal-tb;
-    }
-
-    .hero-message {
-      grid-area: 2 / 1;
-      justify-self: center;
-      width: min(calc(100% - 28px), 430px);
-      margin: 20px 0 26px;
-      padding: 24px;
     }
 
     .purpose-grid,

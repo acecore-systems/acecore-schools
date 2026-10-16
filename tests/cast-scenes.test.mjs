@@ -158,18 +158,33 @@ if (registration.site === "net") {
   });
 }
 if (registration.site === "schools") {
-  test("tablet and mobile home Hero reserve separate image and copy rows", async () => {
+  test("home Hero reserves separate image and copy rows through 1200px", async () => {
     const css = await readFile(
       new URL("src/styles/tailwind.css", root),
       "utf8",
     );
-    const tablet = css.slice(
-      css.indexOf("@media (max-width: 980px)"),
-      css.indexOf("@media (max-width: 700px)"),
+    const compactHero = css.slice(
+      css.indexOf("@media (max-width: 1200px)"),
+      css.indexOf("@media (max-width: 1180px)"),
     );
-    assert.match(tablet, /\.hero-image\s*\{[^}]*position:\s*relative/su);
-    assert.match(tablet, /\.hero-layout\s*\{[^}]*display:\s*contents/su);
-    assert.match(tablet, /\.hero h1\s*\{[^}]*writing-mode:\s*horizontal-tb/su);
-    assert.match(tablet, /\.hero-message\s*\{[^}]*grid-area:\s*2\s*\/\s*1/su);
+    assert.match(compactHero, /\.hero-image\s*\{[^}]*position:\s*relative/su);
+    assert.match(compactHero, /\.hero-layout\s*\{[^}]*display:\s*contents/su);
+    assert.match(
+      compactHero,
+      /\.hero h1\s*\{[^}]*writing-mode:\s*horizontal-tb/su,
+    );
+    assert.match(
+      compactHero,
+      /\.hero-message\s*\{[^}]*grid-area:\s*2\s*\/\s*1/su,
+    );
+    assert.doesNotMatch(
+      compactHero,
+      /\.site-header|\.page-shell|\.primary-nav/u,
+    );
+    const mobile = css.slice(
+      css.indexOf("@media (max-width: 700px)"),
+      css.indexOf("@media (max-width: 520px)"),
+    );
+    assert.match(mobile, /\.hero h1\s*\{[^}]*font-size:\s*3\.2rem/su);
   });
 }
