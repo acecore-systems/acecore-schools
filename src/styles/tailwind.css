@@ -1816,25 +1816,46 @@
     }
 
     .hero {
-      min-height: 620px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 0;
     }
 
     .hero-image {
-      object-position: 64% center;
+      position: relative;
+      inset: auto;
+      grid-area: 1 / 1;
+      height: clamp(300px, 76vw, 380px);
+      object-position: 70% center;
     }
 
     .hero-layout {
-      grid-template-columns: 140px minmax(270px, 410px);
-      gap: 24px;
-      align-items: end;
-      padding-bottom: 48px;
+      display: contents;
+      min-height: 0;
+      padding: 0;
     }
 
     .hero h1 {
+      position: relative;
+      z-index: 1;
+      grid-area: 1 / 1;
+      align-self: start;
+      justify-self: start;
+      top: auto;
+      left: auto;
+      max-height: none;
+      margin: 20px 14px;
+      padding: 13px 16px;
       font-size: 4rem;
+      letter-spacing: 0.03em;
+      writing-mode: horizontal-tb;
     }
 
     .hero-message {
+      grid-area: 2 / 1;
+      justify-self: center;
+      width: min(calc(100% - 28px), 430px);
+      margin: 20px 0 26px;
       padding: 24px;
     }
 
@@ -2014,47 +2035,8 @@
       font-size: 1rem;
     }
 
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      min-height: 0;
-    }
-
-    .hero-image {
-      position: relative;
-      inset: auto;
-      grid-area: 1 / 1;
-      height: clamp(300px, 76vw, 380px);
-      object-position: 70% center;
-    }
-
-    .hero-layout {
-      display: contents;
-      min-height: 0;
-      padding: 0;
-    }
-
     .hero h1 {
-      position: relative;
-      z-index: 1;
-      grid-area: 1 / 1;
-      align-self: start;
-      justify-self: start;
-      top: auto;
-      left: auto;
-      max-height: none;
-      margin: 20px 14px;
-      padding: 13px 16px;
       font-size: 3.2rem;
-      letter-spacing: 0.03em;
-      writing-mode: horizontal-tb;
-    }
-
-    .hero-message {
-      grid-area: 2 / 1;
-      justify-self: center;
-      width: min(calc(100% - 28px), 430px);
-      margin: 20px 0 26px;
     }
 
     .hero-lead {

@@ -158,17 +158,18 @@ if (registration.site === "net") {
   });
 }
 if (registration.site === "schools") {
-  test("mobile home Hero reserves separate image and copy rows", async () => {
+  test("tablet and mobile home Hero reserve separate image and copy rows", async () => {
     const css = await readFile(
       new URL("src/styles/tailwind.css", root),
       "utf8",
     );
-    const mobile = css.slice(
+    const tablet = css.slice(
+      css.indexOf("@media (max-width: 980px)"),
       css.indexOf("@media (max-width: 700px)"),
-      css.indexOf("@media (max-width: 520px)"),
     );
-    assert.match(mobile, /\.hero-image\s*\{[^}]*position:\s*relative/su);
-    assert.match(mobile, /\.hero-layout\s*\{[^}]*display:\s*contents/su);
-    assert.match(mobile, /\.hero-message\s*\{[^}]*grid-area:\s*2\s*\/\s*1/su);
+    assert.match(tablet, /\.hero-image\s*\{[^}]*position:\s*relative/su);
+    assert.match(tablet, /\.hero-layout\s*\{[^}]*display:\s*contents/su);
+    assert.match(tablet, /\.hero h1\s*\{[^}]*writing-mode:\s*horizontal-tb/su);
+    assert.match(tablet, /\.hero-message\s*\{[^}]*grid-area:\s*2\s*\/\s*1/su);
   });
 }
