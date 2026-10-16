@@ -709,92 +709,6 @@
     background: var(--color-canvas-blue);
   }
 
-  .learning-starts {
-    background: var(--color-canvas-blue);
-  }
-
-  .learning-starts-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
-  }
-
-  .learning-start-card {
-    padding: 24px;
-    border: 1px solid var(--color-line);
-    background: var(--color-paper);
-  }
-
-  .learning-start-card figure {
-    margin: 0 0 20px;
-  }
-
-  .learning-start-card img {
-    width: 128px;
-    height: auto;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-  }
-
-  .learning-start-card figcaption {
-    margin-top: 8px;
-    color: var(--color-muted);
-    font-size: 11px;
-  }
-
-  .learning-start-copy h3 {
-    font-size: 20px;
-    line-height: 1.6;
-  }
-
-  .learning-start-copy p {
-    margin: 12px 0 20px;
-    color: var(--color-muted);
-    font-size: 14px;
-    line-height: 1.85;
-  }
-
-  .learning-start-copy a {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--color-navy);
-    font-size: 13px;
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
-  }
-
-  .learning-starts-disclosure {
-    margin-top: 20px;
-    color: var(--color-muted);
-    font-size: 12px;
-    line-height: 1.8;
-  }
-
-  .learning-starts-disclosure a {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-
-  @media (max-width: 900px) {
-    .learning-starts-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .learning-start-card {
-      display: grid;
-      grid-template-columns: minmax(80px, 100px) minmax(0, 1fr);
-      align-items: start;
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .learning-start-card figure {
-      margin: 0;
-    }
-  }
-
   .area-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1747,6 +1661,17 @@
     font-size: 0.82rem;
   }
 
+  .footer-brand .footer-image-credit {
+    margin-top: 16px;
+    font-size: 0.75rem;
+    line-height: 1.8;
+  }
+
+  .footer-image-credit a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   .footer-brand small {
     display: block;
     margin-top: 18px;
@@ -2090,26 +2015,35 @@
     }
 
     .hero {
-      min-height: 620px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 0;
     }
 
     .hero-image {
+      position: relative;
+      inset: auto;
+      grid-area: 1 / 1;
+      height: clamp(300px, 76vw, 380px);
       object-position: 70% center;
     }
 
     .hero-layout {
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-end;
-      padding-block: 40px;
-      flex-direction: column;
+      display: contents;
+      min-height: 0;
+      padding: 0;
     }
 
     .hero h1 {
-      position: absolute;
-      top: 62px;
-      left: 0;
+      position: relative;
+      z-index: 1;
+      grid-area: 1 / 1;
+      align-self: start;
+      justify-self: start;
+      top: auto;
+      left: auto;
       max-height: none;
+      margin: 20px 14px;
       padding: 13px 16px;
       font-size: 3.2rem;
       letter-spacing: 0.03em;
@@ -2117,7 +2051,10 @@
     }
 
     .hero-message {
-      width: min(100%, 430px);
+      grid-area: 2 / 1;
+      justify-self: center;
+      width: min(calc(100% - 28px), 430px);
+      margin: 20px 0 26px;
     }
 
     .hero-lead {
@@ -2296,11 +2233,7 @@
     }
 
     .hero {
-      min-height: 610px;
-    }
-
-    .hero-layout {
-      padding-bottom: 26px;
+      min-height: 0;
     }
 
     .hero-message {
