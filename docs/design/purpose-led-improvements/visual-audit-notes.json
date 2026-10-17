@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-18",
+  "baseline": [
+    "Home desktop: purpose hero and imagery retained; online, audience and fee facts absent near hero; oversized search preceding only a page directory.",
+    "Learning: 4 domains but intended outcome separated from domain details, generic consultation anchors.",
+    "Pricing: existing amounts retained, one-time/monthly/material timing requires clearer labels; no invented lesson frequency.",
+    "Home mobile390: hero takes most of first viewport; keep new facts concise."
+  ],
+  "references": [
+    {
+      "url": "https://kizuki.or.jp/",
+      "pattern": "Audience and support format near top; learner and parent concerns with adjacent fee paths."
+    },
+    {
+      "url": "https://www.j-webschool.net/charge/",
+      "pattern": "Included and additional cost explanation visually grouped before price tables."
+    },
+    {
+      "url": "https://www.sejuku.net/",
+      "pattern": "Desired outcomes linked to support, and reassurance that course choice need not be decided before consultation."
+    }
+  ],
+  "boundary": "Adopt information hierarchy only. Do not transplant competitor claims, guarantees, fees, teaching models or outcomes."
+}
