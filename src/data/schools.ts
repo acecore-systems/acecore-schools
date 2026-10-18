@@ -93,7 +93,14 @@ export const schoolsContent = {
     title: "何のために。",
     lead: "目的から、必要な学びを組み立てる。",
     body: "学歴や決められた順番より、いま何を変えたいのか。その目的に必要な学びを、一緒に整理して実践へつなげます。",
-    primary: "無料相談を申し込む",
+    summary:
+      "高卒認定、IT・プログラミング、PC・スマホ活用を、通常オンラインで。目的と経験に合わせて、一緒に学び方を考えます。",
+    facts: [
+      { icon: "ph-users", label: "学生〜シニア" },
+      { icon: "ph-monitor", label: "オンライン" },
+      { icon: "ph-chats-circle", label: "相談無料" },
+    ],
+    primary: "無料相談する",
     secondary: "学べることを見る",
     imageAlt:
       "都市を見渡しながら学びや進路を考える、バックパックを背負った人物",
@@ -159,6 +166,7 @@ export const schoolsContent = {
   areas: [
     {
       id: "ged",
+      situation: "必要な科目や、試験までの進め方を整理したい。",
       number: "01",
       icon: "ph-book-open",
       title: "高卒認定・その先の選択",
@@ -175,6 +183,7 @@ export const schoolsContent = {
     },
     {
       id: "programming",
+      situation: "Webサイトや小さなツールを、つくりながら学びたい。",
       number: "02",
       icon: "ph-code",
       title: "IT学習・プログラミング",
@@ -191,6 +200,7 @@ export const schoolsContent = {
     },
     {
       id: "digital",
+      situation: "PCやスマホを、暮らしや仕事の用事に使いたい。",
       number: "03",
       icon: "ph-devices",
       title: "PC・スマホ活用",
@@ -207,6 +217,7 @@ export const schoolsContent = {
     },
     {
       id: "making",
+      situation: "仕組みを組み立て、動かして確かめてみたい。",
       number: "04",
       icon: "ph-circuitry",
       title: "ロボット／メイキング",
@@ -222,6 +233,24 @@ export const schoolsContent = {
       imageAlt: "机の上で小型ロボットの機構と配線を調整する様子",
     },
   ],
+  learningGuide: {
+    situationLabel: "こんなときに",
+    goalLabel: "目指すことの一例",
+    contentLabel: "相談できる内容の例",
+    methodLabel: "受講方法",
+    methodLink: "学び方・必要な環境を見る",
+    pricingLink: "料金と受講前の確認事項",
+    consultationLink: "この分野について無料相談する",
+    makingMethod:
+      "対面の常設講座ではありません。実施方法や時期は、内容に応じて相談します。",
+  },
+  homeGuide: {
+    eyebrow: "BEFORE YOU START",
+    title: "学び方と費用を、先に。",
+    methodLink: "学び方・サポートを見る",
+    pricingLink: "料金と確認事項を見る",
+    makingNote: "ロボット／メイキングは、実施方法や時期からご相談ください。",
+  },
   process: {
     eyebrow: "HOW WE LEARN",
     title: "学びの進め方",
@@ -284,24 +313,28 @@ export const schoolsContent = {
     body: "以下は取り組み方の一例です。目指すゴールは、一人ひとりの目的と現在地に合わせて決めます。",
     items: [
       {
+        areaId: "ged",
         image: "/images/schools/purpose-city/outcome-plan.webp",
         imageAlt: "教材とカレンダーを使って整理された学習計画",
         label: "高卒認定",
         title: "試験までの道筋を、自分で確認する",
       },
       {
+        areaId: "programming",
         image: "/images/schools/purpose-city/outcome-web.webp",
         imageAlt: "ノートパソコンに表示された制作中のWebページ",
         label: "プログラミング",
         title: "Webページや小さなツールの公開を目指す",
       },
       {
+        areaId: "digital",
         image: "/images/schools/purpose-city/outcome-digital.webp",
         imageAlt: "パソコンとスマートフォンで整理された実用的な資料",
         label: "PC・スマホ",
         title: "仕事や生活の用事を、自分で進める力をつける",
       },
       {
+        areaId: "making",
         image: "/images/schools/purpose-city/outcome-making.webp",
         imageAlt: "机の上で完成した小型ロボットと工具",
         label: "ロボット／メイキング",
@@ -394,24 +427,39 @@ export const schoolsContent = {
       {
         icon: "ph-sign-in",
         label: "入会金",
+        timing: "初回のみ",
         amount: "1.1万〜2.2万円",
         note: "初回のみ。支援内容や準備物により変動します。",
       },
       {
         icon: "ph-calendar-dots",
         label: "月謝",
+        timing: "毎月の費用",
         amount: "8千〜3.3万円",
         note: "回数、時間、支援内容、進め方により変動します。",
       },
       {
         icon: "ph-books",
         label: "教材・管理費",
+        timing: "内訳・発生時期を確認",
         amount: "5千〜3万円程度",
         note: "教材、ロボット部材、PC・ライセンス費などは内容により実費が発生します。",
       },
     ],
     note: "すべて税込の目安です。教材、機材、交通費などの外部実費は別途となる場合があります。",
     cta: "料金について無料相談する",
+    guideTitle: "費用は、3つの項目で確認します。",
+    guideBody:
+      "入会時の費用、毎月の費用、教材・管理費を分けて掲載しています。目安だけで決めず、内容に合った正式な金額と条件を受講前に確認できます。",
+    checksTitle: "金額と一緒に、確認したいこと",
+    checksBody:
+      "回数や時間、教材・管理費の発生時期は、学ぶ内容や進め方に合わせて相談します。",
+    checks: [
+      "月謝に含まれる受講回数と、1回あたりの時間",
+      "教材・管理費の内訳と、いつ・何回発生するか",
+      "教材・機材・ライセンスなど、別途かかる実費の有無",
+      "内容やペースを変更する場合の条件・費用",
+    ],
   },
   creativeServices: {
     eyebrow: "CREATIVE LEARNING & SUPPORT",
@@ -489,6 +537,25 @@ export const schoolsContent = {
     body: "相談は無料です。学ぶ内容が決まっていなくても、いまの状況と、できるようになりたいことから一緒に整理します。",
     cta: "LINEで無料相談する",
     formCta: "フォームで無料相談する",
+    preparation: {
+      title: "相談したいことを、まとめておく",
+      areaLabel: "相談したい分野",
+      undecided: "未定・複数の分野",
+      messageLabel: "相談文のメモ（任意）",
+      messageHint:
+        "分かる範囲で書き換えてください。分野を変えても、編集したメモは残ります。",
+      template:
+        "できるようになりたいこと：\n今の状況・経験：\n希望する時期・ペース：\n使っている機器：",
+      copy: "分野と相談文をコピー",
+      copyHint:
+        "コピーした文をLINEや問い合わせフォームに貼り付けて使えます。フォームには自動入力されません。",
+      copied:
+        "分野と相談文をコピーしました。LINEや問い合わせフォームに貼り付けてください。",
+      copyFailed:
+        "コピーできませんでした。相談文を選択したので、手動でコピーしてください。",
+      copiedTitle: "Acecore Schoolsへの相談",
+      areaPrefix: "相談したい分野：",
+    },
     beforeStart: {
       eyebrow: "BEFORE YOU START",
       title: "受講を決める前に確認できること",
