@@ -28,7 +28,8 @@
     "types:cloudflare:check": "wrangler types functions/cloudflare-env.d.ts --env-interface CloudflareEnv --include-runtime false --check",
     "check:pages-config": "wrangler pages functions build --outdir .wrangler/pages-functions",
     "check:maintenance-config": "wrangler deploy --config wrangler.maintenance.jsonc --dry-run --outdir .wrangler/search-maintenance",
-    "typecheck:functions": "tsc --project tsconfig.functions.json"
+    "typecheck:functions": "tsc --project tsconfig.functions.json",
+    "test:consultation": "node --experimental-strip-types --test tests/consultation-context.test.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

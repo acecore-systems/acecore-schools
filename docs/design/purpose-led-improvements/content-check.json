@@ -1,0 +1,36 @@
+{
+  "baseline": "7c942260abcb99cd116a814b0c8ff6e678d702e7",
+  "date": "2026-10-18",
+  "preservedSourceStrings": 335,
+  "changedSourceStrings": [
+    {
+      "path": "/hero/primary",
+      "before": "無料相談を申し込む",
+      "after": "無料相談する"
+    }
+  ],
+  "prices": [
+    {
+      "label": "入会金",
+      "amount": "1.1万〜2.2万円",
+      "note": "初回のみ。支援内容や準備物により変動します。",
+      "preserved": true
+    },
+    {
+      "label": "月謝",
+      "amount": "8千〜3.3万円",
+      "note": "回数、時間、支援内容、進め方により変動します。",
+      "preserved": true
+    },
+    {
+      "label": "教材・管理費",
+      "amount": "5千〜3万円程度",
+      "note": "教材、ロボット部材、PC・ライセンス費などは内容により実費が発生します。",
+      "preserved": true
+    }
+  ],
+  "all16AreaExamplesPreserved": true,
+  "all4GoalTextsPreserved": true,
+  "pastActivityRecordUnchanged": true,
+  "preparationTemplateExcludedFromCorpus": true
+}

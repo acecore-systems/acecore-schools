@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-18",
+  "tested": "local built preview http://127.0.0.1:4326",
+  "checks": [
+    "1440 home/summary/learning visual accepted",
+    "390 home/pricing/mobile menu accepted",
+    "320 home and consultation no horizontal overflow",
+    "768 pricing/learning no horizontal overflow; no broken images",
+    "Programming CTA selects programming and opens preparation",
+    "Changing selection preserves edited memo; clipboard contains selected label and edited text",
+    "Making query selected and focused; Tab moves to memo",
+    "Unknown area restores undecided with details collapsed",
+    "AI dialog open/close works; no messages submitted",
+    "Footer Schools font color corrected to white",
+    "320 hero CTA corrected to single column with 44px heights; 390 two-column labels fit",
+    "Final 1440 and390 home accepted",
+    "Search input visible and console error/warn empty"
+  ],
+  "remaining": ["GitHub draft PR and linked deployment checks"],
+  "limitations": [
+    "No external LINE/form submission",
+    "Production semantic search not exercised from preview"
+  ]
+}

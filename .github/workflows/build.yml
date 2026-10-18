@@ -23,6 +23,8 @@ jobs:
         run: npm run format:check
       - name: Test semantic search
         run: npm run test:search
+      - name: Test consultation context
+        run: npm run test:consultation
       - name: Test structured data
         run: npm run test:structured-data
       - name: Check Cloudflare binding types

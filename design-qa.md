@@ -1,80 +1,41 @@
-# Acecore Schools purpose-city redesign QA
+# Acecore Schools 目的別導線改善 QA
 
-## 今回の監査範囲
+確認日: 2026-10-18。ローカルの最終ビルド済みプレビューで受入確認済み。基点は公開版 `7c942260abcb99cd116a814b0c8ff6e678d702e7`。
 
-- `origin/main` の旧 Schools 情報と現行トップページを比較
-- 現行 `https://acecore.net/` とローカル `acecore-net` のブランド・導線・問い合わせ仕様を照合
-- Codex in-app browser で 1440×1000 / 390×844 を実測
-- PC・モバイルの余白、情報密度、横はみ出し、メニュー、FAQ を確認
+## 結果
 
-## Visual evidence
+**passed**。既存の縦書き・明朝・紺と緑の配色・画像を保ち、トップの具体情報、4領域の説明、料金の理解、相談の文脈を改善した。今回の参考・採否・情報保全は[調査記録](docs/design/purpose-led-improvements/research.md)を参照。過去のQAは[変更前記録](docs/design/purpose-led-improvements/qa-before.md)に保存した。
 
-- Before / after: `artifacts/quality-audit-2/comparison-before-after.webp`
-- Final desktop contact sheet: `artifacts/quality-audit-2/final-desktop-contact.webp`
-- Final mobile contact sheet: `artifacts/quality-audit-2/final-mobile-contact.webp`
-- Acecore reference capture: `artifacts/quality-audit-2/09-acecore-net-home.png`
-- フッターロゴと料金復元の最終追補は、最新branch previewで別途確認
+## 実画面と操作
 
-## 旧サイト情報の扱い
+親担当がBrowser plugin（Edge拡張）で320 / 390 / 768 / 1440pxを確認した。
 
-### 現行方針に合わせて復元
+- トップ、学習内容、料金、相談の余白・密度と画像表示を確認。対象画面に横はみ出しなし。
+- 320pxのhero CTAは1列・高さ44px、390pxは2列で自然に読める。1440pxのheroとロゴの整合を確認。
+- 学習領域CTAから該当分野が選択され、相談準備が開く。メモ編集後に分野を変更しても編集内容を保持し、コピーには現在の分野とメモが入る。
+- `area=making` の見出し・選択欄への誘導、選択欄からTabでメモへの移動を確認。不正な `area=unknown` は未定・折り畳みへ戻る。
+- モバイルメニュー、AI案内の開閉、検索入口の表示を確認。AIへメッセージは送っていない。
+- フッターSchools文字は白、コンソールのerror / warnは空。
+- コピー失敗時のライブ通知・手動コピー欄は実装とコードで確認。ブラウザでの権限拒否試験はしていない。
 
-- 4領域ごとの具体例
-  - 高卒認定: 必要科目、過去問・模試、逆算した計画、その先の選択
-  - IT・プログラミング: HTML/CSS/JavaScript、Python/Node.js、DB/API/クラウド、Git・公開
-  - PC・スマホ: 基本操作、Office、メール/SNS/オンライン会議、セキュリティ・トラブル対応
-  - ロボット／メイキング: 機構、回路、制御、実施方法・時期
-- 学生、社会人、シニアまでを対象に、年齢ではなく目的と現在地から組み立てること
-- 高卒認定以外の学校学習・試験対策を相談できること
-- 受講前に内容、進め方・頻度、機器・教材、費用を確認できること
-- Acecore.netの現行料金ページと照合した、入会金・月謝・教材／管理費の税込目安
-- LINEに加え、AcecoreのSchools専用問い合わせフォーム
+証拠: [最終desktop](docs/design/purpose-led-improvements/after-home-desktop.png)、[320px](docs/design/purpose-led-improvements/after-home-320.png)、[390px](docs/design/purpose-led-improvements/after-home-390.png)、[学び方・料金要約](docs/design/purpose-led-improvements/after-home-summary.png)、[768px料金](docs/design/purpose-led-improvements/after-pricing-768.png)。[変更前トップ](docs/design/purpose-led-improvements/before-home-desktop.png)と[操作観察記録](docs/design/purpose-led-improvements/qa-observations.json)も保存した。
 
-### 現行性を確認できないため復元しない
+## 自動検証
 
-- 旧曜日・時間帯・固定頻度
-- 無料体験授業、端末貸出
-- 会員ポータル、予約変更、ICSなど未提供の将来機能
-- 子供向けロボットプログラミングを常設コースとして扱う旧表現
+- `npm run build`: 8 HTML、29画像のalt監査、144内部リンク、7 JSON-LD、12 cast scenesと7 footer creditsのビルド監査が成功。
+- `npm run test:consultation`: 4件。分野の許可リスト、相談文の合成、分野変更時の編集内容保持、未定・複数を検証。CIにも追加。
+- `npm run test:search`: 68件。
+- `npm run test:structured-data`: 5件。
+- `npm run test:ui-foundation`: 1件。
+- Cloudflare型生成差分、Pages Functionsビルド、maintenance workerのdry-run、Functions型検査が成功。
+- `npm run format:check` とAstro pluginを指定した変更コンポーネントの整形確認、`git diff --check` が成功。
 
-## Acecore連携
+既存3費目の金額・注記、16具体例、4到達イメージ、過去イベント記録をソース比較で確認した。通常オンライン・全年齢・ロボット等の実施方法や時期は要相談という境界を保持。任意相談文例が生成検索コーパスへ入らないことも確認した。[比較結果](docs/design/purpose-led-improvements/content-check.json)を参照。
 
-- ヘッダーを公式ロゴ付きの `Acecore / Schools` 階層へ変更
-- `Acecore Schoolsについて` という誤った親リンク名を `運営元 Acecoreについて` へ修正
-- Acecoreのサービス・About・Blogへ戻れる関連帯を追加
-- 問い合わせフォームを `category=service&service=education` でSchools選択済みの状態へ接続
-- フッターを Schools / Acecore / Network の3群へ再編
-- 存在しない `/privacy-policy/` を正規の `/privacy/` へ修正
-- JSON-LDの `knowsAbout` に4領域と具体例を反映
+## 未実施・公開境界
 
-## 余白・密度
-
-- 本文幅を1360pxから1200pxへ絞り、左右の余白を安定化
-- 全セクション一律96pxをやめ、役割に応じて64〜88pxへ調整
-- ヒーロー最大高を760pxから680pxへ短縮し、1440×1000で目的カードまで表示
-- 成果画像に `height: auto` を追加
-  - 修正前: PCで約310×1024px
-  - 修正後: 約287×185px
-  - 成果セクション高: 約1474pxから約622px
-- 4領域を4列の薄いカードから2列の詳細カードへ変更
-- サポート体制を4列から2列×2行の横組みに変更
-- 相談セクションを見出し・CTAと、開始手順・事前確認事項の2列へ再編
-- モバイルでは主要セクションを56〜64pxへ圧縮し、CTAを手順より前に表示
-
-## Interaction and accessibility
-
-- モバイルメニューは開閉でき、`aria-expanded` と accessible name が更新される
-- 料金FAQを開くと回答が表示される
-- 390×844で横方向のdocument overflowなし
-- Acecoreロゴ3点は読込成功、全14画像にnon-empty altあり
-- LINE、Schools専用問い合わせ、Acecore、Privacyのリンク先を確認
-- ブラウザコンソールに warning / error なし
-
-## Verification
-
-- `npm run format:check`
-- `npm run build`
-- Image-alt audit: 2 HTML files、14 images、0 failures
-- `git diff --check`
-
-final result: passed
+- LINE・外部フォームの実送信、CAPTCHA、外部受付のE2Eは未実施。フォームに分野・本文が自動入力されるとは案内していない。
+- プレビューではProductionのセマンティック検索、Vectorize同期・接続は試していない。検索入口・フォールバックとAI開閉だけを確認した。
+- 全ブラウザ・Safari・網羅的なアクセシビリティ監査や相談成約の計測は未実施。
+- 授業回数・時間、教材管理費の周期等の未確認商条件は新たに確定していない。
+- この記録はローカル受入結果。Draft PR、CI、GitHub連携プレビュー、本番反映は別の状態として確認する。今回担当の範囲ではmergeしない。

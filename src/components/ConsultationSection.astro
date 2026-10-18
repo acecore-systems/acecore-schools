@@ -2,6 +2,7 @@
 import { acecoreContactUrl, lineUrl, schoolsContent } from "../data/schools";
 
 const consultation = schoolsContent.consultation;
+const preparation = consultation.preparation;
 ---
 
 <section
@@ -16,6 +17,69 @@ const consultation = schoolsContent.consultation;
         <h2 id="consultation-title">{consultation.title}</h2>
         <p>{consultation.body}</p>
       </div>
+      <details
+        class="consultation-preparation"
+        data-consultation-preparation
+        data-search-ignore
+        data-pagefind-ignore
+      >
+        <summary>
+          {preparation.title}
+          <i class="ph ph-plus" aria-hidden="true" />
+        </summary>
+        <div class="consultation-preparation__body">
+          <label for="consultation-area">{preparation.areaLabel}</label>
+          <select id="consultation-area" data-consultation-area>
+            <option value="">{preparation.undecided}</option>
+            {schoolsContent.areas.map((area) => (
+              <option value={area.id}>{area.title}</option>
+            ))}
+          </select>
+          <label for="consultation-message">{preparation.messageLabel}</label>
+          <p id="consultation-message-hint">{preparation.messageHint}</p>
+          <textarea
+            id="consultation-message"
+            rows="5"
+            autocomplete="off"
+            aria-describedby="consultation-message-hint"
+            data-consultation-message
+          >{preparation.template}</textarea>
+          <button
+            type="button"
+            class="button consultation-copy"
+            data-consultation-copy
+            hidden
+          >
+            {preparation.copy}
+            <i class="ph ph-copy" aria-hidden="true" />
+          </button>
+          <p>{preparation.copyHint}</p>
+          <p
+            class="consultation-copy-status"
+            role="status"
+            aria-live="polite"
+            data-consultation-copy-status
+            data-success={preparation.copied}
+            data-failure={preparation.copyFailed}
+          ></p>
+          <div data-consultation-manual hidden>
+            <label for="consultation-copy-output">{preparation.copy}</label>
+            <textarea
+              id="consultation-copy-output"
+              rows="7"
+              readonly
+              data-consultation-output
+              data-title={preparation.copiedTitle}
+              data-area-prefix={preparation.areaPrefix}
+            ></textarea>
+          </div>
+          <noscript>
+            <p>
+              分野と相談文を、手動でLINEや問い合わせフォームに貼り付けてください。
+            </p>
+          </noscript>
+        </div>
+      </details>
       <div class="consultation-actions">
         <a
           class="button button-primary consultation-button"
@@ -34,33 +98,103 @@ const consultation = schoolsContent.consultation;
     </div>
     <div class="consultation-details">
       <ol class="consultation-steps">
-        {
-          consultation.steps.map((step) => (
-            <li>
-              <span>{step.number}</span>
-              <div>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </div>
-            </li>
-          ))
-        }
+        {consultation.steps.map((step) => (
+          <li>
+            <span>{step.number}</span>
+            <div>
+              <h3>{step.title}</h3>
+              <p>{step.body}</p>
+            </div>
+          </li>
+        ))}
       </ol>
       <aside class="before-start">
         <p class="section-label">{consultation.beforeStart.eyebrow}</p>
         <h3>{consultation.beforeStart.title}</h3>
         <p>{consultation.beforeStart.body}</p>
         <ul>
-          {
-            consultation.beforeStart.items.map((item) => (
-              <li>
-                <i class:list={["ph", item.icon]} aria-hidden="true" />
-                <span>{item.label}</span>
-              </li>
-            ))
-          }
+          {consultation.beforeStart.items.map((item) => (
+            <li>
+              <i class:list={["ph", item.icon]} aria-hidden="true" />
+              <span>{item.label}</span>
+            </li>
+          ))}
         </ul>
       </aside>
     </div>
   </div>
 </section>
+
+<script>
+  import {
+    composeConsultationMessage,
+    resolveConsultationArea,
+  } from "../lib/consultation-context";
+  const preparation = document.querySelector<HTMLDetailsElement>(
+    "[data-consultation-preparation]",
+  );
+  const area = document.querySelector<HTMLSelectElement>(
+    "[data-consultation-area]",
+  );
+  const message = document.querySelector<HTMLTextAreaElement>(
+    "[data-consultation-message]",
+  );
+  const copy = document.querySelector<HTMLButtonElement>(
+    "[data-consultation-copy]",
+  );
+  const status = document.querySelector<HTMLElement>(
+    "[data-consultation-copy-status]",
+  );
+  const manual = document.querySelector<HTMLElement>(
+    "[data-consultation-manual]",
+  );
+  const output = document.querySelector<HTMLTextAreaElement>(
+    "[data-consultation-output]",
+  );
+  if (preparation && area && message && copy && status && manual && output) {
+    const available = [...area.options].map((option) => option.value);
+    const restoreArea = () => {
+      area.value = resolveConsultationArea(
+        new URL(location.href).searchParams.get("area"),
+        available,
+      );
+      if (area.value) {
+        preparation.open = true;
+        if (location.hash === "#consultation")
+          requestAnimationFrame(() => area.focus({ preventScroll: true }));
+      }
+    };
+    restoreArea();
+    window.addEventListener("popstate", restoreArea);
+    copy.hidden = false;
+    area.addEventListener("change", () => {
+      const url = new URL(location.href);
+      if (area.value) url.searchParams.set("area", area.value);
+      else url.searchParams.delete("area");
+      history.replaceState(null, "", url);
+      status.textContent = "";
+      manual.hidden = true;
+      // The editable message is intentionally left untouched.
+    });
+    copy.addEventListener("click", async () => {
+      const selectedLabel = area.selectedOptions[0]?.textContent?.trim() ?? "";
+      const text = composeConsultationMessage(
+        output.dataset.title ?? "",
+        output.dataset.areaPrefix ?? "",
+        selectedLabel,
+        message.value,
+      );
+      output.value = text;
+      try {
+        await navigator.clipboard.writeText(text);
+        manual.hidden = true;
+        status.textContent = status.dataset.success ?? "";
+      } catch {
+        manual.hidden = false;
+        output.focus();
+        output.select();
+        status.textContent = status.dataset.failure ?? "";
+      }
+    });
+  }
+</script>
