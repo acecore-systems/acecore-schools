@@ -1,0 +1,53 @@
+---
+import { creativeServiceContactUrl, schoolsContent } from "../data/schools";
+
+const services = schoolsContent.creativeServices;
+---
+
+<section
+  class="creative-services section-block"
+  id="creative-services"
+  aria-labelledby="creative-services-title"
+>
+  <div class="page-shell">
+    <div class="section-heading heading-row">
+      <div>
+        <p class="section-label">{services.eyebrow}</p>
+        <h2 id="creative-services-title">{services.title}</h2>
+      </div>
+      <p>{services.body}</p>
+    </div>
+    <p class="creative-services-note">{services.priceNote}</p>
+    <div class="creative-service-grid">
+      {services.items.map((service) => (
+        <article class="creative-service-card" id={service.id}>
+          <i class:list={["ph", service.icon]} aria-hidden="true" />
+          <h3>{service.title}</h3>
+          <p>{service.body}</p>
+          <p class="creative-service-price">
+            <span class="sr-only">{service.title}の料金：</span>
+            <span>{service.unit}</span>
+            <strong>{service.amount}</strong>
+          </p>
+          <dl>
+            <div>
+              <dt>対象</dt>
+              <dd>{service.audience}</dd>
+            </div>
+            <div>
+              <dt>{service.conditionLabel}</dt>
+              <dd>{service.condition}</dd>
+            </div>
+          </dl>
+          <a
+            class="button button-secondary"
+            href={creativeServiceContactUrl(service.id)}
+          >
+            {service.title}を相談する
+            <i class="ph ph-arrow-up-right" aria-hidden="true" />
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

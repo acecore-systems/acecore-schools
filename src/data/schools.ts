@@ -3,7 +3,7 @@ import { castScene } from "./cast-scenes";
 export const schoolsContent = {
   title: "Acecore Schools",
   description:
-    "Acecore Schoolsは、高卒認定、IT・プログラミング、PC・スマホ活用、ロボット／メイキングを、一人ひとりの目的に合わせて組み立てる学習スクールです。",
+    "Acecore Schoolsは、高卒認定、IT・プログラミング、PC・スマホ活用、ロボット／メイキングの学習と、3D・創作の研修・制作支援を、目的に合わせて提供します。",
   nav: [
     { key: "learning", label: "学べること", href: "/learning/" },
     {
@@ -461,6 +461,59 @@ export const schoolsContent = {
       "内容やペースを変更する場合の条件・費用",
     ],
   },
+  creativeServices: {
+    eyebrow: "CREATIVE LEARNING & SUPPORT",
+    title: "3D・創作の研修・制作支援",
+    body: "3D制作の基礎から、制作中の相談、作品のレビュー、創作体験まで。学校・個人・企業などの目的に合わせて、Acecoreがご相談を受け付けます。",
+    priceNote: "表示料金はすべて税込です。",
+    items: [
+      {
+        id: "3d-training",
+        icon: "ph-cube",
+        title: "3D制作の入門研修",
+        body: "Blenderなどの基本操作と、3D制作の工程を扱う入門研修です。",
+        audience: "社内担当者・学校・3D制作の初心者",
+        unit: "90分",
+        amount: "30,000円〜",
+        conditionLabel: "見積条件",
+        condition: "人数・教材・準備内容に応じてお見積もりします。",
+      },
+      {
+        id: "3d-support",
+        icon: "ph-monitor",
+        title: "3D制作の個別技術サポート",
+        body: "3D制作の操作や設定で困っている箇所を、画面共有で確認しながら支援します。",
+        audience: "3D制作に取り組む個人・企業・学校",
+        unit: "60分",
+        amount: "8,000円〜",
+        conditionLabel: "支援方法",
+        condition: "画面共有で操作や設定をご相談いただけます。",
+      },
+      {
+        id: "creative-review",
+        icon: "ph-pencil-line",
+        title: "イラスト・文章の制作レビュー",
+        body: "イラストや文章について、改善点と具体例をお伝えし、次の制作につなげます。",
+        audience: "イラストや文章を制作する個人・企業・学校",
+        unit: "1件",
+        amount: "8,000円〜",
+        conditionLabel: "見積条件",
+        condition: "作品の点数・文字数・レビュー範囲に応じてお見積もりします。",
+      },
+      {
+        id: "creative-workshop",
+        icon: "ph-paint-brush",
+        title: "創作ワークショップ",
+        body: "絵や粘土など、手を動かして創作を体験するワークショップを実施します。",
+        audience: "学校・施設・地域団体・企業",
+        unit: "1回",
+        amount: "30,000円〜",
+        conditionLabel: "見積条件",
+        condition:
+          "人数・時間に応じてお見積もりします。材料費・交通費は別途です。",
+      },
+    ],
+  },
   acecore: {
     eyebrow: "ACECORE NETWORK",
     title: "現場の技術を、学びへつなぐ。",
@@ -563,7 +616,12 @@ export const schoolsContent = {
       {
         question: "料金はいつ分かりますか？",
         answer:
-          "料金ページに入会金、月謝、教材・管理費の目安を掲載しています。正式な金額は、目的や進め方を確認したうえで、受講を決める前にご案内します。",
+          "料金ページに入会金、月謝、教材・管理費の目安と、研修・制作支援の料金を掲載しています。正式な金額は、目的や進め方を確認したうえで、受講やご依頼を決める前にご案内します。",
+      },
+      {
+        question: "3Dや創作の研修・制作支援は団体でも相談できますか？",
+        answer:
+          "はい。学校・施設・地域団体・企業などからもご相談いただけます。3D制作の入門研修、個別技術サポート、イラスト・文章の制作レビュー、創作ワークショップをご案内しています。内容や人数などを確認し、お見積もりします。",
       },
       {
         question: "受講に必要な機器はありますか？",
@@ -590,4 +648,11 @@ export const acecoreOrigin = "https://acecore.net";
 export const acecoreLegalName = "株式会社Acecore";
 export const acecoreContactUrl =
   "https://acecore.net/contact/?category=service&service=education#contact-form";
+export function creativeServiceContactUrl(
+  offering: (typeof schoolsContent.creativeServices.items)[number]["id"],
+) {
+  const url = new URL(acecoreContactUrl);
+  url.searchParams.set("offering", offering);
+  return url.href;
+}
 export const lineUrl = "https://lin.ee/DjIrdqj";
