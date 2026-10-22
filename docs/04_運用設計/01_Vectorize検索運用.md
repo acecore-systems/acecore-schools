@@ -93,7 +93,7 @@ fail closedします。ローカルやPR PreviewからProduction indexへ直接�
 
 ## Build and validation
 
-Node.js 24.18.0 以上で実行します。
+Node.js 24.22.1 以上で実行します。
 
 ```bash
 npm ci

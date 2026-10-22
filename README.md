@@ -90,7 +90,7 @@ Cloudflare Pages の preview / production に分けて設定します。
 
 必要な環境:
 
-- Node.js 24.18.0 以上（`.node-version` を参照）
+- Node.js 24.22.1 以上（`.node-version` を参照）
 - npm
 - Astro v7
 
