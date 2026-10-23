@@ -161,7 +161,7 @@ const supportImage = castScene("support-call");
 const outcomesByArea = new Map(
   content.outcomes.items.map((item) => [item.areaId, item]),
 );
-const acecoreLogo = "/favicon.svg";
+const acecoreLogo = "/logo.svg";
 const currentYear = new Date().getFullYear();
 const searchHref = page === "home" ? "#site-search" : "/#site-search";
 
@@ -378,7 +378,7 @@ const homeOverview = [
         <meta property="article:section" content="活動記録" />
       </>
     )}
-    <link rel="icon" type="image/svg+xml" href={acecoreLogo} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
