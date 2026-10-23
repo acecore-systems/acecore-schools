@@ -382,7 +382,7 @@ const homeOverview = [
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <script
@@ -1025,8 +1025,10 @@ const homeOverview = [
         <section class="faq section-block" id="faq" aria-labelledby="faq-title">
           <div class="faq-layout page-shell">
             <div class="section-heading faq-heading">
-              <p class="section-label">FAQ</p>
-              <h2 id="faq-title">{content.faq.title}</h2>
+              <p class="section-label sr-only">FAQ</p>
+              <h2 id="faq-title" class="sr-only">
+                {content.faq.title}
+              </h2>
               <p>ここにない内容も、無料相談で気軽に聞いてください。</p>
             </div>
             <div class="faq-list">
