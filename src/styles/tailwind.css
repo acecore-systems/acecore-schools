@@ -12,16 +12,16 @@
   --color-paper: #ffffff;
   --color-canvas: #edf8f3;
   --color-canvas-blue: #edf8f3;
-  --color-ink: #071f3e;
-  --color-navy: #071f3e;
-  --color-navy-dark: #071f3e;
+  --color-ink: #20252b;
+  --color-navy: #065f4b;
+  --color-navy-dark: #065f4b;
   --color-green: #087d62;
   --color-green-dark: #065f4b;
   --color-muted: #53616b;
   --color-line: #ccd6df;
   --color-line-strong: #9fb0bf;
   --color-error-canvas: #ffffff;
-  --color-error-ink: #071f3e;
+  --color-error-ink: #20252b;
   --color-error-muted: #4b5565;
   --color-error-action: #087d62;
   --font-sans:
@@ -30,7 +30,7 @@
     Inter, "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   --font-serif: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
-  --shadow-card: 0 18px 44px rgba(20, 50, 73, 0.09);
+  --shadow-card: 0 18px 44px rgba(6, 95, 75, 0.09);
   --shadow-focus: 0 0 0 2px var(--color-paper), 0 0 0 6px var(--color-green);
   --radius-control: 0px;
   --spacing-control-x: 0.9375rem;
@@ -196,10 +196,10 @@
     gap: 30px;
     align-items: center;
     min-height: 74px;
-    border-bottom: 1px solid rgba(10, 53, 105, 0.12);
+    border-bottom: 1px solid rgba(6, 95, 75, 0.12);
     padding: 0 max(28px, calc((100vw - 1280px) / 2));
     background: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 5px 24px rgba(10, 53, 105, 0.05);
+    box-shadow: 0 5px 24px rgba(6, 95, 75, 0.05);
   }
 
   .brand-lockup,
@@ -215,7 +215,7 @@
 
   .brand-parent {
     gap: 8px;
-    color: #00022b;
+    color: var(--color-ink);
     font-size: 1.18rem;
     font-weight: 700;
     letter-spacing: -0.035em;
@@ -1242,7 +1242,7 @@
   .acecore-bridge {
     border-block: 1px solid #cad5e2;
     padding-block: 64px;
-    background: #f8f9ff;
+    background: var(--color-canvas);
   }
 
   .acecore-bridge-layout {
@@ -1262,7 +1262,7 @@
     gap: 12px;
     align-items: center;
     margin-top: 4px;
-    color: #00022b;
+    color: var(--color-ink);
     font-size: 1rem;
     font-weight: 700;
   }
@@ -1296,7 +1296,7 @@
 
   .acecore-bridge-links blockquote {
     margin: 0 0 24px;
-    color: #00022b;
+    color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 1.1rem;
     font-weight: 600;
@@ -1322,7 +1322,7 @@
 
   .acecore-bridge-links a:hover,
   .acecore-bridge-links a:focus-visible {
-    color: #0009e6;
+    color: var(--color-green);
   }
 
   .pricing {
@@ -1572,7 +1572,7 @@
 
   .consultation-button:hover,
   .consultation-button:focus-visible {
-    background: #eaf3f8;
+    background: var(--color-canvas);
     color: var(--color-navy-dark);
   }
 
@@ -1721,19 +1721,21 @@
   }
 
   .footer-brand-lockup img {
-    width: 30px;
-    height: 30px;
-    filter: brightness(0) invert(1);
+    width: 36px;
+    height: 36px;
+    background: white;
+    border-radius: 50%;
+    padding: 4px;
   }
 
   .footer-brand-lockup > span {
-    color: rgba(255, 255, 255, 0.45);
+    color: white;
   }
 
   .footer-brand p {
     max-width: 460px;
     margin-top: 12px;
-    color: rgba(255, 255, 255, 0.65);
+    color: white;
     font-size: 0.82rem;
   }
 
@@ -1751,7 +1753,7 @@
   .footer-brand small {
     display: block;
     margin-top: 18px;
-    color: rgba(255, 255, 255, 0.58);
+    color: white;
     font-size: 0.8rem;
   }
 
@@ -1775,7 +1777,7 @@
   }
 
   .footer-nav-grid a {
-    color: rgba(255, 255, 255, 0.72);
+    color: white;
     font-size: 0.85rem;
     text-decoration: none;
   }
@@ -1792,7 +1794,7 @@
     margin-top: 48px;
     border-top: 1px solid rgba(255, 255, 255, 0.16);
     padding-top: 22px;
-    color: rgba(255, 255, 255, 0.58);
+    color: white;
     font-size: 0.78rem;
   }
 
@@ -2440,7 +2442,7 @@
     border: 1px solid var(--color-line-strong);
     border-radius: 6px;
     background: var(--color-paper);
-    box-shadow: 0 24px 64px rgba(5, 40, 79, 0.2);
+    box-shadow: 0 24px 64px rgba(6, 95, 75, 0.2);
   }
 
   .schools-ai-chat-panel[hidden] {
@@ -2603,7 +2605,7 @@
   .schools-ai-chat-markdown code {
     border-radius: var(--radius-control);
     padding: 0.05rem 0.25rem;
-    background: #e6edf2;
+    background: var(--color-canvas);
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
     font-size: 0.9em;
   }
@@ -2738,7 +2740,7 @@
     padding: 12px 18px;
     background: var(--color-navy);
     color: white;
-    box-shadow: 0 14px 34px rgba(5, 40, 79, 0.24);
+    box-shadow: 0 14px 34px rgba(6, 95, 75, 0.24);
     font-size: 0.86rem;
     font-weight: 700;
     cursor: pointer;
@@ -2817,7 +2819,7 @@
     background:
       linear-gradient(135deg, rgba(8, 125, 98, 0.07), transparent 52%),
       var(--color-paper);
-    box-shadow: 0 12px 32px rgba(20, 50, 73, 0.06);
+    box-shadow: 0 12px 32px rgba(6, 95, 75, 0.06);
   }
 
   .site-search-layout {
@@ -3426,7 +3428,7 @@
     cursor: pointer;
   }
   .consultation-preparation__body .consultation-copy:hover {
-    background: #eaf3f8;
+    background: var(--color-canvas);
   }
   .consultation-copy-status:empty {
     display: none;
@@ -3817,7 +3819,10 @@
     border-radius: 0;
   }
   footer {
-    background: var(--color-ink);
+    background: var(--color-green-dark);
+  }
+  footer :is(p, small, span, strong, a) {
+    color: white;
   }
   .footer-brand-lockup a {
     font-size: clamp(24px, 3vw, 40px);
