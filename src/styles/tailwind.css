@@ -228,11 +228,6 @@
     height: 28px;
   }
 
-  .brand-divider {
-    color: var(--color-line-strong);
-    font-size: 1rem;
-  }
-
   .brand-school {
     color: var(--color-navy);
     font-size: 1.1rem;
@@ -292,9 +287,7 @@
 
   .header-cta,
   .button-primary,
-  [data-search-submit],
-  .schools-ai-chat-toggle,
-  .schools-ai-chat-composer form button {
+  [data-search-submit] {
     background: var(--color-navy);
     color: white;
   }
@@ -1802,9 +1795,9 @@
   }
 
   :focus-visible {
-    outline: 3px solid white;
+    outline: 2px solid var(--ink-accent);
     outline-offset: 3px;
-    box-shadow: 0 0 0 6px var(--color-green);
+    box-shadow: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -2425,393 +2418,11 @@
   }
 
   /* Source: src/components/SchoolsAiChat.astro */
-  .schools-ai-chat {
-    position: fixed;
-    z-index: 90;
-    right: clamp(16px, 3vw, 28px);
-    bottom: clamp(16px, 3vw, 28px);
-    display: grid;
-    justify-items: end;
-    color: var(--color-ink);
-    font-family: var(--font-sans);
-  }
-
-  .schools-ai-chat-panel {
-    display: grid;
-    width: min(390px, calc(100vw - 32px));
-    max-height: min(720px, calc(100dvh - 104px));
-    margin-bottom: 12px;
-    overflow: hidden;
-    border: 1px solid var(--color-line-strong);
-    border-radius: 6px;
-    background: var(--color-paper);
-    box-shadow: 0 24px 64px rgba(6, 95, 75, 0.2);
-  }
-
-  .schools-ai-chat-panel[hidden] {
-    display: none;
-  }
-
-  .schools-ai-chat-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    border-bottom: 1px solid var(--color-line);
-    padding: 16px;
-    background: var(--color-canvas-blue);
-  }
-
-  .schools-ai-chat-heading {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .schools-ai-chat-mark {
-    display: grid;
-    width: 40px;
-    height: 40px;
-    flex: 0 0 auto;
-    place-items: center;
-    border: 1px solid var(--color-line);
-    border-radius: 4px;
-    background: var(--color-paper);
-    color: var(--color-green-dark);
-    font-size: 1.35rem;
-  }
-
-  .schools-ai-chat-header h2 {
-    color: var(--brand-neutral);
-    font-family: var(--font-sans);
-    font-size: 1.05rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
-  .schools-ai-chat-header p {
-    margin-top: 3px;
-    color: var(--color-muted);
-    font-size: 0.78rem;
-    line-height: 1.6;
-  }
-
-  .schools-ai-chat-close {
-    display: grid;
-    width: 40px;
-    height: 40px;
-    flex: 0 0 auto;
-    place-items: center;
-    border: 0;
-    border-radius: 4px;
-    background: transparent;
-    color: var(--color-muted);
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
-
-  .schools-ai-chat-close:hover {
-    background: var(--color-paper);
-    color: var(--color-navy);
-  }
-
-  .schools-ai-chat-messages {
-    min-height: 210px;
-    max-height: min(43vh, 390px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: 18px 16px;
-    background: var(--color-paper);
-    scrollbar-gutter: stable;
-  }
-
-  .schools-ai-chat-message {
-    display: flex;
-  }
-
-  .schools-ai-chat-message + .schools-ai-chat-message {
-    margin-top: 12px;
-  }
-
-  .schools-ai-chat-message[data-role="user"] {
-    justify-content: flex-end;
-  }
-
-  .schools-ai-chat-bubble {
-    max-width: 88%;
-    border: 1px solid var(--color-line);
-    border-radius: 6px;
-    padding: 10px 12px;
-    background: var(--color-canvas);
-    color: var(--color-ink);
-    font-size: 0.84rem;
-    line-height: 1.65;
-    overflow-wrap: anywhere;
-  }
-
-  .schools-ai-chat-message[data-role="user"] .schools-ai-chat-bubble {
-    border-color: var(--color-navy);
-    background: var(--color-navy);
-    color: white;
-    white-space: pre-wrap;
-  }
-
-  .schools-ai-chat-message[data-error="true"] .schools-ai-chat-bubble {
-    border-color: #d7a1a1;
-    background: #fff6f6;
-    color: #8a2525;
-    white-space: pre-wrap;
-  }
-
-  .schools-ai-chat-message[data-loading="true"] .schools-ai-chat-bubble {
-    color: var(--color-muted);
-  }
-
-  .schools-ai-chat-markdown p + p,
-  .schools-ai-chat-markdown p + ul,
-  .schools-ai-chat-markdown p + ol,
-  .schools-ai-chat-markdown ul + p,
-  .schools-ai-chat-markdown ol + p {
-    margin-top: 0.55rem;
-  }
-
-  .schools-ai-chat-markdown ul,
-  .schools-ai-chat-markdown ol {
-    margin: 0.35rem 0 0;
-    padding-left: 1.25rem;
-  }
-
-  .schools-ai-chat-markdown ul {
-    list-style: disc;
-  }
-
-  .schools-ai-chat-markdown ol {
-    list-style: decimal;
-  }
-
-  .schools-ai-chat-markdown li + li {
-    margin-top: 0.25rem;
-  }
-
-  .schools-ai-chat-markdown strong {
-    color: var(--color-navy);
-    font-weight: 700;
-  }
-
-  .schools-ai-chat-markdown a {
-    color: var(--color-green-dark);
-    font-weight: 700;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
-  }
-
-  .schools-ai-chat-markdown code {
-    border-radius: var(--radius-control);
-    padding: 0.05rem 0.25rem;
-    background: var(--color-canvas);
-    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-    font-size: 0.9em;
-  }
-
-  .schools-ai-chat-composer {
-    border-top: 1px solid var(--color-line);
-    padding: 14px 16px 16px;
-    background: var(--color-canvas);
-  }
-
-  .schools-ai-chat-prompts {
-    display: flex;
-    gap: 7px;
-    margin-bottom: 11px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: thin;
-  }
-
-  .schools-ai-chat-prompts button {
-    flex: 0 0 auto;
-    border: 1px solid var(--color-line-strong);
-    border-radius: 999px;
-    padding: 6px 10px;
-    background: var(--color-paper);
-    color: var(--color-navy);
-    font-size: 0.74rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .schools-ai-chat-prompts button:hover {
-    border-color: var(--color-green);
-    color: var(--color-green-dark);
-  }
-
-  .schools-ai-chat-composer form {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: end;
-    gap: 8px;
-  }
-
-  .schools-ai-chat-composer textarea {
-    width: 100%;
-    min-height: 50px;
-    max-height: 120px;
-    resize: vertical;
-    border: 1px solid var(--color-line-strong);
-    border-radius: 4px;
-    padding: 10px 11px;
-    background: var(--color-paper);
-    color: var(--color-ink);
-    font: 400 16px/1.5 var(--font-sans);
-  }
-
-  .schools-ai-chat-composer textarea::placeholder {
-    color: #667782;
-    opacity: 1;
-  }
-
-  .schools-ai-chat-composer form button {
-    display: inline-flex;
-    min-height: 50px;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    border: 1px solid var(--color-navy);
-    border-radius: 4px;
-    padding: 9px 13px;
-    background: var(--color-navy);
-    color: white;
-    font-size: 0.8rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .schools-ai-chat-composer form button:hover:not(:disabled) {
-    background: var(--color-navy-dark);
-  }
-
-  .schools-ai-chat-composer form button:disabled,
-  .schools-ai-chat-prompts button:disabled {
-    cursor: wait;
-    opacity: 0.62;
-  }
-
-  .schools-ai-chat-input-meta {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 5px;
-    color: var(--color-muted);
-    font-size: 0.68rem;
-    line-height: 1.45;
-  }
-
-  .schools-ai-chat-contact {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    margin-top: 11px;
-    font-size: 0.75rem;
-    font-weight: 700;
-  }
-
-  .schools-ai-chat-contact a {
-    color: var(--color-green-dark);
-    text-underline-offset: 3px;
-  }
-
-  .schools-ai-chat-privacy {
-    margin-top: 9px;
-    color: var(--color-muted);
-    font-size: 0.66rem;
-    line-height: 1.55;
-  }
-
-  .schools-ai-chat-privacy a {
-    color: var(--color-navy);
-    text-underline-offset: 2px;
-  }
-
-  .schools-ai-chat-toggle {
-    display: inline-flex;
-    min-height: 56px;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border: 1px solid var(--color-navy);
-    border-radius: 999px;
-    padding: 12px 18px;
-    background: var(--color-navy);
-    color: white;
-    box-shadow: 0 14px 34px rgba(6, 95, 75, 0.24);
-    font-size: 0.86rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition:
-      background-color 160ms ease,
-      transform 160ms ease;
-  }
-
-  .schools-ai-chat-toggle i {
-    font-size: 1.35rem;
-  }
-
-  .schools-ai-chat-toggle:hover {
-    background: var(--color-navy-dark);
-    transform: translateY(-2px);
-  }
-
-  .schools-ai-chat[data-busy="true"] .schools-ai-chat-toggle i {
-    animation: schools-ai-chat-pulse 1.2s ease-in-out infinite;
-  }
-
-  @keyframes schools-ai-chat-pulse {
-    50% {
-      opacity: 0.48;
-    }
-  }
 
   @media (max-width: 520px) {
-    .schools-ai-chat {
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-    }
-
-    .schools-ai-chat-panel {
-      width: 100%;
-      max-height: calc(100dvh - 88px);
-      margin-bottom: 8px;
-    }
-
-    .schools-ai-chat-header {
-      padding: 13px;
-    }
-
-    .schools-ai-chat-messages {
-      min-height: 170px;
-      max-height: 36vh;
-      padding: 15px 13px;
-    }
-
-    .schools-ai-chat-composer {
-      padding: 12px 13px 13px;
-    }
-
-    .schools-ai-chat-toggle {
-      min-height: 52px;
-      padding: 10px 15px;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .schools-ai-chat-toggle {
-      transition: none;
-    }
-
-    .schools-ai-chat[data-busy="true"] .schools-ai-chat-toggle i {
-      animation: none;
-    }
   }
 
   /* Source: src/components/SearchPanel.astro */
@@ -3590,9 +3201,7 @@
   .header-cta,
   .button-primary,
   .consultation-form-button,
-  [data-search-submit],
-  .schools-ai-chat-toggle,
-  .schools-ai-chat-composer form button {
+  [data-search-submit] {
     background: var(--brand-control);
     border: 3px solid transparent;
     color: var(--ink-accent);
@@ -3600,9 +3209,7 @@
   .header-cta:hover,
   .button-primary:hover,
   .consultation-form-button:hover,
-  [data-search-submit]:hover,
-  .schools-ai-chat-toggle:hover,
-  .schools-ai-chat-composer form button:hover:not(:disabled) {
+  [data-search-submit]:hover {
     background:
       linear-gradient(white, white) padding-box,
       var(--paint) border-box;
@@ -3767,7 +3374,7 @@
   }
   .home-start-pricing dd,
   .pricing-row dd > strong {
-    color: var(--color-green);
+    color: var(--brand-neutral);
   }
   .overview-card {
     border-radius: 0;
@@ -3853,11 +3460,6 @@
     display: inline-flex;
     align-items: center;
     min-height: 44px;
-  }
-  .schools-ai-chat-panel,
-  .schools-ai-chat-toggle,
-  .schools-ai-chat-prompts button {
-    border-radius: 0;
   }
   body:has([data-menu-toggle][aria-expanded="true"]) .schools-ai-chat {
     display: none;
@@ -3977,4 +3579,19 @@ footer::before {
   height: 4px;
   background: var(--paint-edge);
   pointer-events: none;
+}
+
+/* Secondary navigation is distinct from the consultation action. */
+.button-secondary {
+  border: 1px solid #8996a4;
+  color: #20252b;
+  background: #fff;
+}
+.button-secondary:is(:hover, :focus-visible) {
+  border-color: #20252b;
+  background: #f3f5f7;
+  color: #20252b;
+}
+main [id] {
+  scroll-margin-top: 112px;
 }
