@@ -1728,9 +1728,7 @@
   .footer-brand-lockup img {
     width: 36px;
     height: 36px;
-    background: white;
-    border-radius: 50%;
-    padding: 4px;
+    object-fit: contain;
   }
 
   .footer-brand-lockup > span {

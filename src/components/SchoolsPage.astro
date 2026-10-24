@@ -1,4 +1,5 @@
 ---
+import BrandWord from "./BrandWord.astro";
 import "../styles/tailwind.css";
 import "@phosphor-icons/web/regular";
 import ActivitySection from "./ActivitySection.astro";
@@ -402,13 +403,13 @@ const homeOverview = [
           aria-label="Acecore 公式サイト"
         >
           <img src={acecoreLogo} alt="Acecore ロゴ" width="32" height="32" />
-          <span>Acecore</span>
+          <BrandWord word="Acecore" kind="corporate" />
         </a>
         <span class="brand-divider" aria-hidden="true">
           /
         </span>
         <a class="brand-school" href="/">
-          Schools
+          <BrandWord word="Schools" kind="service" />
         </a>
       </div>
 
@@ -866,9 +867,9 @@ const homeOverview = [
                   loading="lazy"
                 />
                 <span>
-                  <span class="brand-corporate-name">Acecore</span>{" "}
+                  <BrandWord word="Acecore" kind="corporate" />{" "}
                   <i aria-hidden="true">/</i>{" "}
-                  <span class="brand-service-name">Schools</span>
+                  <BrandWord word="Schools" kind="service" />
                 </span>
               </div>
               <h2 id="acecore-bridge-title">{content.acecore.title}</h2>
@@ -1063,11 +1064,11 @@ const homeOverview = [
                 height="36"
                 loading="lazy"
               />
-              <span class="brand-corporate-name">Acecore</span>
+              <BrandWord word="Acecore" kind="corporate" />
             </a>
             <span aria-hidden="true">/</span>
             <a class="brand-school" href="/">
-              Schools
+              <BrandWord word="Schools" kind="service" />
             </a>
           </div>
           <p>{content.footer.tagline}</p>
