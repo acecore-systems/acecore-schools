@@ -3822,8 +3822,7 @@
   }
   .consultation {
     background: var(--wash);
-    border-block: 5px solid transparent;
-    border-image: var(--paint-edge) 1;
+    border: 0;
     color: var(--brand-neutral);
     padding-block: clamp(64px, 7.5vw, 112px);
   }
@@ -3840,10 +3839,9 @@
     border-radius: 0;
   }
   footer {
-    background:
-      linear-gradient(white, white) padding-box,
-      var(--paint) border-box;
-    border-block: 8px solid transparent;
+    position: relative;
+    background: white;
+    border: 0;
     color: var(--brand-neutral);
   }
   footer :is(p, small, span, strong, a) {
@@ -3972,4 +3970,13 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+}
+
+footer::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--paint-edge);
+  pointer-events: none;
 }
