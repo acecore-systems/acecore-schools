@@ -1,4 +1,6 @@
 ---
+import BrandName from "./BrandName.astro";
+import "../styles/brand.css";
 import "../styles/tailwind.css";
 import "@phosphor-icons/web/regular";
 import ActivitySection from "./ActivitySection.astro";
@@ -161,7 +163,7 @@ const supportImage = castScene("support-call");
 const outcomesByArea = new Map(
   content.outcomes.items.map((item) => [item.areaId, item]),
 );
-const acecoreLogo = `${acecoreOrigin}/favicon.svg`;
+const acecoreLogo = "/logo.svg";
 const currentYear = new Date().getFullYear();
 const searchHref = page === "home" ? "#site-search" : "/#site-search";
 
@@ -378,7 +380,7 @@ const homeOverview = [
         <meta property="article:section" content="活動記録" />
       </>
     )}
-    <link rel="icon" type="image/svg+xml" href={acecoreLogo} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -402,13 +404,15 @@ const homeOverview = [
           aria-label="Acecore 公式サイト"
         >
           <img src={acecoreLogo} alt="Acecore ロゴ" width="32" height="32" />
-          <span>Acecore</span>
+          <span>
+            <BrandName name="Acecore" />
+          </span>
         </a>
         <span class="brand-divider" aria-hidden="true">
           /
         </span>
         <a class="brand-school" href="/">
-          Schools
+          <BrandName name="Schools" />
         </a>
       </div>
 
@@ -866,7 +870,8 @@ const homeOverview = [
                   loading="lazy"
                 />
                 <span>
-                  Acecore <i aria-hidden="true">/</i> Schools
+                  <BrandName name="Acecore" /> <i aria-hidden="true">/</i>{" "}
+                  <BrandName name="Schools" />
                 </span>
               </div>
               <h2 id="acecore-bridge-title">{content.acecore.title}</h2>
@@ -1053,17 +1058,19 @@ const homeOverview = [
           <div class="footer-brand-lockup">
             <a href={acecoreOrigin} aria-label="Acecore 公式サイト">
               <img
-                src={acecoreLogo}
+                src="/logo-on-dark.svg"
                 alt="Acecore ロゴ"
                 width="36"
                 height="36"
                 loading="lazy"
               />
-              <span>Acecore</span>
+              <span>
+                <BrandName name="Acecore" />
+              </span>
             </a>
             <span aria-hidden="true">/</span>
             <a class="brand-school" href="/">
-              Schools
+              <BrandName name="Schools" />
             </a>
           </div>
           <p>{content.footer.tagline}</p>
@@ -1100,7 +1107,9 @@ const homeOverview = [
           </nav>
           <nav aria-label="Acecore 関連サイト">
             <strong>Network</strong>
-            <a href="https://systems.acecore.net/">Acecore Systems</a>
+            <a href="https://systems.acecore.net/">
+              <BrandName name="Acecore Systems" />
+            </a>
             <a href="https://asv.acecore.net/">Aceserver</a>
             <a href={`${acecoreOrigin}/privacy/`}>プライバシー</a>
           </nav>

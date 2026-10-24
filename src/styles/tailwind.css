@@ -11,12 +11,12 @@
 @theme {
   --color-paper: #ffffff;
   --color-canvas: #f7f8f5;
-  --color-canvas-blue: #f3f7fa;
-  --color-ink: #102433;
-  --color-navy: #0a3569;
-  --color-navy-dark: #05284f;
-  --color-green: #087d62;
-  --color-green-dark: #065a49;
+  --color-canvas-blue: #f2f8f4;
+  --color-ink: #20252b;
+  --color-navy: #176b45;
+  --color-navy-dark: #143b2b;
+  --color-green: #176b45;
+  --color-green-dark: #105034;
   --color-muted: #53616b;
   --color-line: #ccd6df;
   --color-line-strong: #9fb0bf;
@@ -215,7 +215,7 @@
 
   .brand-parent {
     gap: 8px;
-    color: #00022b;
+    color: #20252b;
     font-size: 1.18rem;
     font-weight: 700;
     letter-spacing: -0.035em;
@@ -592,7 +592,7 @@
 
   .overview-card h3 {
     margin-top: 7px;
-    color: var(--color-navy);
+    color: var(--color-ink);
     font-family: var(--font-serif);
     font-size: 1.45rem;
   }
@@ -773,7 +773,7 @@
 
   .area-body h3 {
     margin-top: 10px;
-    color: var(--color-navy);
+    color: var(--color-ink);
     font-size: 1.08rem;
   }
 
@@ -1242,7 +1242,7 @@
   .acecore-bridge {
     border-block: 1px solid #cad5e2;
     padding-block: 64px;
-    background: #f8f9ff;
+    background: #f5faf7;
   }
 
   .acecore-bridge-layout {
@@ -1262,7 +1262,7 @@
     gap: 12px;
     align-items: center;
     margin-top: 4px;
-    color: #00022b;
+    color: #20252b;
     font-size: 1rem;
     font-weight: 700;
   }
@@ -1296,7 +1296,7 @@
 
   .acecore-bridge-links blockquote {
     margin: 0 0 24px;
-    color: #00022b;
+    color: #20252b;
     font-family: var(--font-serif);
     font-size: 1.1rem;
     font-weight: 600;
@@ -1322,7 +1322,7 @@
 
   .acecore-bridge-links a:hover,
   .acecore-bridge-links a:focus-visible {
-    color: #0009e6;
+    color: #176b45;
   }
 
   .pricing {
@@ -2477,7 +2477,7 @@
   }
 
   .schools-ai-chat-header h2 {
-    color: var(--color-navy);
+    color: var(--color-ink);
     font-family: var(--font-serif);
     font-size: 1.05rem;
     font-weight: 600;
@@ -2833,7 +2833,7 @@
   }
 
   .site-search-copy h3 {
-    color: var(--color-navy);
+    color: var(--color-ink);
     font-family: var(--font-serif);
     font-size: clamp(1.55rem, 2.2vw, 2.15rem);
     font-weight: 600;
@@ -2947,7 +2947,7 @@
   }
 
   .site-search-results-heading h4 {
-    color: var(--color-navy);
+    color: var(--color-ink);
     font-family: var(--font-serif);
     font-size: 1.2rem;
   }
@@ -3117,7 +3117,7 @@
   }
   .home-start-grid h3 {
     margin-block: 10px 16px;
-    color: var(--color-navy);
+    color: var(--color-ink);
     font-family: var(--font-serif);
     font-size: 1.5rem;
   }
@@ -3188,7 +3188,7 @@
     background: var(--color-paper);
   }
   .learning-goal-note h3 {
-    color: var(--color-navy);
+    color: var(--color-ink);
     font-family: var(--font-serif);
     font-weight: 600;
     font-size: 1.3rem;
@@ -3304,7 +3304,7 @@
   }
   .pricing-reading-guide h3 {
     margin-bottom: 10px;
-    color: var(--color-navy);
+    color: var(--color-ink);
     font-size: 1.15rem;
   }
   .pricing-reading-guide p {
@@ -3345,7 +3345,7 @@
   }
   .pricing-checks h3 {
     margin-bottom: 10px;
-    color: var(--color-navy);
+    color: var(--color-ink);
     font-size: 1.15rem;
   }
   .pricing-checks > p {
