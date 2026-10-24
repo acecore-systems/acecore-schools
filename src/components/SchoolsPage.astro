@@ -1,4 +1,5 @@
 ---
+import BrandName from "./BrandName.astro";
 import BrandWord from "./BrandWord.astro";
 import "../styles/tailwind.css";
 import "@phosphor-icons/web/regular";
@@ -1105,7 +1106,9 @@ const homeOverview = [
           </nav>
           <nav aria-label="Acecore 関連サイト">
             <strong>Network</strong>
-            <a href="https://systems.acecore.net/">Acecore Systems</a>
+            <a href="https://systems.acecore.net/">
+              <BrandName name="Acecore Systems" />
+            </a>
             <a href="https://asv.acecore.net/">Aceserver</a>
             <a href={`${acecoreOrigin}/privacy/`}>プライバシー</a>
           </nav>
