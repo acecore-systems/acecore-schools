@@ -1,6 +1,6 @@
 ---
 import BrandName from "./BrandName.astro";
-import "../styles/brand.css";
+import BrandWord from "./BrandWord.astro";
 import "../styles/tailwind.css";
 import "@phosphor-icons/web/regular";
 import ActivitySection from "./ActivitySection.astro";
@@ -384,7 +384,7 @@ const homeOverview = [
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <script
@@ -404,15 +404,10 @@ const homeOverview = [
           aria-label="Acecore 公式サイト"
         >
           <img src={acecoreLogo} alt="Acecore ロゴ" width="32" height="32" />
-          <span>
-            <BrandName name="Acecore" />
-          </span>
+          <BrandWord word="Acecore" kind="corporate" />
         </a>
-        <span class="brand-divider" aria-hidden="true">
-          /
-        </span>
         <a class="brand-school" href="/">
-          <BrandName name="Schools" />
+          <BrandWord word="Schools" kind="service" />
         </a>
       </div>
 
@@ -870,8 +865,8 @@ const homeOverview = [
                   loading="lazy"
                 />
                 <span>
-                  <BrandName name="Acecore" /> <i aria-hidden="true">/</i>{" "}
-                  <BrandName name="Schools" />
+                  <BrandWord word="Acecore" kind="corporate" />{" "}
+                  <BrandWord word="Schools" kind="service" />
                 </span>
               </div>
               <h2 id="acecore-bridge-title">{content.acecore.title}</h2>
@@ -1030,8 +1025,10 @@ const homeOverview = [
         <section class="faq section-block" id="faq" aria-labelledby="faq-title">
           <div class="faq-layout page-shell">
             <div class="section-heading faq-heading">
-              <p class="section-label">FAQ</p>
-              <h2 id="faq-title">{content.faq.title}</h2>
+              <p class="section-label sr-only">FAQ</p>
+              <h2 id="faq-title" class="sr-only">
+                {content.faq.title}
+              </h2>
               <p>ここにない内容も、無料相談で気軽に聞いてください。</p>
             </div>
             <div class="faq-list">
@@ -1058,19 +1055,16 @@ const homeOverview = [
           <div class="footer-brand-lockup">
             <a href={acecoreOrigin} aria-label="Acecore 公式サイト">
               <img
-                src="/logo-on-dark.svg"
+                src={acecoreLogo}
                 alt="Acecore ロゴ"
                 width="36"
                 height="36"
                 loading="lazy"
               />
-              <span>
-                <BrandName name="Acecore" />
-              </span>
+              <BrandWord word="Acecore" kind="corporate" />
             </a>
-            <span aria-hidden="true">/</span>
             <a class="brand-school" href="/">
-              <BrandName name="Schools" />
+              <BrandWord word="Schools" kind="service" />
             </a>
           </div>
           <p>{content.footer.tagline}</p>

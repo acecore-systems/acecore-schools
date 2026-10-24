@@ -298,7 +298,7 @@ export function initSchoolsAiChat(root: HTMLElement): void {
     options: { error?: boolean; loading?: boolean } = {},
   ): HTMLElement => {
     const row = document.createElement("div");
-    row.className = "schools-ai-chat-message";
+    row.className = "schools-ai-chat-message ac-chat__message";
     row.dataset.role = role;
     if (options.error) row.dataset.error = "true";
     if (options.loading) {
@@ -307,7 +307,7 @@ export function initSchoolsAiChat(root: HTMLElement): void {
     }
 
     const bubble = document.createElement("div");
-    bubble.className = "schools-ai-chat-bubble";
+    bubble.className = "schools-ai-chat-bubble ac-chat__bubble";
     if (role === "assistant" && !options.error && !options.loading) {
       bubble.classList.add("schools-ai-chat-markdown");
       renderMarkdownText(bubble, content);
@@ -339,20 +339,24 @@ export function initSchoolsAiChat(root: HTMLElement): void {
 
   const openChat = () => {
     lastFocusedElement =
-      document.activeElement instanceof HTMLElement
+      document.activeElement instanceof HTMLElement &&
+      document.activeElement !== document.body
         ? document.activeElement
         : toggle;
     panel.hidden = false;
+    root.classList.add("is-open");
     toggle.setAttribute("aria-expanded", "true");
     if (!greetingShown && greeting) {
       renderMessage("assistant", greeting);
       greetingShown = true;
+      messagesElement.scrollTop = 0;
     }
     window.setTimeout(() => input.focus(), 0);
   };
 
   const closeChat = ({ restoreFocus = true } = {}) => {
     panel.hidden = true;
+    root.classList.remove("is-open");
     toggle.setAttribute("aria-expanded", "false");
     activeController?.abort();
     if (restoreFocus) {
@@ -361,6 +365,7 @@ export function initSchoolsAiChat(root: HTMLElement): void {
   };
 
   const sendQuestion = async (rawQuestion: string) => {
+    if (activeController) return;
     const question = rawQuestion.normalize("NFKC").replace(/\s+/gu, " ").trim();
     if (!question) {
       input.focus();
@@ -471,7 +476,7 @@ export function initSchoolsAiChat(root: HTMLElement): void {
   }
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !panel.hidden) {
+    if (event.key === "Escape" && !event.isComposing && !panel.hidden) {
       event.preventDefault();
       closeChat();
     }
