@@ -41,6 +41,7 @@ maintenance Workerで削除します。
 [Vectorize検索運用](docs/04_運用設計/01_Vectorize検索運用.md)を参照してください。
 
 設計文書の入口は [docs/README.md](docs/README.md) です。
+UI・ロゴ・配色の変更時は、[AGENTS.md](AGENTS.md) にある承認済みブランドカラーの指針も確認してください。
 
 予約用の`SCHOOLS_DB`はまだ作成していません。検索専用の`SEARCH_RATE_LIMIT_DB`と、将来の
 予約データベースは責務を分離します。
