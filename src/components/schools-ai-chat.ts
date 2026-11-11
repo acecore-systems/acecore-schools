@@ -23,7 +23,7 @@ const ALLOWED_HTTPS_ORIGINS = new Set([
 const CENTRAL_ORIGIN = "https://acecore.net";
 const LINE_URL = "https://lin.ee/DjIrdqj";
 const EMAIL_URL = "mailto:info@acecore.net";
-const PHONE_URL = "tel:05088902788";
+const PHONE_URL = "tel:0120987370";
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
