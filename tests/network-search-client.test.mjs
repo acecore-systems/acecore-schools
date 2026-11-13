@@ -284,7 +284,9 @@ test("サイト内検索はVectorizeが使えない時だけPagefindを表示し
   assert.match(layout, /data-pagefind-body/u);
   assert.match(layout, /const revealSearch =/u);
   assert.doesNotMatch(layout, /fetch\("\/api\/health"/u);
-  assert.match(packageJson, /"pagefind": "\^1\.5\.2"/u);
+  const packageManifest = JSON.parse(packageJson);
+  assert.match(packageManifest.devDependencies.pagefind, /^\^1\.\d+\.\d+$/u);
+  assert.match(packageManifest.scripts.build, /\bpagefind --site dist\b/u);
   assert.match(headers, /\/pagefind\/index\/\*/u);
 });
 
