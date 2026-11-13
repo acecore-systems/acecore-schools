@@ -285,7 +285,16 @@ test("サイト内検索はVectorizeが使えない時だけPagefindを表示し
   assert.match(layout, /const revealSearch =/u);
   assert.doesNotMatch(layout, /fetch\("\/api\/health"/u);
   const packageManifest = JSON.parse(packageJson);
-  assert.match(packageManifest.devDependencies.pagefind, /^\^1\.\d+\.\d+$/u);
+  const pagefindRange = packageManifest.devDependencies.pagefind;
+  assert.match(pagefindRange, /^\^1\.\d+\.\d+$/u);
+  const [, pagefindMinor, pagefindPatch] = pagefindRange
+    .slice(1)
+    .split(".")
+    .map(Number);
+  assert.ok(
+    pagefindMinor > 5 || (pagefindMinor === 5 && pagefindPatch >= 2),
+    "Pagefind must stay at version 1.5.2 or later within major version 1",
+  );
   assert.match(packageManifest.scripts.build, /\bpagefind --site dist\b/u);
   assert.match(headers, /\/pagefind\/index\/\*/u);
 });
