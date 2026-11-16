@@ -130,9 +130,7 @@ function createSyncFetch(
     const parsedUrl = new URL(url);
 
     if (
-      parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${indexName}`,
-      ) &&
+      parsedUrl.pathname.endsWith(`/vectorize/v2/indexes/${indexName}`) &&
       (init.method || "GET") === "GET"
     ) {
       return cloudflareResponse({
@@ -141,9 +139,7 @@ function createSyncFetch(
     }
 
     if (
-      parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${indexName}/list`,
-      )
+      parsedUrl.pathname.endsWith(`/vectorize/v2/indexes/${indexName}/list`)
     ) {
       assert.equal(parsedUrl.searchParams.has("namespace"), false);
       let visibleIds = currentIds;
@@ -196,9 +192,7 @@ function createSyncFetch(
     }
 
     if (
-      parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${indexName}/upsert`,
-      )
+      parsedUrl.pathname.endsWith(`/vectorize/v2/indexes/${indexName}/upsert`)
     ) {
       staleUpsertVectors = new Map(currentVectors);
       remainingStaleUpsertReads = upsertVisibilityDelayReads;
@@ -228,9 +222,7 @@ function createSyncFetch(
     }
 
     if (
-      parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${indexName}/info`,
-      )
+      parsedUrl.pathname.endsWith(`/vectorize/v2/indexes/${indexName}/info`)
     ) {
       return cloudflareResponse({ processedUpToMutation: lastMutationId });
     }
