@@ -185,6 +185,30 @@ Production migrationも公開marker、GitHub Environment、corpus SHA-256、corp
 GitHubのrun情報、対象index、corpus version、no-op、mutation ID、件数をsync logと一緒にartifactへ
 保存します。失敗時も`if: always()`で取得できる範囲の証跡をアップロードします。
 
+### Voyage 4 Lite qualification
+
+The explicit target `acecore-schools-search-voyage-4-lite-1024-production-v1` prepares a separate index for the currently deployed public corpus. The sync sends document text to the Atlas Embedding API using `voyage-4-lite` and `input_type=document`. Use the build marker and corpus artifact from the production workflow for the current deployment.
+
+Run a dry run to verify the corpus and read its `corpusVersion`.
+
+```sh
+node scripts/sync-vectorize.mjs --dry-run \
+  --index acecore-schools-search-voyage-4-lite-1024-production-v1 \
+  --corpus verified-corpus/corpus.json
+```
+
+Create the separate 1,024-dimensional cosine index. Run the following with `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` and the Atlas model key `VOYAGE_API_KEY` supplied by the execution environment. The endpoint is `https://ai.mongodb.com/v1/embeddings`, which requires an unscoped Atlas model key.
+
+```sh
+node scripts/sync-vectorize.mjs \
+  --index acecore-schools-search-voyage-4-lite-1024-production-v1 \
+  --corpus verified-corpus/corpus.json \
+  --confirm-production '<corpusVersion>' \
+  --receipt voyage-vectorize-receipt.json
+```
+
+Once the ID set and metadata have converged, embed representative Japanese queries with `input_type=query` and check the new index in the `ja` namespace. Compare returned URLs and relevance with the existing search before deploying a change to the Pages query provider and index binding.
+
 ## Production gate
 
 Production 同期は通常の同期コマンドでは実行できません。Production indexが

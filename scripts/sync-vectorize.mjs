@@ -19,8 +19,12 @@ import {
 
 export const PRODUCTION_INDEX_NAME =
   "acecore-schools-search-bge-m3-1024-production-v1";
+export const VOYAGE_INDEX_NAME =
+  "acecore-schools-search-voyage-4-lite-1024-production-v1";
 
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
+const VOYAGE_EMBEDDINGS_URL = "https://ai.mongodb.com/v1/embeddings";
+const VOYAGE_EMBEDDING_MODEL = "voyage-4-lite";
 const DEFAULT_CORPUS_FILE = resolve(".vectorize/corpus.json");
 const EMBEDDING_BATCH_SIZE = 16;
 const UPSERT_BATCH_SIZE = 200;
@@ -41,7 +45,7 @@ const MANAGED_VECTOR_ID_PATTERN = /^schools-v(?:1|2)-[0-9a-f]{48}$/u;
 const V1_VECTOR_ID_PATTERN = /^schools-v1-[0-9a-f]{48}$/u;
 const V2_VECTOR_ID_PATTERN = /^schools-v2-[0-9a-f]{48}$/u;
 const CORPUS_VERSION_PATTERN = /^[0-9a-f]{20}$/u;
-const ALLOWED_INDEX_NAMES = new Set([PRODUCTION_INDEX_NAME]);
+const ALLOWED_INDEX_NAMES = new Set([PRODUCTION_INDEX_NAME, VOYAGE_INDEX_NAME]);
 
 class CloudflareApiError extends Error {
   constructor(message, status) {
@@ -95,6 +99,7 @@ export async function syncVectorize(options = {}) {
 async function performVectorizeSync({
   accountId = process.env.CLOUDFLARE_ACCOUNT_ID,
   apiToken = process.env.CLOUDFLARE_API_TOKEN,
+  voyageApiKey = process.env.VOYAGE_API_KEY,
   indexName = process.env.VECTORIZE_INDEX_NAME,
   corpusFile = DEFAULT_CORPUS_FILE,
   dryRun = false,
@@ -120,7 +125,7 @@ async function performVectorizeSync({
     );
   }
   validateIndexName(indexName, { required: !dryRun });
-  validateProductionConfirmation(indexName, {
+  validateProductionConfirmation({
     dryRun,
     corpusVersion: corpus.version,
     confirmProductionVersion,
@@ -137,6 +142,11 @@ async function performVectorizeSync({
     };
     logger.log(JSON.stringify({ event: "vectorize_sync_dry_run", ...result }));
     return result;
+  }
+
+  const voyagePilot = indexName === VOYAGE_INDEX_NAME;
+  if (voyagePilot && !voyageApiKey?.trim()) {
+    throw new Error("VOYAGE_API_KEY is required for the Voyage pilot index.");
   }
 
   const cloudflareClient = createCloudflareClient({
@@ -202,7 +212,13 @@ async function performVectorizeSync({
 
   const upsertMutationIds = [];
   for (const chunkBatch of batches(chunksToUpsert, EMBEDDING_BATCH_SIZE)) {
-    const embeddings = await createEmbeddings(cloudflareClient, chunkBatch);
+    const embeddings = voyagePilot
+      ? await createVoyageDocumentEmbeddings(chunkBatch, {
+          apiKey: voyageApiKey,
+          fetchImpl,
+          requestTimeoutMs,
+        })
+      : await createEmbeddings(cloudflareClient, chunkBatch);
 
     for (const vectorBatch of batches(
       chunkBatch.map((chunk, index) => ({
@@ -454,15 +470,12 @@ function validateIndexName(indexName, { required }) {
   }
 }
 
-function validateProductionConfirmation(
-  indexName,
-  { dryRun, corpusVersion, confirmProductionVersion },
-) {
-  if (
-    dryRun ||
-    indexName !== PRODUCTION_INDEX_NAME ||
-    confirmProductionVersion === corpusVersion
-  ) {
+function validateProductionConfirmation({
+  dryRun,
+  corpusVersion,
+  confirmProductionVersion,
+}) {
+  if (dryRun || confirmProductionVersion === corpusVersion) {
     return;
   }
   throw new Error(
@@ -531,12 +544,16 @@ function throwConvergenceError(
   );
 }
 
-export function extractEmbeddingData(payload, expectedCount) {
+export function extractEmbeddingData(
+  payload,
+  expectedCount,
+  provider = "Workers AI",
+) {
   const data = payload?.data;
 
   if (!Array.isArray(data) || data.length !== expectedCount) {
     throw new Error(
-      `Workers AI returned ${Array.isArray(data) ? data.length : 0} embeddings; expected ${expectedCount}.`,
+      `${provider} returned ${Array.isArray(data) ? data.length : 0} embeddings; expected ${expectedCount}.`,
     );
   }
 
@@ -562,7 +579,7 @@ export function extractEmbeddingData(payload, expectedCount) {
       )
     ) {
       throw new Error(
-        `Workers AI embedding must contain ${SEARCH_EMBEDDING_DIMENSIONS} finite values.`,
+        `${provider} embedding must contain ${SEARCH_EMBEDDING_DIMENSIONS} finite values.`,
       );
     }
     return values;
@@ -913,6 +930,66 @@ async function createEmbeddings(client, chunks) {
   return extractEmbeddingData(payload?.result, chunks.length);
 }
 
+async function createVoyageDocumentEmbeddings(
+  chunks,
+  { apiKey, fetchImpl, requestTimeoutMs },
+) {
+  let response;
+  try {
+    response = await fetchImpl(VOYAGE_EMBEDDINGS_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        input: chunks.map(({ text }) => text),
+        model: VOYAGE_EMBEDDING_MODEL,
+        input_type: "document",
+        output_dimension: SEARCH_EMBEDDING_DIMENSIONS,
+        output_dtype: "float",
+        truncation: false,
+      }),
+      redirect: "error",
+      signal: AbortSignal.timeout(requestTimeoutMs),
+    });
+  } catch {
+    throw new Error("Voyage embeddings request failed.");
+  }
+  if (!response.ok) {
+    await response.body?.cancel().catch(() => {});
+    throw new Error(`Voyage embeddings returned HTTP ${response.status}.`);
+  }
+
+  const payload = await readJsonResponse(response, "Voyage embeddings");
+  if (
+    payload?.model !== VOYAGE_EMBEDDING_MODEL ||
+    !Array.isArray(payload.data) ||
+    payload.data.length !== chunks.length
+  ) {
+    throw new Error("Voyage returned an invalid embedding response.");
+  }
+
+  const ordered = new Map();
+  for (const row of payload.data) {
+    const index = row?.index;
+    if (
+      !Number.isInteger(index) ||
+      index < 0 ||
+      index >= chunks.length ||
+      ordered.has(index)
+    ) {
+      throw new Error("Voyage returned an invalid embedding index.");
+    }
+    ordered.set(index, row.embedding);
+  }
+  return extractEmbeddingData(
+    { data: chunks.map((_, index) => ordered.get(index)) },
+    chunks.length,
+    "Voyage",
+  );
+}
+
 async function upsertVectors(client, indexName, vectors) {
   const ndjson = vectors.map((vector) => JSON.stringify(vector)).join("\n");
   const form = new FormData();
@@ -974,7 +1051,7 @@ async function waitForMutation(
   );
 }
 
-async function readJsonResponse(response) {
+async function readJsonResponse(response, service = "Cloudflare API") {
   const declaredLength = Number(response.headers.get("Content-Length"));
   if (
     Number.isFinite(declaredLength) &&
@@ -1016,7 +1093,7 @@ async function readJsonResponse(response) {
     return JSON.parse(text);
   } catch {
     throw new Error(
-      `Cloudflare API returned a non-JSON response with ${response.status}.`,
+      `${service} returned a non-JSON response with ${response.status}.`,
     );
   }
 }

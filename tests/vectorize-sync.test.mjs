@@ -12,6 +12,7 @@ import {
 } from "../scripts/build-search-corpus.mjs";
 import {
   PRODUCTION_INDEX_NAME,
+  VOYAGE_INDEX_NAME,
   extractEmbeddingData,
   syncVectorize,
   validateCorpus,
@@ -99,6 +100,7 @@ function createSyncFetch(
   expectedIds,
   {
     dimensions = 1024,
+    indexName = PRODUCTION_INDEX_NAME,
     existingChunks = [],
     deleteVisibilityDelayLists = 0,
     upsertVisibilityDelayReads = 0,
@@ -129,7 +131,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}`,
+        `/vectorize/v2/indexes/${indexName}`,
       ) &&
       (init.method || "GET") === "GET"
     ) {
@@ -140,7 +142,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}/list`,
+        `/vectorize/v2/indexes/${indexName}/list`,
       )
     ) {
       assert.equal(parsedUrl.searchParams.has("namespace"), false);
@@ -159,7 +161,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}/get_by_ids`,
+        `/vectorize/v2/indexes/${indexName}/get_by_ids`,
       )
     ) {
       const ids = JSON.parse(init.body).ids;
@@ -195,7 +197,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}/upsert`,
+        `/vectorize/v2/indexes/${indexName}/upsert`,
       )
     ) {
       staleUpsertVectors = new Map(currentVectors);
@@ -212,7 +214,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}/delete_by_ids`,
+        `/vectorize/v2/indexes/${indexName}/delete_by_ids`,
       )
     ) {
       staleDeleteIds = new Set(currentIds);
@@ -227,7 +229,7 @@ function createSyncFetch(
 
     if (
       parsedUrl.pathname.endsWith(
-        `/vectorize/v2/indexes/${PRODUCTION_INDEX_NAME}/info`,
+        `/vectorize/v2/indexes/${indexName}/info`,
       )
     ) {
       return cloudflareResponse({ processedUpToMutation: lastMutationId });
@@ -302,6 +304,81 @@ test("Workers AI embeddingの件数・1024次元・有限値を検証する", ()
   assert.throws(
     () => extractEmbeddingData({ data: [] }, 1),
     /returned 0 embeddings/u,
+  );
+});
+
+test("Voyageの文書ベクトルは専用索引にだけ同期され、応答順序に依存しない", async (t) => {
+  const corpus = createCorpus();
+  const { corpusFile, directory } = await writeCorpusFile(corpus);
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const mock = createSyncFetch(
+    [],
+    corpus.chunks.map(({ id }) => id),
+    { indexName: VOYAGE_INDEX_NAME },
+  );
+  const options = {
+    accountId: "test-account",
+    apiToken: "synthetic-cloudflare-token",
+    indexName: VOYAGE_INDEX_NAME,
+    corpusFile,
+    confirmProductionVersion: corpus.version,
+    logger: { log() {} },
+  };
+
+  await assert.rejects(
+    syncVectorize({
+      ...options,
+      voyageApiKey: "",
+      fetchImpl: () => assert.fail("missing key must stop before requests"),
+    }),
+    /VOYAGE_API_KEY/u,
+  );
+
+  const result = await syncVectorize({
+    ...options,
+    voyageApiKey: "synthetic-voyage-key",
+    fetchImpl: async (url, init) => {
+      if (new URL(url).host === "api.cloudflare.com") {
+        assert.ok(String(url).includes(VOYAGE_INDEX_NAME));
+        assert.equal(
+          new Headers(init.headers).get("Authorization"),
+          "Bearer synthetic-cloudflare-token",
+        );
+        return mock.fetchImpl(url, init);
+      }
+      assert.equal(url, "https://ai.mongodb.com/v1/embeddings");
+      assert.equal(init.headers.Authorization, "Bearer synthetic-voyage-key");
+      assert.equal(init.redirect, "error");
+      assert.deepEqual(JSON.parse(init.body), {
+        input: corpus.chunks.map(({ text }) => text),
+        model: "voyage-4-lite",
+        input_type: "document",
+        output_dimension: 1024,
+        output_dtype: "float",
+        truncation: false,
+      });
+      return Response.json({
+        model: "voyage-4-lite",
+        data: corpus.chunks
+          .map((_, index) => ({
+            index,
+            embedding: [index + 1, ...embedding.slice(1)],
+          }))
+          .reverse(),
+      });
+    },
+    mutationPollIntervalMs: 0,
+  });
+
+  assert.equal(result.upserted, corpus.vectorCount);
+  const { init } = mock.calls.find(({ url }) => url.endsWith("/upsert"));
+  const vectors = (await init.body.get("vectors").text())
+    .trimEnd()
+    .split("\n")
+    .map((line) => JSON.parse(line));
+  assert.deepEqual(
+    vectors.map(({ id, values }) => [id, values[0]]),
+    corpus.chunks.map(({ id }, index) => [id, index + 1]),
   );
 });
 
