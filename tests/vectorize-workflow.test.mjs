@@ -37,10 +37,10 @@ test("Production同期はpush・schedule・manualで公開中のcommitだけを�
     buildJob,
     /COMMIT_SHA: \$\{\{ steps\.site\.outputs\.commit \}\}/u,
   );
-  assert.equal(workflow.match(/--assert-current/g)?.length, 3);
+  assert.equal(workflow.match(/--assert-current/g)?.length, 5);
   assert.equal(
     productionJob.match(/verifier\/scripts\/wait-for-deployment\.mjs/g)?.length,
-    2,
+    4,
   );
   assert.match(productionJob, /--confirm-production "\$CORPUS_VERSION"/u);
   assert.match(
@@ -124,4 +124,56 @@ test("Pages binding・sync allowlist・workflowをProduction indexへ限定す�
   assert.doesNotMatch(workflow, new RegExp(previewIndex, "u"));
   assert.doesNotMatch(wrangler, new RegExp(previewIndex, "u"));
   assert.doesNotMatch(syncScript, new RegExp(previewIndex, "u"));
+});
+
+test("Voyage候補の同期は明示有効化時だけ独立した証跡で実行する", async () => {
+  const workflow = await readFile(workflowUrl, "utf8");
+  const job = workflow.slice(workflow.indexOf("  sync-production:"));
+  const bge = job.indexOf("name: Sync production Vectorize index");
+  const before = job.indexOf(
+    "name: Confirm the Voyage candidate corpus is still public",
+  );
+  const sync = job.indexOf("name: Sync Voyage candidate index");
+  const after = job.indexOf(
+    "name: Confirm the synced Voyage candidate corpus is still public",
+  );
+  const evidence = job.indexOf("name: Stage production sync evidence");
+  assert.ok(
+    bge >= 0 &&
+      bge < before &&
+      before < sync &&
+      sync < after &&
+      after < evidence,
+  );
+  const voyage = job.slice(before, evidence);
+  assert.equal(
+    voyage.match(/if: vars\.SCHOOLS_VOYAGE_SYNC_ENABLED == 'true'/gu)?.length,
+    3,
+  );
+  assert.match(voyage, /VOYAGE_API_KEY: \$\{\{ secrets\.VOYAGE_API_KEY \}\}/u);
+  assert.match(
+    voyage,
+    /if \[\[ -z "\$\{VOYAGE_API_KEY:-\}" \]\]; then[\s\S]*?exit 1/u,
+  );
+  assert.match(
+    voyage,
+    /--index acecore-schools-search-voyage-4-lite-1024-production-v1/u,
+  );
+  assert.match(
+    voyage,
+    /--corpus payload\/corpus\.json[\s\S]*?--confirm-production "\$CORPUS_VERSION"/u,
+  );
+  assert.equal(voyage.match(/--assert-current/gu)?.length, 2);
+  assert.match(
+    voyage,
+    /--receipt "\$RUNNER_TEMP\/voyage-vectorize-receipt\.json"/u,
+  );
+  assert.match(job, /evidence\/voyage-receipt\.json/u);
+  assert.match(job, /evidence\/voyage-sync\.log/u);
+  assert.match(job, /evidence\/receipt\.json/u);
+  assert.doesNotMatch(voyage, /--migrate-v1-to-v2/u);
+  assert.match(
+    job,
+    /environment:\s+name: cloudflare-schools-search-production/u,
+  );
 });
