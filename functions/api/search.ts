@@ -1,6 +1,7 @@
 import { getSafeInternalUrl } from "../../src/scripts/search-url-safety.ts";
 
 const EMBEDDING_MODEL = "@cf/baai/bge-m3";
+const VOYAGE_EMBEDDING_MODEL = "voyage-4-lite";
 const EMBEDDING_DIMENSIONS = 1024;
 const SEARCH_LOCALE = "ja";
 const DEFAULT_MIN_SCORE = 0.5;
@@ -126,14 +127,18 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
     const searchIndex = env.SEARCH_INDEX;
     const rateLimitDatabase = env.SEARCH_RATE_LIMIT_DB;
     const rateLimitSecret = env.SEARCH_RATE_LIMIT_SECRET;
-    const embeddingModel = env.SEARCH_EMBEDDING_MODEL || EMBEDDING_MODEL;
+    const embeddingModel: string =
+      env.SEARCH_EMBEDDING_MODEL || EMBEDDING_MODEL;
+    const voyageEmbedder = env.VOYAGE_EMBEDDER;
     const embeddingDimensions = Number(
       env.SEARCH_EMBEDDING_DIMENSIONS || EMBEDDING_DIMENSIONS,
     );
     if (
       String(env.SEARCH_ENABLED) !== "true" ||
-      !ai ||
-      embeddingModel !== EMBEDDING_MODEL ||
+      !(
+        (embeddingModel === EMBEDDING_MODEL && ai) ||
+        (embeddingModel === VOYAGE_EMBEDDING_MODEL && voyageEmbedder)
+      ) ||
       embeddingDimensions !== EMBEDDING_DIMENSIONS ||
       !searchIndex ||
       !rateLimitDatabase ||
@@ -249,7 +254,10 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
 
     let embedding: number[];
     try {
-      embedding = await createWorkersAiEmbedding(ai, query);
+      embedding =
+        embeddingModel === VOYAGE_EMBEDDING_MODEL
+          ? await createVoyageEmbedding(voyageEmbedder!, query)
+          : await createWorkersAiEmbedding(ai!, query);
     } catch (error) {
       logSearchError(
         requestId,
@@ -652,6 +660,57 @@ async function createWorkersAiEmbedding(
         payload.shape[1] !== EMBEDDING_DIMENSIONS))
   ) {
     throw new EmbeddingProviderError("invalid_embedding_contract");
+  }
+  return values;
+}
+
+async function createVoyageEmbedding(
+  embedder: Fetcher,
+  query: string,
+): Promise<number[]> {
+  let payload: unknown;
+  try {
+    const response = await embedder.fetch(
+      "https://voyage-embeddings.internal/v1/embeddings",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: VOYAGE_EMBEDDING_MODEL,
+          input: [query],
+          input_type: "query",
+          output_dimension: EMBEDDING_DIMENSIONS,
+          output_dtype: "float",
+          truncation: false,
+        }),
+      },
+    );
+    if (!response.ok) throw new EmbeddingProviderError("provider_error");
+    payload = await response.json();
+  } catch {
+    throw new EmbeddingProviderError("provider_error");
+  }
+
+  if (
+    !isJsonObject(payload) ||
+    payload.model !== VOYAGE_EMBEDDING_MODEL ||
+    !Array.isArray(payload.data) ||
+    payload.data.length !== 1 ||
+    !isJsonObject(payload.data[0]) ||
+    payload.data[0].index !== 0 ||
+    !Array.isArray(payload.data[0].embedding)
+  ) {
+    throw new EmbeddingProviderError("invalid_embedding_contract");
+  }
+  const values = payload.data[0].embedding;
+  if (
+    values.length !== EMBEDDING_DIMENSIONS ||
+    !values.every(
+      (value): value is number =>
+        typeof value === "number" && Number.isFinite(value),
+    )
+  ) {
+    throw new EmbeddingProviderError("invalid_embedding");
   }
   return values;
 }
