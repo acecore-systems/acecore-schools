@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
-  "releaseId": "scenes-v1.2.0",
+  "releaseId": "scenes-v1.2.1",
   "site": "schools",
   "siteOrigin": "https://schools.acecore.net",
   "catalogUrl": "https://cast.acecore.net/",
   "manifest": {
-    "url": "https://cast.acecore.net/releases/scenes-v1.2.0/consumer-manifest.json",
-    "sha256": "0ed7eb0bf88cc66289a27dc94a39dbf962a2ba82abd293af82fbfcba114686f7",
-    "snapshot": "vendor/cast/scenes-v1.2.0/consumer-manifest.json"
+    "url": "https://cast.acecore.net/releases/scenes-v1.2.1/consumer-manifest.json",
+    "sha256": "557e5b6ac6decb5c98d70f6ffae5654dc9a653cd1bab12754b7c8ae94787238c",
+    "snapshot": "vendor/cast/scenes-v1.2.1/consumer-manifest.json"
   },
   "assets": [
     {
       "id": "schools--area-digital",
-      "localPath": "/images/cast/scenes-v1.2.0/schools--area-digital--5120b2531a030a2b1b04aaf0b1d4bfb86840da4bee40e5a90dd7f41d825df235.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--area-digital--5120b2531a030a2b1b04aaf0b1d4bfb86840da4bee40e5a90dd7f41d825df235.webp",
-      "sha256": "5120b2531a030a2b1b04aaf0b1d4bfb86840da4bee40e5a90dd7f41d825df235",
-      "bytes": 124736,
+      "localPath": "/images/cast/scenes-v1.2.1/schools--area-digital--e7d13e4767e1c782695e8c63f62ae1df690870062ff3f445c5bf7f734aa3ffeb.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--area-digital--e7d13e4767e1c782695e8c63f62ae1df690870062ff3f445c5bf7f734aa3ffeb.webp",
+      "sha256": "e7d13e4767e1c782695e8c63f62ae1df690870062ff3f445c5bf7f734aa3ffeb",
+      "bytes": 1261816,
       "width": 1536,
       "height": 1024,
       "mimeType": "image/webp"
@@ -23,7 +23,7 @@
     {
       "id": "schools--area-ged",
       "localPath": "/images/cast/scenes-v1.2.0/schools--area-ged--ed79e04609680f9288f33d5ae24ab793c375b21590716ca728dfac3065b62d1a.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--area-ged--ed79e04609680f9288f33d5ae24ab793c375b21590716ca728dfac3065b62d1a.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--area-ged--ed79e04609680f9288f33d5ae24ab793c375b21590716ca728dfac3065b62d1a.webp",
       "sha256": "ed79e04609680f9288f33d5ae24ab793c375b21590716ca728dfac3065b62d1a",
       "bytes": 148022,
       "width": 1536,
@@ -32,10 +32,10 @@
     },
     {
       "id": "schools--area-making",
-      "localPath": "/images/cast/scenes-v1.2.0/schools--area-making--1aa394e401d44f45fa8a4a837e09450dea87125e86d486f73ffc1e9539ef8078.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--area-making--1aa394e401d44f45fa8a4a837e09450dea87125e86d486f73ffc1e9539ef8078.webp",
-      "sha256": "1aa394e401d44f45fa8a4a837e09450dea87125e86d486f73ffc1e9539ef8078",
-      "bytes": 187098,
+      "localPath": "/images/cast/scenes-v1.2.1/schools--area-making--f295a44089e7ab341540fb9eb10fd2641d2418148b6f2a6f9ada2ba029518d5a.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--area-making--f295a44089e7ab341540fb9eb10fd2641d2418148b6f2a6f9ada2ba029518d5a.webp",
+      "sha256": "f295a44089e7ab341540fb9eb10fd2641d2418148b6f2a6f9ada2ba029518d5a",
+      "bytes": 1458234,
       "width": 1536,
       "height": 1024,
       "mimeType": "image/webp"
@@ -43,7 +43,7 @@
     {
       "id": "schools--area-programming",
       "localPath": "/images/cast/scenes-v1.2.0/schools--area-programming--2c266ec0ee1b4e2175dfc52014bf3b5dc62b665671da15a5e699b8903ed17149.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--area-programming--2c266ec0ee1b4e2175dfc52014bf3b5dc62b665671da15a5e699b8903ed17149.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--area-programming--2c266ec0ee1b4e2175dfc52014bf3b5dc62b665671da15a5e699b8903ed17149.webp",
       "sha256": "2c266ec0ee1b4e2175dfc52014bf3b5dc62b665671da15a5e699b8903ed17149",
       "bytes": 126446,
       "width": 1536,
@@ -53,7 +53,7 @@
     {
       "id": "schools--hero-about",
       "localPath": "/images/cast/scenes-v1.2.0/schools--hero-about--f229c391349473efea691aeff4922a3f34755f2e316b73989de9f6ce4f1701fa.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--hero-about--f229c391349473efea691aeff4922a3f34755f2e316b73989de9f6ce4f1701fa.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--hero-about--f229c391349473efea691aeff4922a3f34755f2e316b73989de9f6ce4f1701fa.webp",
       "sha256": "f229c391349473efea691aeff4922a3f34755f2e316b73989de9f6ce4f1701fa",
       "bytes": 107716,
       "width": 1730,
@@ -63,7 +63,7 @@
     {
       "id": "schools--hero-city",
       "localPath": "/images/cast/scenes-v1.2.0/schools--hero-city--eef6272247ca3eb7be6e65d4973f96bbd650561a76e70a7a67db2257fe921619.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--hero-city--eef6272247ca3eb7be6e65d4973f96bbd650561a76e70a7a67db2257fe921619.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--hero-city--eef6272247ca3eb7be6e65d4973f96bbd650561a76e70a7a67db2257fe921619.webp",
       "sha256": "eef6272247ca3eb7be6e65d4973f96bbd650561a76e70a7a67db2257fe921619",
       "bytes": 92738,
       "width": 1774,
@@ -73,7 +73,7 @@
     {
       "id": "schools--hero-faq",
       "localPath": "/images/cast/scenes-v1.2.0/schools--hero-faq--433bea7ef215f8b3943bd2096a96e402d9fb46ae778cbcea7a2731303455998b.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--hero-faq--433bea7ef215f8b3943bd2096a96e402d9fb46ae778cbcea7a2731303455998b.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--hero-faq--433bea7ef215f8b3943bd2096a96e402d9fb46ae778cbcea7a2731303455998b.webp",
       "sha256": "433bea7ef215f8b3943bd2096a96e402d9fb46ae778cbcea7a2731303455998b",
       "bytes": 113114,
       "width": 1732,
@@ -83,7 +83,7 @@
     {
       "id": "schools--hero-how-it-works",
       "localPath": "/images/cast/scenes-v1.2.0/schools--hero-how-it-works--277f32ee4389c0cdb16b53ad47cc0a7f499ebe0f8c5f510e8abedf45bf043a60.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--hero-how-it-works--277f32ee4389c0cdb16b53ad47cc0a7f499ebe0f8c5f510e8abedf45bf043a60.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--hero-how-it-works--277f32ee4389c0cdb16b53ad47cc0a7f499ebe0f8c5f510e8abedf45bf043a60.webp",
       "sha256": "277f32ee4389c0cdb16b53ad47cc0a7f499ebe0f8c5f510e8abedf45bf043a60",
       "bytes": 91406,
       "width": 1732,
@@ -93,7 +93,7 @@
     {
       "id": "schools--hero-learning",
       "localPath": "/images/cast/scenes-v1.2.0/schools--hero-learning--0a51d9684513bb67d22c0df40aba406f61ca293c0524443ee9706beb554d37e6.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--hero-learning--0a51d9684513bb67d22c0df40aba406f61ca293c0524443ee9706beb554d37e6.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--hero-learning--0a51d9684513bb67d22c0df40aba406f61ca293c0524443ee9706beb554d37e6.webp",
       "sha256": "0a51d9684513bb67d22c0df40aba406f61ca293c0524443ee9706beb554d37e6",
       "bytes": 106552,
       "width": 1730,
@@ -103,7 +103,7 @@
     {
       "id": "schools--hero-pricing",
       "localPath": "/images/cast/scenes-v1.2.0/schools--hero-pricing--36c0c6259c603191a0ffa93994cf37493ba1f98f9e8fd185383650e295d2e84b.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--hero-pricing--36c0c6259c603191a0ffa93994cf37493ba1f98f9e8fd185383650e295d2e84b.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--hero-pricing--36c0c6259c603191a0ffa93994cf37493ba1f98f9e8fd185383650e295d2e84b.webp",
       "sha256": "36c0c6259c603191a0ffa93994cf37493ba1f98f9e8fd185383650e295d2e84b",
       "bytes": 145332,
       "width": 1730,
@@ -113,7 +113,7 @@
     {
       "id": "schools--support-call",
       "localPath": "/images/cast/scenes-v1.2.0/schools--support-call--7983bc52fe10252b1c5a068c4226273dc0e03956cfff580fb51c245e53682ddf.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--support-call--7983bc52fe10252b1c5a068c4226273dc0e03956cfff580fb51c245e53682ddf.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--support-call--7983bc52fe10252b1c5a068c4226273dc0e03956cfff580fb51c245e53682ddf.webp",
       "sha256": "7983bc52fe10252b1c5a068c4226273dc0e03956cfff580fb51c245e53682ddf",
       "bytes": 142546,
       "width": 1536,
@@ -123,7 +123,7 @@
     {
       "id": "schools--workshop-robot-summer",
       "localPath": "/images/cast/scenes-v1.2.0/schools--workshop-robot-summer--98e3914c8e8521d6a720928e676dee2732fbab7f011119192314f245e3abc226.webp",
-      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.0/assets/schools--workshop-robot-summer--98e3914c8e8521d6a720928e676dee2732fbab7f011119192314f245e3abc226.webp",
+      "sourceUrl": "https://cast.acecore.net/releases/scenes-v1.2.1/assets/schools--workshop-robot-summer--98e3914c8e8521d6a720928e676dee2732fbab7f011119192314f245e3abc226.webp",
       "sha256": "98e3914c8e8521d6a720928e676dee2732fbab7f011119192314f245e3abc226",
       "bytes": 195710,
       "width": 1536,
