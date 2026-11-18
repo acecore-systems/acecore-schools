@@ -164,7 +164,7 @@ mainの祖先と確認して再収束します。
 checkoutし、artifactのSHA-256とcorpus versionを再検証してから、そのverifierの同期scriptだけを
 実行します。公開中の古いcommitへProduction tokenを渡しません。
 
-同期処理は対象index名をProductionの1件に限定し、indexを暗黙作成しません。既存の管理外IDを検出した場合、
+同期処理は対象index名をBGE ProductionとVoyage候補の許可済み2件に限定し、indexを暗黙作成しません。既存の管理外IDを検出した場合、
 または削除が既存vectorの20%を超える場合は変更前に停止します。upsert/delete 後は
 `processedUpToMutation` を待ち、最終ID集合の一致を検証します。既存vectorのID、namespace、
 metadata内の本文・metadata・embedding／chunk設定digestがcorpusとすべて一致する場合はno-opとし、
@@ -184,6 +184,45 @@ Production migrationも公開marker、GitHub Environment、corpus SHA-256、corp
 各実行はtokenを含まない`receipt.json`を作成し、attemptからsuccessまたはfailureへ状態を更新します。
 GitHubのrun情報、対象index、corpus version、no-op、mutation ID、件数をsync logと一緒にartifactへ
 保存します。失敗時も`if: always()`で取得できる範囲の証跡をアップロードします。
+
+### Voyage 4 Liteの継続同期
+
+既存のBGE Production同期を継続し、同じ検証済み公開corpusをVoyage候補へ追加同期できます。
+`cloudflare-schools-search-production` Environmentへ専用Atlasモデルキーを`VOYAGE_API_KEY`として登録した後、
+repository variable `SCHOOLS_VOYAGE_SYNC_ENABLED=true`を明示設定した場合だけ候補の同期を実行します。
+未設定・`true`以外では候補への同期やキー参照を行いません。有効時にキーが欠けていれば明示的に失敗します。
+通常のpush／schedule起動には引き続き`SCHOOLS_VECTORIZE_SYNC_ENABLED=true`も必要で、manual dispatchでも
+Voyage側の明示有効化が必要です。キーやvariableの設定自体はこの変更に含みません。
+
+BGE同期後に公開identityを再確認し、Voyage同期の直前・直後にも同じcommitとcorpusの公開一致を検証します。
+両者は同じ保護Environmentとconcurrencyを使い、候補のログとreceiptは既存BGEの証跡とは別の
+`voyage-sync.log`・`voyage-receipt.json`として同じartifactへ保存します。Voyage候補にはv1→v2の移行モードを渡しません。
+Atlasの枠は他の利用と共有するため、上限と429を監視し、回復が必要な場合は手動dispatchで再試行します。
+この同期有効化はPagesのモデル・index bindingの切替を行いません。
+
+### Voyage 4 Lite qualification
+
+The explicit target `acecore-schools-search-voyage-4-lite-1024-production-v1` prepares a separate index for the currently deployed public corpus. The sync sends document text to the Atlas Embedding API using `voyage-4-lite` and `input_type=document`. Use the build marker and corpus artifact from the production workflow for the current deployment.
+
+Run a dry run to verify the corpus and read its `corpusVersion`.
+
+```sh
+node scripts/sync-vectorize.mjs --dry-run \
+  --index acecore-schools-search-voyage-4-lite-1024-production-v1 \
+  --corpus verified-corpus/corpus.json
+```
+
+Create the separate 1,024-dimensional cosine index. Run the following with `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` and the Atlas model key `VOYAGE_API_KEY` supplied by the execution environment. The endpoint is `https://ai.mongodb.com/v1/embeddings`, which requires an unscoped Atlas model key.
+
+```sh
+node scripts/sync-vectorize.mjs \
+  --index acecore-schools-search-voyage-4-lite-1024-production-v1 \
+  --corpus verified-corpus/corpus.json \
+  --confirm-production '<corpusVersion>' \
+  --receipt voyage-vectorize-receipt.json
+```
+
+Once the ID set and metadata have converged, embed representative Japanese queries with `input_type=query` and check the new index in the `ja` namespace. Compare returned URLs and relevance with the existing search before deploying a change to the Pages query provider and index binding.
 
 ## Production gate
 

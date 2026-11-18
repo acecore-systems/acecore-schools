@@ -869,6 +869,120 @@ test("不正なembeddingを502にし、logへquery本文を残さない", async 
   }
 });
 
+test("Voyage明示選択時は専用bindingのquery vectorだけを検索に使う", async () => {
+  const env = createEnv({
+    onAiRun() {
+      assert.fail("BGE must not run");
+    },
+    onQuery(values) {
+      assert.deepEqual(values, queryVector);
+    },
+  });
+  env.SEARCH_EMBEDDING_MODEL = "voyage-4-lite";
+  delete env.AI;
+  env.VOYAGE_EMBEDDER = {
+    async fetch(url, init) {
+      assert.equal(url, "https://voyage-embeddings.internal/v1/embeddings");
+      assert.equal(init.method, "POST");
+      assert.equal(init.headers["Content-Type"], "application/json");
+      assert.deepEqual(JSON.parse(init.body), {
+        model: "voyage-4-lite",
+        input: ["料金について"],
+        input_type: "query",
+        output_dimension: 1024,
+        output_dtype: "float",
+        truncation: false,
+      });
+      return Response.json({
+        model: "voyage-4-lite",
+        data: [{ index: 0, embedding: queryVector }],
+      });
+    },
+  };
+  const response = await onRequestPost({
+    request: searchRequest({ query: "料金について", locale: "ja" }),
+    env,
+    waitUntil() {},
+  });
+  assert.equal(response.status, 200);
+});
+
+test("Voyage bindingや対応モデルの設定が不正なら503で検索しない", async () => {
+  for (const model of ["voyage-4-lite", "unknown-model"]) {
+    const env = createEnv({
+      onAiRun() {
+        assert.fail("AI must not run");
+      },
+      onQuery() {
+        assert.fail("index must not run");
+      },
+    });
+    env.SEARCH_EMBEDDING_MODEL = model;
+    const response = await onRequestPost({
+      request: searchRequest({ query: "料金について", locale: "ja" }),
+      env,
+      waitUntil() {},
+    });
+    assert.equal(response.status, 503);
+  }
+});
+
+test("Voyageの障害や不正な応答は502でvector検索せずqueryをlogに出さない", async () => {
+  const valid = {
+    model: "voyage-4-lite",
+    data: [{ index: 0, embedding: queryVector }],
+  };
+  const cases = [
+    () => {
+      throw new Error("secret query");
+    },
+    () => new Response("error", { status: 503 }),
+    () => new Response("invalid json"),
+    () => Response.json({ ...valid, model: "wrong" }),
+    () => Response.json({ ...valid, data: [] }),
+    () => Response.json({ ...valid, data: [valid.data[0], valid.data[0]] }),
+    () => Response.json({ ...valid, data: [{ ...valid.data[0], index: 1 }] }),
+    () => Response.json({ ...valid, data: [{ index: 0, embedding: [1] }] }),
+    () =>
+      Response.json({
+        ...valid,
+        data: [{ index: 0, embedding: [...queryVector.slice(1), null] }],
+      }),
+  ];
+  for (const makeResponse of cases) {
+    const env = createEnv({
+      onAiRun() {
+        assert.fail("BGE must not run");
+      },
+      onQuery() {
+        assert.fail("index must not run");
+      },
+    });
+    env.SEARCH_EMBEDDING_MODEL = "voyage-4-lite";
+    env.VOYAGE_EMBEDDER = { fetch: makeResponse };
+    const logs = [];
+    const originalError = console.error;
+    console.error = (value) => logs.push(String(value));
+    try {
+      const response = await onRequestPost({
+        request: searchRequest({
+          query: "秘密を含む検索テキスト",
+          locale: "ja",
+        }),
+        env,
+        waitUntil() {},
+      });
+      assert.equal(response.status, 502);
+      assert.doesNotMatch(
+        logs.join(" "),
+        /秘密を含む検索テキスト|secret query/,
+      );
+    } finally {
+      console.error = originalError;
+    }
+  }
+});
+
 function searchRequest(body, headerOverrides = {}) {
   return new Request("https://schools.acecore.net/api/search", {
     method: "POST",

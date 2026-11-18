@@ -302,6 +302,48 @@ jobs:
           "${{ needs.build-production-corpus.outputs.site_commit }}"
           payload/corpus.json
 
+      - name: Confirm the Voyage candidate corpus is still public
+        if: vars.SCHOOLS_VOYAGE_SYNC_ENABLED == 'true'
+        run: >-
+          node verifier/scripts/wait-for-deployment.mjs
+          "$PRODUCTION_BUILD_MARKER_URL"
+          --assert-current
+          "${{ needs.build-production-corpus.outputs.site_commit }}"
+          payload/corpus.json
+
+      - name: Sync Voyage candidate index
+        if: vars.SCHOOLS_VOYAGE_SYNC_ENABLED == 'true'
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN }}
+          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+          CORPUS_VERSION: ${{ needs.build-production-corpus.outputs.corpus_version }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
+            echo "::error::CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN is not configured."
+            exit 1
+          fi
+          if [[ -z "${VOYAGE_API_KEY:-}" ]]; then
+            echo "::error::VOYAGE_API_KEY is not configured."
+            exit 1
+          fi
+          node verifier/scripts/sync-vectorize.mjs \
+            --index acecore-schools-search-voyage-4-lite-1024-production-v1 \
+            --corpus payload/corpus.json \
+            --confirm-production "$CORPUS_VERSION" \
+            --receipt "$RUNNER_TEMP/voyage-vectorize-receipt.json" |
+            tee "$RUNNER_TEMP/voyage-vectorize-sync.log"
+
+      - name: Confirm the synced Voyage candidate corpus is still public
+        if: vars.SCHOOLS_VOYAGE_SYNC_ENABLED == 'true'
+        run: >-
+          node verifier/scripts/wait-for-deployment.mjs
+          "$PRODUCTION_BUILD_MARKER_URL"
+          --assert-current
+          "${{ needs.build-production-corpus.outputs.site_commit }}"
+          payload/corpus.json
+
       - name: Stage production sync evidence
         if: always()
         shell: bash
@@ -319,6 +361,12 @@ jobs:
           fi
           if [[ -f "$RUNNER_TEMP/vectorize-receipt.json" ]]; then
             install -m 0644 "$RUNNER_TEMP/vectorize-receipt.json" evidence/receipt.json
+          fi
+          if [[ -f "$RUNNER_TEMP/voyage-vectorize-sync.log" ]]; then
+            install -m 0644 "$RUNNER_TEMP/voyage-vectorize-sync.log" evidence/voyage-sync.log
+          fi
+          if [[ -f "$RUNNER_TEMP/voyage-vectorize-receipt.json" ]]; then
+            install -m 0644 "$RUNNER_TEMP/voyage-vectorize-receipt.json" evidence/voyage-receipt.json
           fi
 
       - name: Upload production sync evidence
