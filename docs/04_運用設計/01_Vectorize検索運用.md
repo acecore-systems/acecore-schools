@@ -200,6 +200,12 @@ BGE同期後に公開identityを再確認し、Voyage同期の直前・直後に
 Atlasの枠は他の利用と共有するため、上限と429を監視し、回復が必要な場合は手動dispatchで再試行します。
 この同期有効化はPagesのモデル・index bindingの切替を行いません。
 
+GitHub Environmentのキーによる疎通だけを検証する場合は、mainの `Sync Schools Vectorize index` を
+`workflow_dispatch` で `voyage_probe=true`（`migration=none`）として起動します。合成文書1件を
+通常同期と同じVoyage文書埋め込み処理で検証し、modelと次元だけを出力します。このモードでは
+corpusのbuildや索引同期を実行しません。`SCHOOLS_VOYAGE_SYNC_ENABLED=true` とEnvironmentの
+`VOYAGE_API_KEY` が必要で、いずれかが未設定の場合は失敗します。
+
 ### Voyage 4 Lite qualification
 
 The explicit target `acecore-schools-search-voyage-4-lite-1024-production-v1` prepares a separate index for the currently deployed public corpus. The sync sends document text to the Atlas Embedding API using `voyage-4-lite` and `input_type=document`. Use the build marker and corpus artifact from the production workflow for the current deployment.
