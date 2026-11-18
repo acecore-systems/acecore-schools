@@ -8,6 +8,11 @@ on:
     - cron: "17 */6 * * *"
   workflow_dispatch:
     inputs:
+      voyage_probe:
+        description: Voyage合成文書の疎通だけを検証（索引同期なし）
+        required: true
+        type: boolean
+        default: false
       migration:
         description: 初回v1→v2移行だけで使う限定モード
         required: true
@@ -29,6 +34,7 @@ jobs:
     name: Build the public Production corpus without secrets
     if: >-
       github.ref == 'refs/heads/main' &&
+      !(github.event_name == 'workflow_dispatch' && inputs.voyage_probe == true) &&
       (
         (
           vars.SCHOOLS_VECTORIZE_SYNC_ENABLED == 'true' &&
@@ -191,6 +197,46 @@ jobs:
           path: verified-corpus
           if-no-files-found: error
           retention-days: 7
+
+  probe-voyage-document:
+    name: Verify Voyage document embedding without index changes
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch' &&
+      inputs.voyage_probe == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: cloudflare-schools-search-production
+    concurrency:
+      group: vectorize-schools-search-production
+      cancel-in-progress: false
+    steps:
+      - name: Check out the exact event tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - name: Verify the Voyage document embedding
+        shell: bash
+        env:
+          VOYAGE_ENABLED: ${{ vars.SCHOOLS_VOYAGE_SYNC_ENABLED }}
+          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ "$VOYAGE_ENABLED" != "true" ]]; then
+            echo "::error::SCHOOLS_VOYAGE_SYNC_ENABLED must be true."
+            exit 1
+          fi
+          if [[ -z "${VOYAGE_API_KEY:-}" ]]; then
+            echo "::error::VOYAGE_API_KEY is not configured."
+            exit 1
+          fi
+          node scripts/probe-voyage-document.mjs
 
   sync-production:
     name: Reconcile production index with the verified public corpus

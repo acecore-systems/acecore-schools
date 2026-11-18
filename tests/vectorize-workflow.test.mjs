@@ -186,3 +186,46 @@ test("Voyage候補の同期は明示有効化時だけ独立した証跡で実�
     /environment:\s+name: cloudflare-schools-search-production/u,
   );
 });
+
+test("手動合成文書検証は独立し同期や索引変更を起動しない", async () => {
+  const workflow = await readFile(workflowUrl, "utf8");
+  const build = workflow.slice(
+    workflow.indexOf("  build-production-corpus:"),
+    workflow.indexOf("  probe-voyage-document:"),
+  );
+  const probe = workflow.slice(
+    workflow.indexOf("  probe-voyage-document:"),
+    workflow.indexOf("  sync-production:"),
+  );
+  assert.match(
+    workflow,
+    /voyage_probe:\s+description:[\s\S]*?type: boolean\s+default: false/u,
+  );
+  assert.match(
+    build,
+    /!\(github\.event_name == 'workflow_dispatch' && inputs\.voyage_probe == true\)/u,
+  );
+  assert.match(
+    probe,
+    /github\.ref == 'refs\/heads\/main'[\s\S]*?github\.event_name == 'workflow_dispatch'[\s\S]*?inputs\.voyage_probe == true/u,
+  );
+  assert.match(
+    probe,
+    /environment:\s+name: cloudflare-schools-search-production/u,
+  );
+  assert.match(
+    probe,
+    /VOYAGE_ENABLED: \$\{\{ vars\.SCHOOLS_VOYAGE_SYNC_ENABLED \}\}/u,
+  );
+  assert.match(probe, /VOYAGE_API_KEY: \$\{\{ secrets\.VOYAGE_API_KEY \}\}/u);
+  assert.match(
+    probe,
+    /if \[\[ "\$VOYAGE_ENABLED" != "true" \]\]; then[\s\S]*?exit 1/u,
+  );
+  assert.match(
+    probe,
+    /if \[\[ -z "\$\{VOYAGE_API_KEY:-\}" \]\]; then[\s\S]*?exit 1/u,
+  );
+  assert.match(probe, /node scripts\/probe-voyage-document\.mjs/u);
+  assert.doesNotMatch(probe, /sync-vectorize\.mjs|CLOUDFLARE_API_TOKEN/u);
+});

@@ -14,6 +14,7 @@ import {
   PRODUCTION_INDEX_NAME,
   VOYAGE_INDEX_NAME,
   extractEmbeddingData,
+  probeVoyageDocument,
   syncVectorize,
   validateCorpus,
 } from "../scripts/sync-vectorize.mjs";
@@ -915,5 +916,47 @@ test("管理外ID、20%超削除、index設定不一致では変更前に停止�
       logger: { log: () => {} },
     }),
     /must use 1024 dimensions/u,
+  );
+});
+
+test("合成文書の検証は本番同期と同じVoyage契約で1件だけ要求する", async () => {
+  let calls = 0;
+  const result = await probeVoyageDocument({
+    voyageApiKey: "synthetic-key",
+    async fetchImpl(url, options) {
+      calls += 1;
+      assert.equal(url, "https://ai.mongodb.com/v1/embeddings");
+      assert.equal(options.headers.Authorization, "Bearer synthetic-key");
+      const body = JSON.parse(options.body);
+      assert.equal(body.model, "voyage-4-lite");
+      assert.equal(body.input_type, "document");
+      assert.equal(body.input.length, 1);
+      assert.equal(body.output_dimension, 1024);
+      assert.equal(body.output_dtype, "float");
+      assert.equal(body.truncation, false);
+      return Response.json({
+        model: "voyage-4-lite",
+        data: [{ index: 0, embedding }],
+      });
+    },
+  });
+  assert.equal(calls, 1);
+  assert.deepEqual(result, { model: "voyage-4-lite", dimensions: 1024 });
+  await assert.rejects(
+    probeVoyageDocument({
+      voyageApiKey: "",
+      fetchImpl() {
+        assert.fail("unexpected fetch");
+      },
+    }),
+    /VOYAGE_API_KEY/,
+  );
+  await assert.rejects(
+    probeVoyageDocument({
+      voyageApiKey: "synthetic-key",
+      fetchImpl: async () =>
+        Response.json({ model: "wrong", data: [{ index: 0, embedding }] }),
+    }),
+    /invalid embedding response/,
   );
 });
