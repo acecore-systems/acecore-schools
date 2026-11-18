@@ -70,6 +70,22 @@ test("mutation後の公開identity確認が成功証跡より先にある", asyn
   assert.match(productionJob, /node verifier\/scripts\/sync-vectorize\.mjs/u);
   assert.match(
     productionJob,
+    /name: Sync production Vectorize index\s+if: vars\.SCHOOLS_BGE_SYNC_ENABLED != 'false'/u,
+  );
+  assert.match(
+    productionJob,
+    /name: Confirm the synced corpus is still public\s+if: vars\.SCHOOLS_BGE_SYNC_ENABLED != 'false'/u,
+  );
+  assert.match(
+    productionJob,
+    /if \[\[ "\$BGE_ENABLED" == "false" && "\$VOYAGE_ENABLED" != "true" \]\]; then[\s\S]*?exit 1/u,
+  );
+  assert.match(
+    productionJob,
+    /if \[\[ "\$BGE_ENABLED" == "false" && -n "\$MIGRATION_MODE" && "\$MIGRATION_MODE" != "none" \]\]; then[\s\S]*?exit 1/u,
+  );
+  assert.match(
+    productionJob,
     /--receipt "\$RUNNER_TEMP\/vectorize-receipt\.json"/u,
   );
   assert.match(

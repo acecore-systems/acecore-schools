@@ -270,6 +270,23 @@ jobs:
           name: ${{ needs.build-production-corpus.outputs.artifact_name }}
           path: payload
 
+      - name: Verify the configured sync targets
+        shell: bash
+        env:
+          BGE_ENABLED: ${{ vars.SCHOOLS_BGE_SYNC_ENABLED }}
+          VOYAGE_ENABLED: ${{ vars.SCHOOLS_VOYAGE_SYNC_ENABLED }}
+          MIGRATION_MODE: ${{ inputs.migration }}
+        run: |
+          set -euo pipefail
+          if [[ "$BGE_ENABLED" == "false" && "$VOYAGE_ENABLED" != "true" ]]; then
+            echo "::error::Enable at least one Schools Vectorize sync target."
+            exit 1
+          fi
+          if [[ "$BGE_ENABLED" == "false" && -n "$MIGRATION_MODE" && "$MIGRATION_MODE" != "none" ]]; then
+            echo "::error::The v1-to-v2 migration requires BGE sync to be enabled."
+            exit 1
+          fi
+
       - name: Verify the event tooling and downloaded corpus
         shell: bash
         env:
@@ -310,6 +327,7 @@ jobs:
           payload/corpus.json
 
       - name: Sync production Vectorize index
+        if: vars.SCHOOLS_BGE_SYNC_ENABLED != 'false'
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_SCHOOLS_SEARCH_PRODUCTION_API_TOKEN }}
@@ -341,6 +359,7 @@ jobs:
             tee "$RUNNER_TEMP/vectorize-sync.log"
 
       - name: Confirm the synced corpus is still public
+        if: vars.SCHOOLS_BGE_SYNC_ENABLED != 'false'
         run: >-
           node verifier/scripts/wait-for-deployment.mjs
           "$PRODUCTION_BUILD_MARKER_URL"
