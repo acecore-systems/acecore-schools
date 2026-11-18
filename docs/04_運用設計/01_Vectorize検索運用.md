@@ -198,7 +198,10 @@ BGE同期後に公開identityを再確認し、Voyage同期の直前・直後に
 両者は同じ保護Environmentとconcurrencyを使い、候補のログとreceiptは既存BGEの証跡とは別の
 `voyage-sync.log`・`voyage-receipt.json`として同じartifactへ保存します。Voyage候補にはv1→v2の移行モードを渡しません。
 Atlasの枠は他の利用と共有するため、上限と429を監視し、回復が必要な場合は手動dispatchで再試行します。
-この同期有効化はPagesのモデル・index bindingの切替を行いません。
+Schoolsの本番検索はVoyage索引を使用します。横断検索の全参照がVoyageへ移った後は、
+`SCHOOLS_VOYAGE_SYNC_ENABLED=true`を維持して`SCHOOLS_BGE_SYNC_ENABLED=false`を設定します。
+BGE同期とその公開確認だけが停止し、Voyage同期の直前・直後の公開照合と証跡を維持します。
+両方の同期が無効な場合と、BGE停止中の`migration=v1-to-v2`は失敗します。
 
 GitHub Environmentのキーによる疎通だけを検証する場合は、mainの `Sync Schools Vectorize index` を
 `workflow_dispatch` で `voyage_probe=true`（`migration=none`）として起動します。合成文書1件を
