@@ -39,7 +39,7 @@ export const schoolsContent = {
     fallbackTitle: "Acecore Schoolsのページ",
     fallbackExcerpt: "ページで詳しい内容をご確認ください。",
     privacy:
-      "検索語は、このサイトとAcecore関連サイトの公開情報を検索するために送信されます。個人情報・非公開情報は入力しないでください。",
+      "サイト内の意味検索では、検索語をMongoDB Voyage AIに送信し、公開情報と照合します。Acecore関連サイトの検索にも検索語を送信します。個人情報や非公開情報は入力しないでください。",
     errors: {
       rateLimited:
         "検索が混み合っています。1分ほど時間をおいて、もう一度お試しください。",
