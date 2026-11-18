@@ -109,18 +109,27 @@ test("PreviewにはVectorizeをbind・同期せずProductionだけを扱う", as
   );
 });
 
-test("Pages binding・sync allowlist・workflowをProduction indexへ限定する", async () => {
+test("PagesはVoyage索引を使いBGE索引の同期も維持する", async () => {
   const [workflow, wrangler, syncScript] = await Promise.all([
     readFile(workflowUrl, "utf8"),
     readFile(wranglerUrl, "utf8"),
     readFile(syncScriptUrl, "utf8"),
   ]);
-
-  const productionIndex = "acecore-schools-search-bge-m3-1024-production-v1";
+  const production = wrangler.slice(wrangler.indexOf('    "production": {'));
+  const bgeIndex = "acecore-schools-search-bge-m3-1024-production-v1";
+  const voyageIndex = "acecore-schools-search-voyage-4-lite-1024-production-v1";
   const previewIndex = "acecore-schools-search-bge-m3-1024-preview";
-  assert.match(workflow, new RegExp(productionIndex, "u"));
-  assert.match(wrangler, new RegExp(productionIndex, "u"));
-  assert.match(syncScript, new RegExp(productionIndex, "u"));
+  assert.match(production, new RegExp(voyageIndex, "u"));
+  assert.doesNotMatch(production, new RegExp(bgeIndex, "u"));
+  assert.match(production, /"SEARCH_EMBEDDING_MODEL": "voyage-4-lite"/u);
+  assert.match(
+    production,
+    /"binding": "VOYAGE_EMBEDDER",\s*"service": "acecore-chat-worker",\s*"entrypoint": "VoyageEmbedding"/u,
+  );
+  for (const index of [bgeIndex, voyageIndex]) {
+    assert.match(workflow, new RegExp(index, "u"));
+    assert.match(syncScript, new RegExp(index, "u"));
+  }
   assert.doesNotMatch(workflow, new RegExp(previewIndex, "u"));
   assert.doesNotMatch(wrangler, new RegExp(previewIndex, "u"));
   assert.doesNotMatch(syncScript, new RegExp(previewIndex, "u"));

@@ -61,7 +61,7 @@
       "vectorize": [
         {
           "binding": "SEARCH_INDEX",
-          "index_name": "acecore-schools-search-bge-m3-1024-production-v1",
+          "index_name": "acecore-schools-search-voyage-4-lite-1024-production-v1",
         },
       ],
       "d1_databases": [
@@ -77,6 +77,11 @@
           "binding": "ACECORE_CHAT",
           "service": "acecore-chat-worker",
         },
+        {
+          "binding": "VOYAGE_EMBEDDER",
+          "service": "acecore-chat-worker",
+          "entrypoint": "VoyageEmbedding",
+        },
       ],
       "vars": {
         "ACECORE_NET_URL": "https://acecore.net",
@@ -84,7 +89,7 @@
         "ALLOWED_ORIGINS": "https://schools.acecore.net,https://acecore.net",
         "SEARCH_ENABLED": "true",
         "SEARCH_MIN_SCORE": "0.50",
-        "SEARCH_EMBEDDING_MODEL": "@cf/baai/bge-m3",
+        "SEARCH_EMBEDDING_MODEL": "voyage-4-lite",
         "SEARCH_EMBEDDING_DIMENSIONS": "1024",
       },
     },
