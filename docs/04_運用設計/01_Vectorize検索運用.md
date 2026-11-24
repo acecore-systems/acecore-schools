@@ -6,10 +6,10 @@ Acecore Schools の公開ページを、日本語の自然文から探すため�
 
 ## Current rollout state
 
-| Environment | Vectorize index                                    | Search D1                           | Index state  | Search |
-| ----------- | -------------------------------------------------- | ----------------------------------- | ------------ | ------ |
-| Preview     | bindingなし                                        | `acecore-schools-search-production` | 対象外       | OFF    |
-| Production  | `acecore-schools-search-bge-m3-1024-production-v1` | `acecore-schools-search-production` | 全件同期対象 | ON     |
+| Environment | Vectorize index                                           | Search D1                           | Index state | Search |
+| ----------- | --------------------------------------------------------- | ----------------------------------- | ----------- | ------ |
+| Preview     | bindingなし                                               | `acecore-schools-search-production` | 対象外      | OFF    |
+| Production  | `acecore-schools-search-voyage-4-lite-1024-production-v1` | `acecore-schools-search-production` | 同期対象    | ON     |
 
 Pages PreviewはVectorizeを利用せず、静的ページと既存ナビゲーションを確認する環境です。
 旧OpenAI用1536次元indexは2026-07-31のProduction run `30599692065`でmain corpus 7件へ同期したrollback資産です。BGE-M3用indexの完了判定には使いません。
@@ -31,10 +31,8 @@ Productionをmain push直後と6時間ごとに公開buildへ再収束させ、�
    `.vectorize/corpus.json` を生成します。
 3. `scripts/write-build-meta.mjs`がGitHub連携Pagesから渡されるcommitとcorpus identityを
    `/.well-known/acecore-schools-build.json`へ出力します。
-4. `scripts/sync-vectorize.mjs` が Cloudflare Workers AI の `@cf/baai/bge-m3`で
-   1024次元embeddingを生成し、`ja` namespaceへupsertします。
-5. `/api/search` がネイティブ `AI` bindingの同じモデルで質問を embedding し、Vectorize の cosine 類似検索結果を
-   最大5ページへ正規化します。
+4. 本番の `scripts/sync-vectorize.mjs` はAtlasで文書を埋め込み、1,024次元のベクトルを `ja` namespaceへupsertします。
+5. 本番の `/api/search` は `VOYAGE_EMBEDDER` を呼んで同じモデルで質問を埋め込み、Vectorizeのcosine類似検索結果を最大5ページへ正規化します。
 6. D1 がクライアント10回/分、全体20回/分を1 SQL statementで同時判定し、片方が上限なら
    client・globalのどちらも増やしません。
 7. レート制限を通過した検索だけをD1へUTC時別に集計し、成功数、エラー、0件、結果数、
@@ -64,7 +62,7 @@ const payload = await response.json();
 ```
 
 成功時は`results`にroot-relative URL、title、section、excerpt、contentType、rankを返します。
-質問本文はlogへ残しません。キルスイッチ、Workers AI binding、D1、Vectorizeのいずれかが
+質問本文はlogへ残しません。キルスイッチ、埋め込みbinding、D1、Vectorizeのいずれかが
 利用できなければfail closedし、検索結果を推測で返しません。
 
 検索UIは`GET /api/health`の`searchEnabled`が`true`のときだけ導線とフォームを表示します。
@@ -78,7 +76,8 @@ Productionだけに置き、top-levelとPreviewには置きません。D1とvars
 
 | Binding                       | Purpose                                        |
 | ----------------------------- | ---------------------------------------------- |
-| `AI`                          | Production-only Workers AI binding             |
+| `AI`                          | 旧BGE-M3構成用のWorkers AI binding             |
+| `VOYAGE_EMBEDDER`             | 本番の `VoyageEmbedding` Service Binding       |
 | `SEARCH_EMBEDDING_MODEL`      | Fixed embedding model identity                 |
 | `SEARCH_EMBEDDING_DIMENSIONS` | Fixed Vectorize-compatible dimensions          |
 | `SEARCH_INDEX`                | Production-only Vectorize index                |
@@ -186,6 +185,8 @@ GitHubのrun情報、対象index、corpus version、no-op、mutation ID、件数
 保存します。失敗時も`if: always()`で取得できる範囲の証跡をアップロードします。
 
 ### Voyage 4 Liteの継続同期
+
+本番の検索クエリとVoyage索引への文書同期は、`config/ai-models.generated.json` の `search.embedding` を参照します。現在の索引はVoyage 4 Lite・1,024次元です。配布設定のモデルや提供元が互換条件を満たさない場合は、検索とVoyage文書同期を埋め込みの送信前に停止します。モデルを切り替える場合は先に新しいモデルで文書を埋め込んだ索引を準備し、共有Workerと各利用先の参照先を合わせて切り替えます。既存corpusのID・versionと明示指定のBGE同期は従来の契約に従います。
 
 既存のBGE Production同期を継続し、同じ検証済み公開corpusをVoyage候補へ追加同期できます。
 `cloudflare-schools-search-production` Environmentへ専用Atlasモデルキーを`VOYAGE_API_KEY`として登録した後、

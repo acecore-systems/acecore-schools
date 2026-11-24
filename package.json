@@ -17,7 +17,7 @@
     "preview": "astro preview",
     "deploy:preview": "npm run build && wrangler pages deploy dist --project-name acecore-schools",
     "format:check": "prettier . --check",
-    "test:search": "node --experimental-strip-types --test tests/ai-chat-ui.test.mjs tests/deployment-marker.test.mjs tests/health-api.test.mjs tests/network-search-client.test.mjs tests/search-api.test.mjs tests/search-corpus.test.mjs tests/search-maintenance.test.mjs tests/vectorize-sync.test.mjs tests/vectorize-workflow.test.mjs",
+    "test:search": "node --experimental-strip-types --test tests/ai-chat-ui.test.mjs tests/deployment-marker.test.mjs tests/embedding-policy.test.mjs tests/health-api.test.mjs tests/network-search-client.test.mjs tests/search-api.test.mjs tests/search-corpus.test.mjs tests/search-maintenance.test.mjs tests/vectorize-sync.test.mjs tests/vectorize-workflow.test.mjs",
     "test:ai-chat": "node --experimental-strip-types --test tests/ai-chat-ui.test.mjs",
     "test:structured-data": "node --test tests/structured-data.test.mjs",
     "test:ui-foundation": "node --test tests/tailwind-ui-foundation.test.mjs",
