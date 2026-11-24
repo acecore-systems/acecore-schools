@@ -1,4 +1,4 @@
-import modelConfig from "../../config/ai-models.generated.json" with { type: "json" };
+import modelConfig from "../../config/ai-models.cjs";
 
 // The existing Voyage Vectorize index was built in this model's embedding space.
 const VOYAGE_INDEX_MODEL = "voyage-4-lite";

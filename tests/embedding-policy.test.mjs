@@ -8,11 +8,11 @@ updatedConfig.features["search.embedding"].api_model_id = "voyage-future-model";
 
 const hook = registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (specifier === "../../config/ai-models.generated.json") {
+    if (specifier === "../../config/ai-models.cjs") {
       return {
         url:
-          "data:application/json," +
-          encodeURIComponent(JSON.stringify(updatedConfig)),
+          "data:text/javascript," +
+          encodeURIComponent(`export default ${JSON.stringify(updatedConfig)}`),
         shortCircuit: true,
       };
     }
