@@ -1,7 +1,7 @@
+import { VOYAGE_EMBEDDING_MODEL } from "../../src/scripts/search-embedding-policy.ts";
 import { getSafeInternalUrl } from "../../src/scripts/search-url-safety.ts";
 
 const EMBEDDING_MODEL = "@cf/baai/bge-m3";
-const VOYAGE_EMBEDDING_MODEL = "voyage-4-lite";
 const EMBEDDING_DIMENSIONS = 1024;
 const SEARCH_LOCALE = "ja";
 const DEFAULT_MIN_SCORE = 0.5;
@@ -256,7 +256,11 @@ export const onRequestPost: PagesFunction<CloudflareEnv> = async (context) => {
     try {
       embedding =
         embeddingModel === VOYAGE_EMBEDDING_MODEL
-          ? await createVoyageEmbedding(voyageEmbedder!, query)
+          ? await createVoyageEmbedding(
+              voyageEmbedder!,
+              query,
+              VOYAGE_EMBEDDING_MODEL,
+            )
           : await createWorkersAiEmbedding(ai!, query);
     } catch (error) {
       logSearchError(
@@ -667,6 +671,7 @@ async function createWorkersAiEmbedding(
 async function createVoyageEmbedding(
   embedder: Fetcher,
   query: string,
+  model: string,
 ): Promise<number[]> {
   let payload: unknown;
   try {
@@ -676,7 +681,7 @@ async function createVoyageEmbedding(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: VOYAGE_EMBEDDING_MODEL,
+          model,
           input: [query],
           input_type: "query",
           output_dimension: EMBEDDING_DIMENSIONS,
@@ -693,7 +698,7 @@ async function createVoyageEmbedding(
 
   if (
     !isJsonObject(payload) ||
-    payload.model !== VOYAGE_EMBEDDING_MODEL ||
+    payload.model !== model ||
     !Array.isArray(payload.data) ||
     payload.data.length !== 1 ||
     !isJsonObject(payload.data[0]) ||

@@ -2,6 +2,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { VOYAGE_EMBEDDING_MODEL } from "../src/scripts/search-embedding-policy.ts";
+
 import {
   SEARCH_CORPUS_SCHEMA_VERSION,
   SEARCH_DISTANCE_METRIC,
@@ -24,7 +26,6 @@ export const VOYAGE_INDEX_NAME =
 
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
 const VOYAGE_EMBEDDINGS_URL = "https://ai.mongodb.com/v1/embeddings";
-const VOYAGE_EMBEDDING_MODEL = "voyage-4-lite";
 const DEFAULT_CORPUS_FILE = resolve(".vectorize/corpus.json");
 const EMBEDDING_BATCH_SIZE = 16;
 const UPSERT_BATCH_SIZE = 200;
@@ -117,6 +118,8 @@ async function performVectorizeSync({
   randomImpl = Math.random,
   logger = console,
 } = {}) {
+  const voyageModel =
+    indexName === VOYAGE_INDEX_NAME ? requireVoyageEmbeddingModel() : null;
   const corpus = JSON.parse(await readFile(corpusFile, "utf8"));
   validateCorpus(corpus);
   if (!dryRun && (!accountId || !apiToken || !indexName)) {
@@ -144,8 +147,7 @@ async function performVectorizeSync({
     return result;
   }
 
-  const voyagePilot = indexName === VOYAGE_INDEX_NAME;
-  if (voyagePilot && !voyageApiKey?.trim()) {
+  if (voyageModel && !voyageApiKey?.trim()) {
     throw new Error("VOYAGE_API_KEY is required for the Voyage pilot index.");
   }
 
@@ -212,8 +214,9 @@ async function performVectorizeSync({
 
   const upsertMutationIds = [];
   for (const chunkBatch of batches(chunksToUpsert, EMBEDDING_BATCH_SIZE)) {
-    const embeddings = voyagePilot
+    const embeddings = voyageModel
       ? await createVoyageDocumentEmbeddings(chunkBatch, {
+          model: voyageModel,
           apiKey: voyageApiKey,
           fetchImpl,
           requestTimeoutMs,
@@ -930,26 +933,41 @@ async function createEmbeddings(client, chunks) {
   return extractEmbeddingData(payload?.result, chunks.length);
 }
 
+function requireVoyageEmbeddingModel() {
+  if (!VOYAGE_EMBEDDING_MODEL) {
+    throw new Error(
+      "The shared embedding policy is incompatible with the existing Voyage index. Rebuild the index and coordinate the model switch.",
+    );
+  }
+  return VOYAGE_EMBEDDING_MODEL;
+}
+
 export async function probeVoyageDocument({
   voyageApiKey = process.env.VOYAGE_API_KEY,
   fetchImpl = globalThis.fetch,
 } = {}) {
+  const model = requireVoyageEmbeddingModel();
   if (!voyageApiKey?.trim()) {
     throw new Error("VOYAGE_API_KEY is not configured.");
   }
   await createVoyageDocumentEmbeddings(
     [{ text: "これは検索用の合成文書です。" }],
-    { apiKey: voyageApiKey, fetchImpl, requestTimeoutMs: REQUEST_TIMEOUT_MS },
+    {
+      model,
+      apiKey: voyageApiKey,
+      fetchImpl,
+      requestTimeoutMs: REQUEST_TIMEOUT_MS,
+    },
   );
   return {
-    model: VOYAGE_EMBEDDING_MODEL,
+    model,
     dimensions: SEARCH_EMBEDDING_DIMENSIONS,
   };
 }
 
 async function createVoyageDocumentEmbeddings(
   chunks,
-  { apiKey, fetchImpl, requestTimeoutMs },
+  { model, apiKey, fetchImpl, requestTimeoutMs },
 ) {
   let response;
   try {
@@ -961,7 +979,7 @@ async function createVoyageDocumentEmbeddings(
       },
       body: JSON.stringify({
         input: chunks.map(({ text }) => text),
-        model: VOYAGE_EMBEDDING_MODEL,
+        model,
         input_type: "document",
         output_dimension: SEARCH_EMBEDDING_DIMENSIONS,
         output_dtype: "float",
@@ -980,7 +998,7 @@ async function createVoyageDocumentEmbeddings(
 
   const payload = await readJsonResponse(response, "Voyage embeddings");
   if (
-    payload?.model !== VOYAGE_EMBEDDING_MODEL ||
+    payload?.model !== model ||
     !Array.isArray(payload.data) ||
     payload.data.length !== chunks.length
   ) {
