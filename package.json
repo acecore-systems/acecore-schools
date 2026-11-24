@@ -32,20 +32,20 @@
     "test:consultation": "node --experimental-strip-types --test tests/consultation-context.test.mjs"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/sitemap": "^3.7.6",
     "@phosphor-icons/web": "^2.1.2",
-    "astro": "^7.4.11",
+    "astro": "^7.4.13",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261112.1",
+    "@cloudflare/workers-types": "5.20261121.1",
     "@tailwindcss/vite": "^4.3.5",
     "pagefind": "^1.6.0",
     "prettier": "^3.10.1",
     "prettier-plugin-astro": "^1.1.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
-    "wrangler": "^4.161.0"
+    "wrangler": "^4.166.0"
   },
   "engines": {
     "node": ">=24.22.1"
